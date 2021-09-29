@@ -32,7 +32,7 @@ extern "C"
 #include "trackball.h"
   }
 
-view::view() : _w(1600), _h(900), _quit(false),
+view::view(int argc, char** argv) : _w(1600), _h(900), _quit(false),
 _blit_gl_state(nullptr), _viewport_w(V_W), _viewport_h(V_H),
 _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1)
   {
@@ -110,6 +110,10 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1)
   _md.prev_mouse_y = 0.f;
   _md.wheel_rotation = 0.f;
 
+  if (argc > 1)
+    {
+    _load(std::string(argv[1]));
+    }
   _prepare_render();
   }
 
@@ -306,6 +310,28 @@ void view::_poll_for_events()
     }
   }
 
+void view::_load(const std::string& filename)
+  {
+  std::ifstream t(filename);
+  if (t.is_open())
+    {
+    _current_filename = filename;
+    std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+    _script = str;
+    t.close();
+    Logging::Info() << "Loaded " << _current_filename << "\n";
+    std::stringstream title;
+    title << "JSlide (" << _current_filename << ")";
+    SDL_SetWindowTitle(_window, title.str().c_str());
+    }
+  else
+    {
+    _current_filename = std::string();
+    _script = std::string();
+    SDL_SetWindowTitle(_window, "JSlide");
+    }
+  }
+
 void view::_save()
   {
   if (!_current_filename.empty())
@@ -314,6 +340,9 @@ void view::_save()
     t << _script;
     t.close();
     Logging::Info() << "Saved as " << _current_filename << "\n";
+    std::stringstream title;
+    title << "JSlide (" << _current_filename << ")";
+    SDL_SetWindowTitle(_window, title.str().c_str());
     }
   else
     {
@@ -355,6 +384,7 @@ void view::_imgui_ui()
           {
           _current_filename = std::string();
           _script = std::string();
+          SDL_SetWindowTitle(_window, "JSlide");
           }
         if (ImGui::MenuItem("Load"))
           {
@@ -407,12 +437,8 @@ void view::_imgui_ui()
   if (strlen(openScriptChosenPath) > 0)
     {
     _settings.file_open_folder = open_script_dlg.getLastDirectory();
-    _current_filename = std::string(openScriptChosenPath);
-    std::ifstream t(openScriptChosenPath);
-    std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-    _script = str;
+    _load(std::string(std::string(openScriptChosenPath)));
     _prepare_render();
-    Logging::Info() << "Loaded " << _current_filename << "\n";
     }
 
   static ImGuiFs::Dialog save_script_dlg(false, true, true);
@@ -422,10 +448,18 @@ void view::_imgui_ui()
     {
     _settings.file_open_folder = save_script_dlg.getLastDirectory();
     std::ofstream t(saveScriptChosenPath);
-    t << _script;
-    t.close();
-    _current_filename = std::string(saveScriptChosenPath);
-    Logging::Info() << "Saved " << _current_filename << "\n";
+    if (t.is_open())
+      {
+      t << _script;
+      t.close();
+      _current_filename = std::string(saveScriptChosenPath);
+      std::stringstream title;
+      title << "JSlide (" << _current_filename << ")";
+      SDL_SetWindowTitle(_window, title.str().c_str());
+      Logging::Info() << "Saved " << _current_filename << "\n";
+      }
+    else
+      Logging::Error() << "Could not save as " << std::string(saveScriptChosenPath) << "\n";
     }
 
   if (_settings.log_window)

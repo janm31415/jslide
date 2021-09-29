@@ -8,6 +8,7 @@
 #include <string.h>
 #include <iostream>
 #include "view.h"
+#include "debug.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -18,8 +19,9 @@
 #define JTK_FILE_UTILS_IMPLEMENTATION
 #include "jtk/file_utils.h"
 
-int main(int /*argc*/, char** /*argv*/)
+int main(int argc, char** argv)
   {
+  init_debug();
   SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
 
   if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
@@ -28,9 +30,10 @@ int main(int /*argc*/, char** /*argv*/)
     return -1;
     }
   {
-    view my_view;
+    view my_view(argc, argv);
     my_view.loop();
   }
   SDL_Quit();
+  close_debug();
   return 0;
   }

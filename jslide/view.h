@@ -18,7 +18,7 @@ struct ImGuiInputTextCallbackData;
 class view
   {
   public:
-    view();
+    view(int argc, char** argv);
     ~view(); 
 
     void loop();
@@ -35,6 +35,7 @@ class view
     void _destroy_blit_gl_objects();
     void _prepare_render();
     void _save();
+    void _load(const std::string& filename);
     bool _ctrl_pressed();
 
   private:
