@@ -14,5 +14,4 @@ struct mouse_data
   bool left_button_down;
   bool right_button_down;
   bool wheel_down;
-  bool ctrl_pressed;
   };

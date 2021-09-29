@@ -7,6 +7,8 @@
 #include <array>
 #include <memory>
 
+#include "keyboard.h"
+
 #include "settings.h"
 #include "mouse_data.h"
 #include "blit_gl.h"
@@ -32,14 +34,18 @@ class view
     void _destroy_gl_objects();
     void _destroy_blit_gl_objects();
     void _prepare_render();
-    
+    void _save();
+    bool _ctrl_pressed();
+
   private:
     SDL_Window* _window;    
-    uint32_t _w, _h, _viewport_w, _viewport_h, _viewport_pos_x, _viewport_pos_y;
+    uint32_t _w, _h, _viewport_w, _viewport_h, _viewport_pos_x, _viewport_pos_y, _max_w, _max_h, _windowed_w, _windowed_h;
     bool _quit;
     settings _settings;    
     blit_t* _blit_gl_state;
     mouse_data _md;    
     std::string _script;    
     int _line_nr, _col_nr;
+    std::string _current_filename;
+    keyboard_handler _keyb;
   };

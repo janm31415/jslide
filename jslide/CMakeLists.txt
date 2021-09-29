@@ -31,6 +31,8 @@ ${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imguifilesystem.cpp
 set(HDRS
 blit_gl.h
 font_gl.h
+image_helper.h
+keyboard.h
 logging.h
 mouse_data.h
 pref_file.h
@@ -44,6 +46,7 @@ view.h
 set(SRCS
 blit_gl.cpp
 font_gl.cpp
+image_helper.cpp
 logging.cpp
 main.cpp
 pref_file.cpp
