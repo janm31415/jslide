@@ -21,8 +21,8 @@
 
 #include "logging.h"
 
-#define V_W 800
-#define V_H 450
+#define V_W 960
+#define V_H 540
 #define V_X 50
 #define V_Y 50
 
@@ -306,7 +306,7 @@ void view::_imgui_ui()
   bool open = true;
   static bool open_script = false;
   static bool save_script = false;
-  if (ImGui::Begin("Pief", &open, window_flags))
+  if (ImGui::Begin("jslide", &open, window_flags))
     {
     if (!open)
       _quit = true;
@@ -392,25 +392,7 @@ int view::script_window_callback(ImGuiInputTextCallbackData* data)
       }
     else
       ++_col_nr;
-    }
-  /*
-  if (cur >= _script.size())
-    cur = (int)_script.size() - 1;
-  int line_nr = 1;
-  int col_nr = 1;
-  for (int i = 0; i < cur; ++i)
-    {
-    if (_script[i] == '\n')
-      {
-      ++line_nr;
-      col_nr = 1;
-      }
-    else
-      ++col_nr;
-    }
-  _line_nr = line_nr;
-  _col_nr = col_nr;
-  */
+    }  
   return 0;
   }
 
@@ -426,7 +408,7 @@ void view::_script_window()
     }
   ImGuiInputTextFlags flags = ImGuiInputTextFlags_CallbackAlways;  
   ImGui::InputTextMultiline("Scripting", &_script, ImVec2(-1.f, (float)(_h - 2 * V_Y - ImGui::GetTextLineHeight()*6)), flags, &_script_window_callback, this);
-  if (ImGui::Button("Present"))
+  if (ImGui::Button("Build"))
     {    
     }
   ImGui::SameLine();
@@ -466,7 +448,7 @@ void view::loop()
     {
     _poll_for_events();
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);   
 
     //draw_blit_data(_blit_gl_state, &_image_gl_state->tex, _w, _h);
@@ -476,8 +458,6 @@ void view::loop()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 
-    SDL_GL_SwapWindow(_window);
-
-    glGetError(); //hack
+    SDL_GL_SwapWindow(_window);    
     }
   }

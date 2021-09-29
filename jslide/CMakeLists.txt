@@ -30,6 +30,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imguifilesystem.cpp
 
 set(HDRS
 blit_gl.h
+font_gl.h
 logging.h
 mouse_data.h
 pref_file.h
@@ -42,6 +43,7 @@ view.h
 	
 set(SRCS
 blit_gl.cpp
+font_gl.cpp
 logging.cpp
 main.cpp
 pref_file.cpp
@@ -98,19 +100,32 @@ source_group("ThirdParty/stb" FILES ${STB})
 
  target_include_directories(jslide
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../
+    ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../jtk
    	${CMAKE_CURRENT_SOURCE_DIR}/../glew/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../glew/include/glew
     ${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/
     ${CMAKE_CURRENT_SOURCE_DIR}/../json/
     ${CMAKE_CURRENT_SOURCE_DIR}/../SDL2/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../stb/
     )	
 	
 target_link_libraries(jslide
     PRIVATE	
     SDL2
     SDL2main     
+    freetype
     ${OPENGL_LIBRARIES} 
     )	
     
+      
+if (WIN32)
+add_custom_command(TARGET jslide POST_BUILD 
+   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data" "${CMAKE_CURRENT_BINARY_DIR}/data")
+endif (WIN32)
+
+if (UNIX)
+add_custom_command(TARGET jslide POST_BUILD 
+   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data" "$<TARGET_FILE_DIR:jslide>/data")
+endif (UNIX)    
