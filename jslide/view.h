@@ -7,26 +7,11 @@
 #include <array>
 #include <memory>
 
-#include "jtk/render.h"
-
 #include "settings.h"
 #include "mouse_data.h"
 #include "blit_gl.h"
 
 struct ImGuiInputTextCallbackData;
-
-struct view3d_data
-  {
-  float projection_matrix[16];
-  float camera_position[16], camera_position_inv[16], object_system[16];
-  float center[4];
-  float zoom_factor;
-  int w, h;
-  float _near, _far;
-  jtk::render_data rd;
-  jtk::frame_buffer fb;
-  uint32_t ob_id;
-  };
 
 class view
   {
@@ -56,4 +41,5 @@ class view
     blit_t* _blit_gl_state;
     mouse_data _md;    
     std::string _script;    
+    int _line_nr, _col_nr;
   };

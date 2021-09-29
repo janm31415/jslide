@@ -34,7 +34,7 @@ extern "C"
 
 view::view() : _w(1600), _h(900), _quit(false), 
 _blit_gl_state(nullptr), _viewport_w(V_W), _viewport_h(V_H),
-_viewport_pos_x(V_X), _viewport_pos_y(V_Y)
+_viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1)
   {
   // Setup window
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -328,10 +328,6 @@ void view::_imgui_ui()
           }
         ImGui::EndMenu();
         }
-      if (ImGui::BeginMenu("View"))
-        {        
-        ImGui::EndMenu();
-        }
       if (ImGui::BeginMenu("Window"))
         {
         if (ImGui::MenuItem("Fullscreen", NULL, &_settings.fullscreen))
@@ -339,7 +335,6 @@ void view::_imgui_ui()
           _destroy_blit_gl_objects();
           _setup_blit_gl_objects(_settings.fullscreen);
           }
-        ImGui::MenuItem("Controls", NULL, &_settings.controls);
         ImGui::MenuItem("Log window", NULL, &_settings.log_window);
         ImGui::MenuItem("Script window", NULL, &_settings.script_window);
         ImGui::EndMenu();
@@ -385,21 +380,64 @@ namespace
 
 int view::script_window_callback(ImGuiInputTextCallbackData* data)
   { 
+  int cur = data->CursorPos;
+  _line_nr = 1;
+  _col_nr = 1;
+  for (int i = 0; i < cur; ++i)
+    {
+    if (data->Buf[i] == '\n')
+      {
+      ++_line_nr;
+      _col_nr=1;
+      }
+    else
+      ++_col_nr;
+    }
+  /*
+  if (cur >= _script.size())
+    cur = (int)_script.size() - 1;
+  int line_nr = 1;
+  int col_nr = 1;
+  for (int i = 0; i < cur; ++i)
+    {
+    if (_script[i] == '\n')
+      {
+      ++line_nr;
+      col_nr = 1;
+      }
+    else
+      ++col_nr;
+    }
+  _line_nr = line_nr;
+  _col_nr = col_nr;
+  */
   return 0;
   }
 
 void view::_script_window()
   {
-  ImGui::SetNextWindowSize(ImVec2((float)(_w - V_W - 3 * V_X), (float)(_h - 3 * V_Y - V_H)), ImGuiCond_Always);
-  ImGui::SetNextWindowPos(ImVec2((float)(V_X * 2 + V_W), (float)(2 * V_Y + V_H)), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2((float)(_w - V_W - 3 * V_X), (float)(_h - 2 * V_Y)), ImGuiCond_Always);
+  ImGui::SetNextWindowPos(ImVec2((float)(V_X * 2 + V_W), (float)(V_Y)), ImGuiCond_Always);
 
   if (!ImGui::Begin("Script window", &_settings.script_window))
     {
     ImGui::End();
     return;
     }
-  ImGuiInputTextFlags flags = ImGuiInputTextFlags_CallbackEdit;  
-  ImGui::InputTextMultiline("Scripting", &_script, ImVec2(-1.f, (float)(_h - 3 * V_Y - V_H - ImGui::GetTextLineHeight()*3)), flags, &_script_window_callback, this);
+  ImGuiInputTextFlags flags = ImGuiInputTextFlags_CallbackAlways;  
+  ImGui::InputTextMultiline("Scripting", &_script, ImVec2(-1.f, (float)(_h - 2 * V_Y - ImGui::GetTextLineHeight()*6)), flags, &_script_window_callback, this);
+  if (ImGui::Button("Present"))
+    {    
+    }
+  ImGui::SameLine();
+  if (ImGui::Button("<<"))
+    {
+    }
+  ImGui::SameLine();
+  if (ImGui::Button(">>"))
+    {
+    }
+  ImGui::Text("Ln %d\tCol %d", _line_nr, _col_nr);
   ImGui::End();
   }
 
