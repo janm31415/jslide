@@ -21,20 +21,17 @@
 
 #include "logging.h"
 
+#include "tokenizer.h"
+#include "parser.h"
+
 #define V_W 960
 #define V_H 540
 #define V_X 50
 #define V_Y 50
 
-
-extern "C"
-  {
-#include "trackball.h"
-  }
-
 view::view(int argc, char** argv) : _w(1600), _h(900), _quit(false),
-_blit_gl_state(nullptr), _viewport_w(V_W), _viewport_h(V_H),
-_viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1)
+_blit_gl_state(nullptr), _slide_gl_state(nullptr), _viewport_w(V_W), _viewport_h(V_H),
+_viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0)
   {
   SDL_DisplayMode dm;
   _windowed_w = _w;
@@ -159,11 +156,19 @@ void view::_setup_blit_gl_objects(bool fullscreen)
 
 void view::_setup_gl_objects()
   {
+  _slide_gl_state = new slide_t();
+  init_slide_data(_slide_gl_state, _max_w/2, _max_h/2);
   }
 
 void view::_destroy_gl_objects()
   {
   _destroy_blit_gl_objects();
+  if (_slide_gl_state)
+    {
+    destroy_slide_data(_slide_gl_state);
+    delete _slide_gl_state;
+    _slide_gl_state = nullptr;
+    }
   }
 
 bool view::_ctrl_pressed()
@@ -319,10 +324,12 @@ void view::_load(const std::string& filename)
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     _script = str;
     t.close();
+    _slide_id = 0;
     Logging::Info() << "Loaded " << _current_filename << "\n";
     std::stringstream title;
     title << "JSlide (" << _current_filename << ")";
     SDL_SetWindowTitle(_window, title.str().c_str());
+    _build();
     }
   else
     {
@@ -330,6 +337,7 @@ void view::_load(const std::string& filename)
     _script = std::string();
     SDL_SetWindowTitle(_window, "JSlide");
     }
+  _render_current_slide();
   }
 
 void view::_save()
@@ -496,6 +504,24 @@ int view::script_window_callback(ImGuiInputTextCallbackData* data)
   return 0;
   }
 
+void view::_build()
+  {
+  try
+    {
+  tokens tokes = tokenize(_script);
+  for (const auto& t : tokes)
+    {
+    Logging::Info() << "t: " << t.type << "  -  " << t.value << "  -  " << t.line_nr << ":" << t.col_nr << "\n";
+    }
+  _presentation = make_presentation(tokes);
+    }
+  catch (std::runtime_error& e)
+    {
+    Logging::Error() << e.what() << "\n";
+    }
+  _render_current_slide();
+  }
+
 void view::_script_window()
   {
   ImGui::SetNextWindowSize(ImVec2((float)(_w - V_W - 3 * V_X), (float)(_h - 2 * V_Y)), ImGuiCond_Always);
@@ -510,14 +536,17 @@ void view::_script_window()
   ImGui::InputTextMultiline("Scripting", &_script, ImVec2(-1.f, (float)(_h - 2 * V_Y - ImGui::GetTextLineHeight() * 6)), flags, &_script_window_callback, this);
   if (ImGui::Button("Build"))
     {
+    _build();
     }
   ImGui::SameLine();
   if (ImGui::Button("<<"))
     {
+    _previous_slide();
     }
   ImGui::SameLine();
   if (ImGui::Button(">>"))
     {
+    _next_slide();
     }
   ImGui::Text("Ln %d\tCol %d", _line_nr, _col_nr);
   ImGui::End();
@@ -542,16 +571,41 @@ void view::_log_window()
   log.Draw("Log window", &_settings.log_window);
   }
 
+void view::_next_slide()
+  {
+  if ((_slide_id+1) < _presentation.slides.size())
+    ++_slide_id;
+  _render_current_slide();
+  }
+
+void view::_previous_slide()
+  {
+  if (_slide_id > 0)
+    --_slide_id;
+  _render_current_slide();
+  }
+
+void view::_render_current_slide()
+  {
+  if (_presentation.slides.empty())
+    return;
+  if (_slide_id >= _presentation.slides.size())
+    _slide_id = 0;
+  draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id]);
+  }
+
 void view::loop()
   {
   while (!_quit)
     {
     _poll_for_events();
-
+    glViewport(0, 0, _w, _h);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //draw_blit_data(_blit_gl_state, &_image_gl_state->tex, _w, _h);
+
+
+    draw_blit_data(_blit_gl_state, _slide_gl_state->fbo.get_texture(), _w, _h);
 
     _imgui_ui();
 

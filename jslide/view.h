@@ -12,6 +12,9 @@
 #include "settings.h"
 #include "mouse_data.h"
 #include "blit_gl.h"
+#include "slide_gl.h"
+
+#include "parser.h"
 
 struct ImGuiInputTextCallbackData;
 
@@ -37,6 +40,10 @@ class view
     void _save();
     void _load(const std::string& filename);
     bool _ctrl_pressed();
+    void _build();
+    void _render_current_slide();
+    void _next_slide();
+    void _previous_slide();
 
   private:
     SDL_Window* _window;    
@@ -44,9 +51,12 @@ class view
     bool _quit;
     settings _settings;    
     blit_t* _blit_gl_state;
+    slide_t* _slide_gl_state;
     mouse_data _md;    
     std::string _script;    
     int _line_nr, _col_nr;
     std::string _current_filename;
     keyboard_handler _keyb;
+    Presentation _presentation;
+    uint32_t _slide_id;
   };
