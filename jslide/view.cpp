@@ -499,7 +499,8 @@ void view::_imgui_ui()
   }
 
 void view::_set_fullscreen(bool on)
-  {
+  {  
+  ImGui::SetWindowFocus(nullptr); // hack: if not for this line, the script text would disappear if the script window had the focus
   _settings.fullscreen = on;
   //SDL_SetWindowFullscreen(_window, _settings.fullscreen);
   if (_settings.fullscreen)
