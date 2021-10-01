@@ -101,10 +101,10 @@ namespace
       {
       throw_parse_error(-1, -1, "empty slide");
       }
-    float left = 0.f;
+    float left = -1.f;
     float right = 1.f;
-    float top = 0.f;
-    float bottom = 1.f;
+    float top = 1.f;
+    float bottom = -1.f;
     while (!tokes.empty())
       {
       if (tokes.back().type == token::T_NEWSLIDE)

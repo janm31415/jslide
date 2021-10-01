@@ -87,6 +87,7 @@ void create_font_atlas(font_t* state)
 
   state->tex.bind_to_channel(0);
   state->tex.create_empty(w, h, 1, jtk::texture::pixel_type::byte);
+  state->tex.set_filter_mode(GL_NEAREST);  
 
   // Fill texture with glyph bitmaps and cache placements
   char_info_t* char_info = state->char_info;
@@ -106,7 +107,15 @@ void create_font_atlas(font_t* state)
       row_h = 0;
       offset_x = 0;
       }
-
+    
+    unsigned char* alpha = g->bitmap.buffer;
+    for (int k = 0; k < g->bitmap.width*g->bitmap.rows; ++k)
+      {
+      if (*alpha < 255)
+        *alpha = 0;
+      ++alpha;
+      }
+    
     state->tex.load_from_pixels((GLubyte*)g->bitmap.buffer, offset_x, offset_y, g->bitmap.width, g->bitmap.rows, 1, jtk::texture::pixel_type::byte);
 
     // Cache values
@@ -257,7 +266,8 @@ void init_font(font_t* state, int screen_width, int screen_height)
   state->screen_width = screen_width;
   state->screen_height = screen_height;
 
-  if (FT_New_Face(state->ft, "data/Karla-Regular.ttf", 0, &state->face)) {
+  //if (FT_New_Face(state->ft, "data/Karla-Regular.ttf", 0, &state->face)) {
+  if (FT_New_Face(state->ft, "data/MorePerfectDOSVGA.ttf", 0, &state->face)) {
     printf("Error loading font face\n");
     exit(EXIT_FAILURE);
     }

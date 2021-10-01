@@ -157,7 +157,7 @@ void view::_setup_blit_gl_objects(bool fullscreen)
 void view::_setup_gl_objects()
   {
   _slide_gl_state = new slide_t();
-  init_slide_data(_slide_gl_state, _max_w/2, _max_h/2);
+  init_slide_data(_slide_gl_state, _max_w, _max_h);
   }
 
 void view::_destroy_gl_objects()
