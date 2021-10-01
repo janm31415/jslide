@@ -258,7 +258,7 @@ void view::_poll_for_events()
       else if (event.button.button == 1)
         {
         _md.left_dragging = false;
-        if (!ImGui::GetIO().WantCaptureMouse)
+        if (_settings.fullscreen || !ImGui::GetIO().WantCaptureMouse)
           {
           _next_slide();
           }
@@ -266,7 +266,7 @@ void view::_poll_for_events()
       else if (event.button.button == 3)
         {
         _md.right_dragging = false;
-        if (!ImGui::GetIO().WantCaptureMouse)
+        if (_settings.fullscreen || !ImGui::GetIO().WantCaptureMouse)
           {
           _previous_slide();
           }
@@ -433,6 +433,10 @@ void view::_imgui_ui()
           {
           save_script = true;
           }
+        if (ImGui::MenuItem("Build", "CTRL+b"))
+          {
+          _build();
+          }
         if (ImGui::MenuItem("Exit"))
           {
           _quit = true;
@@ -441,7 +445,7 @@ void view::_imgui_ui()
         }
       if (ImGui::BeginMenu("Window"))
         {
-        if (ImGui::MenuItem("Fullscreen", NULL, &_settings.fullscreen))
+        if (ImGui::MenuItem("Fullscreen", "F5", &_settings.fullscreen))
           {
           _set_fullscreen(_settings.fullscreen);
           }
