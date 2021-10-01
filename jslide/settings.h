@@ -8,6 +8,7 @@ struct settings
   bool log_window;
   bool script_window;
   bool fullscreen; 
+  bool crt_effect;
   };
 
 settings read_settings(const char* filename);

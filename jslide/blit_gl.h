@@ -13,4 +13,4 @@ typedef struct blit_t {
 
 void init_blit_data(blit_t* state, uint32_t blit_x, uint32_t blit_y, uint32_t blit_w, uint32_t blit_h, uint32_t view_w, uint32_t view_h);
 void destroy_blit_data(blit_t* state);
-void draw_blit_data(blit_t* state, jtk::texture* tex, uint32_t vp_w, uint32_t vp_h);
+void draw_blit_data(blit_t* state, jtk::texture* tex, uint32_t vp_w, uint32_t vp_h, bool crt_blit = false);

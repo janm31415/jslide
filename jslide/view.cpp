@@ -576,6 +576,8 @@ void view::_script_window()
     {
     _next_slide();
     }
+  ImGui::SameLine();
+  ImGui::Checkbox("CRT", &_settings.crt_effect);
   ImGui::Text("Ln %d\tCol %d", _line_nr, _col_nr);
   ImGui::End();
   }
@@ -668,7 +670,7 @@ void view::loop()
       {
       draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);
       }
-    draw_blit_data(_blit_gl_state, _slide_gl_state->fbo.get_texture(), _w, _h);
+    draw_blit_data(_blit_gl_state, _slide_gl_state->fbo.get_texture(), _w, _h, _settings.crt_effect);
 
     if (!_settings.fullscreen)
       {

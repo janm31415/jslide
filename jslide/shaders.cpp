@@ -56,13 +56,40 @@ std::string get_blit_fragment_shader()
   uniform vec2      iBlitResolution;
   uniform vec2      iBlitOffset;
   uniform sampler2D iChannel0;
-  
+  uniform int       iCrt;  
+
   out vec4 FragColor;
   
+  vec2 CRTCurveUV( vec2 uv )
+  {
+      uv = uv * 2.0 - 1.0;
+      vec2 offset = abs( uv.yx ) / vec2( 6.0, 4.0 );
+      uv = uv + uv * offset * offset;
+      uv = uv * 0.5 + 0.5;
+      return uv;
+  }
+
+  void DrawVignette( inout vec3 color, vec2 uv )
+  {    
+      float vignette = uv.x * uv.y * ( 1.0 - uv.x ) * ( 1.0 - uv.y );
+      vignette = clamp( pow( 16.0 * vignette, 0.3 ), 0.0, 1.0 );
+      color *= vignette;
+  }
+
   void main()
   {
   vec2 pos = (gl_FragCoord.xy - iBlitOffset)/iBlitResolution;
-  FragColor = texture(iChannel0, pos);
+  if (iCrt > 0)
+    {
+    vec2 crtpos = CRTCurveUV( pos ); 
+    vec4 clr = vec4( 0.0, 0.0, 0.0, 1.0);
+    if (crtpos.x >= 0.0 && crtpos.x <= 1.0 && crtpos.y >= 0.0 && crtpos.y <= 1.0)
+      clr = texture(iChannel0, crtpos);
+    DrawVignette( clr.xyz, crtpos );
+    FragColor = clr;
+    }
+  else
+    FragColor = texture(iChannel0, pos);
   }
   )");
   }

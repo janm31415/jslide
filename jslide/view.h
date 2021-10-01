@@ -60,5 +60,5 @@ class view
     keyboard_handler _keyb;
     Presentation _presentation;
     uint32_t _slide_id, _previous_slide_id;
-    shader_parameters _sp;
+    shader_parameters _sp;    
   };
