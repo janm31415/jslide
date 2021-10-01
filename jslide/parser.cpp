@@ -79,14 +79,14 @@ namespace
       case token::T_HASH:
       {
         b.expr = make_title(tokes);
-        b.bottom = b.top + BASE_SIZE + (7-std::get<Title>(b.expr).size)* SIZE_FACTOR;
+        b.bottom = b.top - BASE_SIZE - (7-std::get<Title>(b.expr).size)* SIZE_FACTOR;
         top = b.bottom;
         break;
       }
       default:
       {
       b.expr = make_text(tokes);
-      b.bottom = b.top + BASE_SIZE;
+      b.bottom = b.top - BASE_SIZE;
       top = b.bottom;
       break;
       }

@@ -44,6 +44,8 @@ class view
     void _render_current_slide();
     void _next_slide();
     void _previous_slide();
+    void _set_fullscreen(bool on);
+    void _do_mouse();
 
   private:
     SDL_Window* _window;    

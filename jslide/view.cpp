@@ -256,10 +256,18 @@ void view::_poll_for_events()
       else if (event.button.button == 1)
         {
         _md.left_dragging = false;
+        if (!ImGui::GetIO().WantCaptureMouse)
+          {
+          _next_slide();
+          }
         }
       else if (event.button.button == 3)
         {
         _md.right_dragging = false;
+        if (!ImGui::GetIO().WantCaptureMouse)
+          {
+          _previous_slide();
+          }
         }
       break;
       }
@@ -305,7 +313,12 @@ void view::_poll_for_events()
         {
         case SDLK_ESCAPE:
         {
-        _quit = true;
+        _set_fullscreen(false);
+        break;
+        }
+        case SDLK_F5:
+        {
+        _set_fullscreen(true);
         break;
         }
         }
@@ -421,14 +434,7 @@ void view::_imgui_ui()
         {
         if (ImGui::MenuItem("Fullscreen", NULL, &_settings.fullscreen))
           {
-          //SDL_SetWindowFullscreen(_window, _settings.fullscreen);
-          if (_settings.fullscreen)
-            SDL_SetWindowSize(_window, _max_w, _max_h);
-          else
-            SDL_SetWindowSize(_window, _windowed_w, _windowed_h);
-          SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-          _destroy_blit_gl_objects();
-          _setup_blit_gl_objects(_settings.fullscreen);
+          _set_fullscreen(_settings.fullscreen);         
           }
         ImGui::MenuItem("Log window", NULL, &_settings.log_window);
         ImGui::MenuItem("Script window", NULL, &_settings.script_window);
@@ -478,6 +484,19 @@ void view::_imgui_ui()
   ImGui::Render();
   }
 
+void view::_set_fullscreen(bool on)
+  {
+  _settings.fullscreen = on;
+  //SDL_SetWindowFullscreen(_window, _settings.fullscreen);
+  if (_settings.fullscreen)
+    SDL_SetWindowSize(_window, _max_w, _max_h);
+  else
+    SDL_SetWindowSize(_window, _windowed_w, _windowed_h);
+  SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+  _destroy_blit_gl_objects();
+  _setup_blit_gl_objects(_settings.fullscreen);
+  }
+
 namespace
   {
   int _script_window_callback(ImGuiInputTextCallbackData* data)
@@ -508,12 +527,12 @@ void view::_build()
   {
   try
     {
-  tokens tokes = tokenize(_script);
-  for (const auto& t : tokes)
-    {
-    Logging::Info() << "t: " << t.type << "  -  " << t.value << "  -  " << t.line_nr << ":" << t.col_nr << "\n";
-    }
-  _presentation = make_presentation(tokes);
+    tokens tokes = tokenize(_script);
+    for (const auto& t : tokes)
+      {
+      Logging::Info() << "t: " << t.type << "  -  " << t.value << "  -  " << t.line_nr << ":" << t.col_nr << "\n";
+      }
+    _presentation = make_presentation(tokes);
     }
   catch (std::runtime_error& e)
     {
@@ -573,7 +592,7 @@ void view::_log_window()
 
 void view::_next_slide()
   {
-  if ((_slide_id+1) < _presentation.slides.size())
+  if ((_slide_id + 1) < _presentation.slides.size())
     ++_slide_id;
   _render_current_slide();
   }
@@ -594,11 +613,17 @@ void view::_render_current_slide()
   draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id]);
   }
 
+void view::_do_mouse()
+  {  
+  }
+
 void view::loop()
   {
   while (!_quit)
     {
     _poll_for_events();
+    _do_mouse();
+
     glViewport(0, 0, _w, _h);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -607,9 +632,11 @@ void view::loop()
 
     draw_blit_data(_blit_gl_state, _slide_gl_state->fbo.get_texture(), _w, _h);
 
-    _imgui_ui();
-
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    if (!_settings.fullscreen)
+      {
+      _imgui_ui();
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+      }
 
 
     SDL_GL_SwapWindow(_window);

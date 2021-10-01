@@ -2,16 +2,33 @@
 
 namespace
   {
+
+  float get_size(int size)
+    {
+    if (size > 6)
+      size = 6;
+    if (size < 1)
+      size = 1;
+    float sz = (7 - size) * 0.002;
+    return sz;
+    }
+
   void _draw_title(slide_t* state, const Title& expr, float left, float right, float top, float bottom)
     {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    float sz = (7-expr.size)*0.002;
-    render_text(&state->font_gl_state, expr.text.value.c_str(), left, 0, sz, sz);
+    float sz = get_size(expr.size);
+    jtk::vec3<float> color(1, 0.5, 0);
+    float text_width, text_height;
+    get_render_size(text_width, text_height, &state->font_gl_state, expr.text.value.c_str(), sz, sz);
+    render_text(&state->font_gl_state, expr.text.value.c_str(), left, top - text_height, sz, sz, color);
     }
 
   void _draw_text(slide_t* state, const Text& expr, float left, float right, float top, float bottom)
     {
+    float sz = get_size(3);
+    jtk::vec3<float> color(1, 0.5, 0);
+    float text_width, text_height;
+    get_render_size(text_width, text_height, &state->font_gl_state, expr.value.c_str(), sz, sz);
+    render_text(&state->font_gl_state, expr.value.c_str(), left, top - text_height, sz, sz, color);
     }
 
   void _draw_expression(slide_t* state, const Expression& expr, float left, float right, float top, float bottom)

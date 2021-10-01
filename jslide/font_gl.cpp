@@ -148,9 +148,49 @@ inline text_vert_t make_text_vert(GLfloat x, GLfloat y, GLfloat s, GLfloat t, GL
   return out;
   }
 
+void get_render_size(float& width, float& height, font_t* state, const char* text, float sx, float sy)
+  {
+  char_info_t* c = state->char_info;
+
+  float x = 0.f;
+  float y = 0.f;
+
+  width = 0.f;
+  height = 0.f;
+
+  const char* p;
+  for (p = text; *p; p++) {
+    float x2 = x + c[*p].bl * sx;
+    float y2 = -y - c[*p].bt * sy;
+    float w = c[*p].bw * sx;
+    float h = c[*p].bh * sy;
+
+    // Advance cursor to start of next char
+    x += c[*p].ax * sx;
+    y += c[*p].ay * sy;
+
+    // Skip 0 pixel glyphs
+    if (!w || !h)
+      continue;
+
+    width = std::max<float>(width, std::abs(x2));
+    width = std::max<float>(width, std::abs(x2 + w));
+    height = std::max<float>(height, std::abs(y2));
+    height = std::max<float>(height, std::abs(y2 + h));
+    /*
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2, c[*p].tx, c[*p].ty, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / state->atlas_height, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / state->atlas_height, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2 - h, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty + c[*p].bh / state->atlas_height, color[0], color[1], color[2]);
+    */
+    }
+  }
+
 // Render single string
 // Assumes arrays and program already steup
-void render_text(font_t* state, const char* text, float x, float y, float sx, float sy)
+void render_text(font_t* state, const char* text, float x, float y, float sx, float sy, const jtk::vec3<float>& color)
   {
   state->program.bind();
   jtk::gl_check_error("state->program.bind();");
@@ -195,12 +235,12 @@ void render_text(font_t* state, const char* text, float x, float y, float sx, fl
     if (!w || !h)
       continue;
 
-    verts[n++] = (text_vert_t)make_text_vert(x2, -y2, c[*p].tx, c[*p].ty, 1, 1, 1);
-    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty, 1, 1, 1);
-    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / state->atlas_height, 1, 1, 1);
-    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty, 1, 1, 1);
-    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / state->atlas_height, 1, 1, 1);
-    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2 - h, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty + c[*p].bh / state->atlas_height, 1, 1, 1);
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2, c[*p].tx, c[*p].ty, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / state->atlas_height, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / state->atlas_height, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2 - h, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty + c[*p].bh / state->atlas_height, color[0], color[1], color[2]);
     }
 
   state->vbo.allocate(NULL, n * sizeof(text_vert_t));
@@ -267,7 +307,8 @@ void init_font(font_t* state, int screen_width, int screen_height)
   state->screen_height = screen_height;
 
   //if (FT_New_Face(state->ft, "data/Karla-Regular.ttf", 0, &state->face)) {
-  if (FT_New_Face(state->ft, "data/MorePerfectDOSVGA.ttf", 0, &state->face)) {
+  //if (FT_New_Face(state->ft, "data/MorePerfectDOSVGA.ttf", 0, &state->face)) {
+  if (FT_New_Face(state->ft, "data/LessPerfectDOSVGA.ttf", 0, &state->face)) {
     printf("Error loading font face\n");
     exit(EXIT_FAILURE);
     }
