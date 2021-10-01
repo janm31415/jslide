@@ -2,6 +2,10 @@
 #include "sizing.h"
 #include "defines.h"
 
+#include "jtk/file_utils.h"
+
+#include <fstream>
+
 namespace
   {
 
@@ -43,12 +47,31 @@ namespace
     _draw_text(state, expr, left, right, top, bottom, sz);
     }
 
+  void _draw_line(slide_t* state, const Line& expr, float left, float right, float top, float bottom)
+    {
+    float sz = get_size(NORMAL_TEXT_SIZE);
+    Text t;
+    t.words.emplace_back("_", expr.attrib);
+    float text_width = 0;
+    float text_height = 0;
+    get_text_sizes(text_width, text_height, &state->font_gl_state, t, sz);
+    int nr_of_chars = (int)std::floor((right-left) / text_width);
+    std::string line;
+    line.reserve(nr_of_chars);
+    for (int i = 0; i < nr_of_chars; ++i)
+      line.push_back('_');
+    t.words.front().first = line;
+    _draw_text(state, t, left, right, top, bottom, sz);
+    }
+
   void _draw_expression(slide_t* state, const Expression& expr, float left, float right, float top, float bottom)
     {
     if (std::holds_alternative<Title>(expr))
       _draw_title(state, std::get<Title>(expr), left, right, top, bottom);
     if (std::holds_alternative<Text>(expr))
       _draw_text(state, std::get<Text>(expr), left, right, top, bottom);
+    if (std::holds_alternative<Line>(expr))
+      _draw_line(state, std::get<Line>(expr), left, right, top, bottom);
     }
 
   void _draw_block(slide_t* state, const Block& b)
@@ -124,5 +147,18 @@ void init_slide_shader(slide_t* state, const std::string& script)
   if (state->shader_gl_state.shader_program.is_linked())
     destroy_shader_data(&state->shader_gl_state);
   if (!script.empty())
-    init_shader_data(&state->shader_gl_state, script, state->shader_width, state->shader_height);
+    {
+    if (jtk::file_exists(script))
+      {
+      std::ifstream f(script);
+      if (f.is_open())
+        {
+        std::string scr((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+        f.close();
+        init_shader_data(&state->shader_gl_state, scr, state->shader_width, state->shader_height);
+        }
+      }
+    else
+      init_shader_data(&state->shader_gl_state, script, state->shader_width, state->shader_height);
+    }
   }

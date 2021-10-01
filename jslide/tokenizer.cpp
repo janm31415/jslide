@@ -3,12 +3,22 @@
 namespace
   {
 
+  bool _has_dashes_only(const std::string& buff)
+    {
+    for (size_t i = 0; i < buff.length(); ++i)
+      if (buff[i] != '-')
+        return false;
+    return true;
+    }
 
   void _treat_buffer(std::string& buff, std::vector<token>& tokes, int line_nr, int col_nr)
     {
     if (!buff.empty())
       {
-      tokes.emplace_back(token::T_TEXT, buff, line_nr, col_nr);
+      if (buff.size()>=4 && _has_dashes_only(buff))
+        tokes.emplace_back(token::T_LINE, "----", line_nr, col_nr);
+      else
+        tokes.emplace_back(token::T_TEXT, buff, line_nr, col_nr);
       buff.clear();
       }
     }
@@ -129,6 +139,8 @@ tokens tokenize(const std::string& str)
               ++col_nr;
             ++t;
             }
+          tokes.emplace_back(token::T_TEXT, shader_code, line_nr, col_nr);
+          tokes.emplace_back(token::T_SHADER_END, "\"", line_nr, col_nr);
           if (*t)
             ++t;
           if (*t == '\n')
@@ -138,8 +150,6 @@ tokens tokenize(const std::string& str)
             newline = true;
             ++t;
             }
-          tokes.emplace_back(token::T_TEXT, shader_code, line_nr, col_nr);
-          tokes.emplace_back(token::T_SHADER_END, "\"", line_nr, col_nr);
           s = t;
           }
         else if (*t == '[') // image

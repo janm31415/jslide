@@ -14,7 +14,8 @@ struct token
     T_ATTRIBUTE_BEGIN,
     T_ATTRIBUTE_END,
     T_SHADER_BEGIN,
-    T_SHADER_END
+    T_SHADER_END,
+    T_LINE
     };
 
   e_type type;

@@ -32,7 +32,12 @@ class Title
     int size;
   };
 
-typedef std::variant<Text, Title> Expression;
+struct Line
+  {
+  ActiveAttributes attrib;
+  };
+
+typedef std::variant<Text, Title, Line> Expression;
 
 class Block
   {

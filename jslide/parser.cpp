@@ -162,6 +162,16 @@ namespace
     return t;
     }
 
+  Line make_line(tokens& tokes)
+    {
+    Line l;
+    l.attrib = current_attributes;
+    require(tokes, "----");
+    if (!tokes.empty())
+      require(tokes, "\\n"); // pop the newline
+    return l;
+    }
+
   Block make_block(tokens& tokes)
     {
     Block b;
@@ -176,6 +186,11 @@ namespace
         b.expr = make_title(tokes);        
         break;
       }      
+      case token::T_LINE:
+      {
+        b.expr = make_line(tokes);
+        break;
+      }
       default:
       {
       b.expr = make_text(tokes);      

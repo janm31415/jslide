@@ -535,10 +535,10 @@ void view::_build()
   try
     {
     tokens tokes = tokenize(_script);
-    for (const auto& t : tokes)
-      {
-      Logging::Info() << "t: " << t.type << "  -  " << t.value << "  -  " << t.line_nr << ":" << t.col_nr << "\n";
-      }
+    //for (const auto& t : tokes)
+    //  {
+    //  Logging::Info() << "t: " << t.type << "  -  " << t.value << "  -  " << t.line_nr << ":" << t.col_nr << "\n";
+    //  }
     _presentation = make_presentation(tokes);
     nest_blocks(_presentation, &_slide_gl_state->font_gl_state);
     }
@@ -631,7 +631,7 @@ void view::_do_mouse()
   }
 
 void view::loop()
-  {  
+  {
   _sp.frame = 0;
   _sp.time = 0.f;
   auto last_tic = std::chrono::high_resolution_clock::now();
@@ -648,8 +648,10 @@ void view::loop()
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-    draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);
+    if (!_presentation.slides.empty())
+      {
+      draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);      
+      }
     draw_blit_data(_blit_gl_state, _slide_gl_state->fbo.get_texture(), _w, _h);
 
     if (!_settings.fullscreen)

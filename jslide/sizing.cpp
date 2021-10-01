@@ -11,6 +11,11 @@ void get_text_sizes(float& text_width, float& text_height, font_t* state, const 
     get_render_size(tw, th, state, word.first.c_str(), sz * get_font_ratio(), sz);
     text_width += tw;
     text_height = std::max<float>(text_height, th);
+    if (th == 0.f)
+      {
+      get_render_size(tw, th, state, "a", sz * get_font_ratio(), sz);
+      text_height = std::max<float>(text_height, th);
+      }
     }
   if (expr.words.empty())
     {

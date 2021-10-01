@@ -27,6 +27,14 @@ namespace
     _nest_text(expr, state, left, right, top, bottom, sz);
     }
 
+  void _nest_line(Line& expr, font_t* state, float& left, float& right, float& top, float& bottom)
+    {
+    float sz = get_size(NORMAL_TEXT_SIZE);
+    Text t;
+    t.words.emplace_back("d", expr.attrib);
+    _nest_text(t, state, left, right, top, bottom, sz);
+    }
+
   void _nest_block(Block& b, font_t* state, float& left, float& right, float& top, float& bottom)
     {
     b.left = left;
@@ -36,7 +44,9 @@ namespace
     if (std::holds_alternative<Title>(b.expr))
       _nest_title(std::get<Title>(b.expr), state, b.left, b.right, b.top, b.bottom);
     if (std::holds_alternative<Text>(b.expr))
-      _nest_text(std::get<Text>(b.expr), state, b.left, b.right, b.top, b.bottom);  
+      _nest_text(std::get<Text>(b.expr), state, b.left, b.right, b.top, b.bottom); 
+    if (std::holds_alternative<Line>(b.expr))
+      _nest_line(std::get<Line>(b.expr), state, b.left, b.right, b.top, b.bottom);
     top = b.bottom;
     }
 
