@@ -1,5 +1,6 @@
 #include "slide_gl.h"
 #include "sizing.h"
+#include "defines.h"
 
 namespace
   {
@@ -9,9 +10,21 @@ namespace
     float text_width = 0;
     float text_height = 0;
     get_text_sizes(text_width, text_height, &state->font_gl_state, expr, sz);    
+
+    float offset = 0.f;
+    if (!expr.words.empty())
+      {
+      switch (expr.words.front().second.e_alignment)
+        {
+        case alignment::T_LEFT: break;
+        case alignment::T_RIGHT: offset = (right-left) - text_width; break;
+        case alignment::T_CENTER: offset = (right-left-text_width)*0.5; break;
+        }
+      }
+
     for (const auto& word : expr.words)
       {
-      render_text(&state->font_gl_state, word.first.c_str(), left, top - text_height, sz * get_font_ratio(), sz, word.second.color);
+      render_text(&state->font_gl_state, word.first.c_str(), offset + left, top - text_height, sz * get_font_ratio(), sz, word.second.color);
       float tw, th;
       get_render_size(tw, th, &state->font_gl_state, word.first.c_str(), sz * get_font_ratio(), sz);
       left += tw;
@@ -26,7 +39,7 @@ namespace
 
   void _draw_text(slide_t* state, const Text& expr, float left, float right, float top, float bottom)
     {
-    float sz = get_size(6);
+    float sz = get_size(NORMAL_TEXT_SIZE);
     _draw_text(state, expr, left, right, top, bottom, sz);
     }
 

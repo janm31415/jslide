@@ -1,5 +1,6 @@
 #include "nester.h"
 #include "sizing.h"
+#include "defines.h"
 
 #include <variant>
 
@@ -22,7 +23,7 @@ namespace
 
   void _nest_text(Text& expr, font_t* state, float& left, float& right, float& top, float& bottom)
     {
-    float sz = get_size(6);
+    float sz = get_size(NORMAL_TEXT_SIZE);
     _nest_text(expr, state, left, right, top, bottom, sz);
     }
 

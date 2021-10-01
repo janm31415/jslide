@@ -25,6 +25,8 @@
 #include "parser.h"
 #include "nester.h"
 
+#include <thread>
+
 #define V_W 960
 #define V_H 540
 #define V_X 50
@@ -297,6 +299,12 @@ void view::_poll_for_events()
         {
         if (ImGui::GetIO().WantCaptureKeyboard)
           break;
+        break;
+        }
+        case SDLK_b:
+        {
+        if (_ctrl_pressed())
+          _build();
         break;
         }
         case SDLK_s:
@@ -640,7 +648,7 @@ void view::loop()
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
       }
 
-
+    std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(16.0));
     SDL_GL_SwapWindow(_window);
     }
   }

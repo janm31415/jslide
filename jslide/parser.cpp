@@ -140,8 +140,6 @@ namespace
       ++t.size;
       advance(tokes);
       }
-    if (t.size > 6)
-      t.size = 6;
     t.text = make_text(tokes);
     return t;
     }
@@ -194,6 +192,8 @@ namespace
 
 Presentation make_presentation(tokens& tokes)
   {
+  popped_token = token(token::T_NEWLINE, "\\n", -1, -1);
+  current_attributes = ActiveAttributes();
   std::reverse(tokes.begin(), tokes.end());
   Presentation pres;
   while (!tokes.empty())

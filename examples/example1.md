@@ -1,9 +1,16 @@
-{: .green}
-
-
-
-
+{: .green .center}
 # Title
+## Title
+### Title
+@
+### Title
+#### Title
+##### Title
+###### Title
+####### Title
+######## Title
+Title
+@
 ## Title 2
 ## Title {: .red} 2
 {: .orange}
