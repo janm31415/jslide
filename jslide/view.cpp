@@ -287,17 +287,18 @@ void view::_poll_for_events()
         {
         break;
         }
-        case SDLK_LEFT:
+        case SDLK_HOME:
         {
-        if (ImGui::GetIO().WantCaptureKeyboard)
+        if (!_settings.fullscreen && ImGui::GetIO().WantCaptureKeyboard)
           break;
-
+        _first_slide();
         break;
         }
-        case SDLK_RIGHT:
+        case SDLK_END:
         {
-        if (ImGui::GetIO().WantCaptureKeyboard)
+        if (!_settings.fullscreen && ImGui::GetIO().WantCaptureKeyboard)
           break;
+        _last_slide();
         break;
         }
         case SDLK_b:
@@ -414,6 +415,7 @@ void view::_imgui_ui()
           {
           _current_filename = std::string();
           _script = std::string();
+          _build();
           SDL_SetWindowTitle(_window, "JSlide");
           }
         if (ImGui::MenuItem("Load"))
@@ -614,6 +616,20 @@ void view::_previous_slide()
   _previous_slide_id = _slide_id;
   if (_slide_id > 0)
     --_slide_id;
+  _prepare_current_slide();
+  }
+
+void view::_first_slide()
+  {
+  _previous_slide_id = _slide_id;  
+  _slide_id = 0;
+  _prepare_current_slide();
+  }
+
+void view::_last_slide()
+  {
+  _previous_slide_id = _slide_id;
+  _slide_id = _presentation.slides.empty() ? 0 : _presentation.slides.size()-1;
   _prepare_current_slide();
   }
 

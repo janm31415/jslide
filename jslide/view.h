@@ -43,6 +43,8 @@ class view
     void _prepare_current_slide();
     void _next_slide();
     void _previous_slide();
+    void _first_slide();
+    void _last_slide();
     void _set_fullscreen(bool on);
     void _do_mouse();
 

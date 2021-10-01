@@ -92,6 +92,7 @@ void draw_shader_data(shader_t* state, const shader_parameters& params)
   state->shader_program.set_uniform_value("iTime", (GLfloat)params.time);
   state->shader_program.set_uniform_value("iGlobalTime", (GLfloat)params.time);
   state->shader_program.set_uniform_value("iFrame", (GLint)params.frame);
+  state->shader_program.set_uniform_value("iTimeDelta", (GLint)params.time_delta);
 
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   gl_check_error("glDrawElements");

@@ -229,6 +229,19 @@ namespace
     return s;
     }
 
+  Slide make_ending_slide()
+    {
+    Slide s;
+    Block b;
+    Text t;
+    t.words.emplace_back("end of slideshow", ActiveAttributes());
+    Title tt;
+    tt.size = 7;
+    tt.text = t;
+    b.expr = tt;
+    s.blocks.push_back(b);
+    return s;
+    }
   } // namespace
 
 Presentation make_presentation(tokens& tokes)
@@ -244,5 +257,6 @@ Presentation make_presentation(tokens& tokes)
     else
       pres.slides.push_back(make_slide(tokes, Slide()));
     }
+  pres.slides.push_back(make_ending_slide());
   return pres;
   }
