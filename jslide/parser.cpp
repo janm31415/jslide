@@ -2,13 +2,14 @@
 #include <algorithm>
 #include <stdexcept>
 #include <sstream>
-#include "defines.h"
 
 #include "colors.h"
 
 namespace
   {
   ActiveAttributes current_attributes;
+
+  token popped_token(token::T_NEWLINE, "\\n", -1, -1);
 
 
   void throw_parse_error(int line_nr, int col_nr, const std::string& message)
@@ -20,6 +21,12 @@ namespace
     throw std::runtime_error("parse error: " + str.str() + ": " + message);
     }
 
+  void advance(tokens& tokes)
+    {
+    popped_token = tokes.back();
+    tokes.pop_back();
+    }
+
   token take(tokens& tokens)
     {
     if (tokens.empty())
@@ -27,7 +34,7 @@ namespace
       throw_parse_error(-1, -1, "unexpected end");
       }
     token t = tokens.back();
-    tokens.pop_back();
+    advance(tokens);
     return t;
     }
 
@@ -56,6 +63,7 @@ namespace
   void read_attributes(tokens& tokes)
     {
     static auto color_map = get_color_map();
+    bool attributes_lines = popped_token.type == token::T_NEWLINE;
     require(tokes, "{:");
     while (current_type(tokes) != token::T_ATTRIBUTE_END)
       {
@@ -88,6 +96,11 @@ namespace
       throw_parse_error(t.line_nr, t.col_nr, str.str());
       }
     require(tokes, "}");    
+    if (attributes_lines)
+      {
+      if (!tokes.empty() && current_type(tokes) == token::T_NEWLINE)
+        advance(tokes);
+      }
     }
 
   bool check_attributes(tokens& tokes)
@@ -111,10 +124,10 @@ namespace
       word.first = tokes.back().value;
       word.second = current_attributes;
       t.words.push_back(word);
-      tokes.pop_back();
+      advance(tokes);
       }
     if (!tokes.empty())
-      tokes.pop_back(); // pop the newline
+      advance(tokes); // pop the newline
     return t;
     }
 
@@ -125,7 +138,7 @@ namespace
     while (!tokes.empty() && tokes.back().type == token::T_HASH)
       {
       ++t.size;
-      tokes.pop_back();
+      advance(tokes);
       }
     if (t.size > 6)
       t.size = 6;
@@ -133,13 +146,9 @@ namespace
     return t;
     }
 
-  Block make_block(tokens& tokes, float& left, float& right, float& top, float& bottom)
+  Block make_block(tokens& tokes)
     {
     Block b;
-    b.left = left;
-    b.right = right;
-    b.top = top;
-    b.bottom = bottom;
     if (tokes.empty())
       {
       throw_parse_error(-1, -1, "empty block");
@@ -148,16 +157,12 @@ namespace
       {
       case token::T_HASH:
       {
-        b.expr = make_title(tokes);
-        b.bottom = b.top - 2*BASE_SIZE - (7-std::get<Title>(b.expr).size)* SIZE_FACTOR;
-        top = b.bottom;
+        b.expr = make_title(tokes);        
         break;
       }      
       default:
       {
-      b.expr = make_text(tokes);
-      b.bottom = b.top - 2*BASE_SIZE;
-      top = b.bottom;
+      b.expr = make_text(tokes);      
       break;
       }
       }
@@ -171,18 +176,16 @@ namespace
       {
       throw_parse_error(-1, -1, "empty slide");
       }
-    float left = -1.f;
-    float right = 1.f;
-    float top = 1.f;
-    float bottom = -1.f;
     while (!tokes.empty())
       {
       if (tokes.back().type == token::T_NEWSLIDE)
         {
-        tokes.pop_back();
+        advance(tokes);
         break;
         }     
-      s.blocks.push_back(make_block(tokes, left, right, top, bottom));
+      if (check_attributes(tokes))
+        continue;
+      s.blocks.push_back(make_block(tokes));
       }
     return s;
     }

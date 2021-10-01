@@ -38,11 +38,13 @@ image_helper.h
 keyboard.h
 logging.h
 mouse_data.h
+nester.h
 parser.h
 pref_file.h
 settings.h
 shaders.h
 slide_gl.h
+sizing.h
 tokenizer.h
 utils_gl.h
 view.h
@@ -56,11 +58,13 @@ font_gl.cpp
 image_helper.cpp
 logging.cpp
 main.cpp
+nester.cpp
 parser.cpp
 pref_file.cpp
 settings.cpp
 shaders.cpp
 slide_gl.cpp
+sizing.cpp
 tokenizer.cpp
 utils_gl.cpp
 view.cpp

@@ -70,6 +70,10 @@ tokens tokenize(const std::string& str)
         ++s;
         ++col_nr;
         }
+      else
+        {
+        _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
+        }
       break;
       }
       case '#':

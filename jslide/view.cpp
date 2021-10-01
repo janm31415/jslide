@@ -23,6 +23,7 @@
 
 #include "tokenizer.h"
 #include "parser.h"
+#include "nester.h"
 
 #define V_W 960
 #define V_H 540
@@ -533,6 +534,7 @@ void view::_build()
       Logging::Info() << "t: " << t.type << "  -  " << t.value << "  -  " << t.line_nr << ":" << t.col_nr << "\n";
       }
     _presentation = make_presentation(tokes);
+    nest_blocks(_presentation, &_slide_gl_state->font_gl_state);
     }
   catch (std::runtime_error& e)
     {
