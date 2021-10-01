@@ -11,6 +11,7 @@ struct token
     T_TEXT,
     T_NEWLINE,
     T_NEWSLIDE,
+    T_ADDTOSLIDE,
     T_ATTRIBUTE_BEGIN,
     T_ATTRIBUTE_END,
     T_SHADER_BEGIN,

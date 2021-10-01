@@ -34,7 +34,7 @@
 
 view::view(int argc, char** argv) : _w(1600), _h(900), _quit(false),
 _blit_gl_state(nullptr), _slide_gl_state(nullptr), _viewport_w(V_W), _viewport_h(V_H),
-_viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0)
+_viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0), _previous_slide_id(0)
   {
   SDL_DisplayMode dm;
   _windowed_w = _w;
@@ -346,6 +346,7 @@ void view::_load(const std::string& filename)
     _script = str;
     t.close();
     _slide_id = 0;
+    _previous_slide_id = 0;
     Logging::Info() << "Loaded " << _current_filename << "\n";
     std::stringstream title;
     title << "JSlide (" << _current_filename << ")";
@@ -596,6 +597,7 @@ void view::_log_window()
 
 void view::_next_slide()
   {
+  _previous_slide_id = _slide_id;
   if ((_slide_id + 1) < _presentation.slides.size())
     ++_slide_id;
   _prepare_current_slide();
@@ -603,6 +605,7 @@ void view::_next_slide()
 
 void view::_previous_slide()
   {
+  _previous_slide_id = _slide_id;
   if (_slide_id > 0)
     --_slide_id;
   _prepare_current_slide();
@@ -614,15 +617,28 @@ void view::_prepare_current_slide()
     return;
   if (_slide_id >= _presentation.slides.size())
     _slide_id = 0;
-  try
+
+  bool should_compute_shader = _presentation.slides[_slide_id].reset_shaders;
+  if (!should_compute_shader)
     {
-    init_slide_shader(_slide_gl_state, _presentation.slides[_slide_id].shader);
-    _sp.frame = 0;
-    _sp.time = 0.f;
+    if (_previous_slide_id != (_slide_id-1) && _previous_slide_id < _presentation.slides.size())
+      {
+      if (_presentation.slides[_previous_slide_id].reset_shaders)
+        should_compute_shader = true;
+      }
     }
-  catch (std::runtime_error& e)
+  if (should_compute_shader)
     {
-    Logging::Error() << e.what() << "\n";
+    try
+      {
+      init_slide_shader(_slide_gl_state, _presentation.slides[_slide_id].shader);
+      _sp.frame = 0;
+      _sp.time = 0.f;
+      }
+    catch (std::runtime_error& e)
+      {
+      Logging::Error() << e.what() << "\n";
+      }
     }
   }
 
@@ -650,7 +666,7 @@ void view::loop()
 
     if (!_presentation.slides.empty())
       {
-      draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);      
+      draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);
       }
     draw_blit_data(_blit_gl_state, _slide_gl_state->fbo.get_texture(), _w, _h);
 

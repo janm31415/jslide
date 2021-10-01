@@ -63,7 +63,7 @@ namespace
   void read_attributes(tokens& tokes)
     {
     static auto color_map = get_color_map();
-    bool attributes_lines = popped_token.type == token::T_NEWLINE || popped_token.type == token::T_NEWSLIDE;
+    bool attributes_lines = popped_token.type == token::T_NEWLINE || popped_token.type == token::T_NEWSLIDE || popped_token.type == token::T_ADDTOSLIDE;
     require(tokes, "{:");
     while (current_type(tokes) != token::T_ATTRIBUTE_END)
       {
@@ -200,16 +200,18 @@ namespace
     return b;
     }
   
-  Slide make_slide(tokens& tokes)
+  Slide make_slide(tokens& tokes, const Slide& prev_slide)
     {
-    Slide s;
+    Slide s = prev_slide;
+    if (!s.blocks.empty())
+      s.reset_shaders = false;
     if (tokes.empty())
       {
       throw_parse_error(-1, -1, "empty slide");
       }
     while (!tokes.empty())
       {
-      if (tokes.back().type == token::T_NEWSLIDE)
+      if (tokes.back().type == token::T_NEWSLIDE || tokes.back().type == token::T_ADDTOSLIDE)
         {
         advance(tokes);
         break;
@@ -237,7 +239,10 @@ Presentation make_presentation(tokens& tokes)
   Presentation pres;
   while (!tokes.empty())
     {
-    pres.slides.push_back(make_slide(tokes));
+    if (popped_token.type == token::T_ADDTOSLIDE)
+      pres.slides.push_back(make_slide(tokes, pres.slides.back()));
+    else
+      pres.slides.push_back(make_slide(tokes, Slide()));
     }
   return pres;
   }

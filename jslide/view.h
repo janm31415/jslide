@@ -59,6 +59,6 @@ class view
     std::string _current_filename;
     keyboard_handler _keyb;
     Presentation _presentation;
-    uint32_t _slide_id;
+    uint32_t _slide_id, _previous_slide_id;
     shader_parameters _sp;
   };

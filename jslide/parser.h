@@ -51,6 +51,7 @@ class Slide
   public:
     std::string shader;
     std::vector<Block> blocks;
+    bool reset_shaders = true;
   };
 
 class Presentation

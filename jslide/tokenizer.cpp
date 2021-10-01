@@ -22,6 +22,14 @@ namespace
       buff.clear();
       }
     }
+
+  bool _buffer_contains_characters_other_than_space(const std::string& buff)
+    {
+    for (size_t i = 0; i < buff.size(); ++i)
+      if (buff[i] != ' ')
+        return true;
+    return false;
+    }
   }
 
 tokens tokenize(const std::string& str)
@@ -82,7 +90,8 @@ tokens tokenize(const std::string& str)
         }
       else
         {
-        _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
+        if (_buffer_contains_characters_other_than_space(buff))
+          _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
         }
       break;
       }
@@ -171,6 +180,18 @@ tokens tokenize(const std::string& str)
           col_nr = 1;
           ++line_nr;
           newline = true;
+          }
+        else if (*t == '@')
+          {
+          ++t;
+          if (*t == '\n')
+            {
+            s += 2;
+            tokes.emplace_back(token::T_ADDTOSLIDE, "@@", line_nr, col_nr);
+            col_nr = 1;
+            ++line_nr;
+            newline = true;
+            }
           }
         }
       break;
