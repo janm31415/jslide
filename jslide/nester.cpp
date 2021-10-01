@@ -11,7 +11,7 @@ namespace
     float text_width = 0;
     float text_height = 0;
     get_text_sizes(text_width, text_height, state, expr, sz);
-    bottom = top - text_height;
+    bottom = top - text_height*1.2f;
     }
 
   void _nest_title(Title& expr, font_t* state, float& left, float& right, float& top, float& bottom)
