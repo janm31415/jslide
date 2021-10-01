@@ -28,15 +28,53 @@ tokens tokenize(const std::string& str)
 
   bool newline = true;
 
+  bool attributes_list = false;
+
   while (s < s_end)
     {
 
     const char* s_copy = s;
     switch (*s)
       {
+      case '{':
+      {      
+      const char* t = s; ++t;
+      if (*t == ':')
+        {
+        _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
+        s = t+1;
+        tokes.emplace_back(token::T_ATTRIBUTE_BEGIN, "{:", line_nr, col_nr);
+        col_nr += 2;
+        newline = false;
+        attributes_list = true;
+        }        
+      break;
+      }
+      case '}':
+      {
+      if (attributes_list)
+        {
+        _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
+        ++s;
+        tokes.emplace_back(token::T_ATTRIBUTE_END, "}", line_nr, col_nr);
+        ++col_nr;
+        attributes_list = false;
+        }
+      break;
+      }
+      case ' ':
+      {
+      if (attributes_list)
+        {
+        _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
+        ++s;
+        ++col_nr;
+        }
+      break;
+      }
       case '#':
       {
-      if (newline)
+      if (newline && !attributes_list)
         {
         const char* t = s; ++t;
         while (*t == '#')
@@ -65,7 +103,7 @@ tokens tokenize(const std::string& str)
       }
       case '@':
       {
-      if (newline)
+      if (newline && !attributes_list)
         {
         const char* t = s; ++t;
         if (*t == '\n')

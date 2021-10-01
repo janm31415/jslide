@@ -3,32 +3,57 @@
 namespace
   {
 
+  float get_font_ratio()
+    {
+    return 3.f/4.f;
+    }
+
   float get_size(int size)
     {
     if (size > 6)
       size = 6;
     if (size < 1)
       size = 1;
-    float sz = (7 - size) * 0.002;
+    float sz = (7 - size) * 0.002f;
     return sz;
+    }
+
+  void _draw_text(slide_t* state, const Text& expr, float left, float right, float top, float bottom, float sz)
+    {
+    float text_width = 0;
+    float text_height = 0;
+    for (const auto& word : expr.words)
+      {
+      float tw, th;
+      get_render_size(tw, th, &state->font_gl_state, word.first.c_str(), sz * get_font_ratio(), sz);
+      text_width += tw;
+      text_height = std::max<float>(text_height, th);
+      }
+    for (const auto& word : expr.words)
+      {
+      render_text(&state->font_gl_state, word.first.c_str(), left, top - text_height, sz * get_font_ratio(), sz, word.second.color);
+      float tw, th;
+      get_render_size(tw, th, &state->font_gl_state, word.first.c_str(), sz * get_font_ratio(), sz);
+      left += tw;
+      }
     }
 
   void _draw_title(slide_t* state, const Title& expr, float left, float right, float top, float bottom)
     {
-    float sz = get_size(expr.size);
-    jtk::vec3<float> color(1, 0.5, 0);
-    float text_width, text_height;
-    get_render_size(text_width, text_height, &state->font_gl_state, expr.text.value.c_str(), sz, sz);
-    render_text(&state->font_gl_state, expr.text.value.c_str(), left, top - text_height, sz, sz, color);
+    float sz = get_size(expr.size);    
+    //float text_width, text_height;
+    //get_render_size(text_width, text_height, &state->font_gl_state, expr.text.value.c_str(), sz* get_font_ratio(), sz);
+    //render_text(&state->font_gl_state, expr.text.value.c_str(), left, top - text_height, sz* get_font_ratio(), sz, expr.text.attributes.color);
+    _draw_text(state, expr.text, left, right, top, bottom, sz);
     }
 
   void _draw_text(slide_t* state, const Text& expr, float left, float right, float top, float bottom)
     {
-    float sz = get_size(3);
-    jtk::vec3<float> color(1, 0.5, 0);
-    float text_width, text_height;
-    get_render_size(text_width, text_height, &state->font_gl_state, expr.value.c_str(), sz, sz);
-    render_text(&state->font_gl_state, expr.value.c_str(), left, top - text_height, sz, sz, color);
+    float sz = get_size(6);
+    //float text_width, text_height;
+    //get_render_size(text_width, text_height, &state->font_gl_state, expr.value.c_str(), sz * get_font_ratio(), sz);
+    //render_text(&state->font_gl_state, expr.value.c_str(), left, top - text_height, sz * get_font_ratio(), sz, expr.attributes.color);
+    _draw_text(state, expr, left, right, top, bottom, sz);
     }
 
   void _draw_expression(slide_t* state, const Expression& expr, float left, float right, float top, float bottom)

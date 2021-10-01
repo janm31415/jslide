@@ -2,20 +2,27 @@
 
 #include "tokenizer.h"
 
+#include "jtk/vec.h"
+
 #include <variant>
 
-enum alignment
+enum class alignment
   {
   T_LEFT,
   T_CENTER,
   T_RIGHT
   };
 
+struct ActiveAttributes
+  {
+  alignment e_alignment = alignment::T_CENTER;
+  jtk::vec3<float> color = jtk::vec3<float>(1,1,1);
+  };
+
 class Text
   {
   public:
-    alignment e_alignment;
-    std::string value;
+    std::vector<std::pair<std::string, ActiveAttributes>> words;    
   };
 
 class Title

@@ -10,7 +10,9 @@ struct token
     T_HASH,
     T_TEXT,
     T_NEWLINE,
-    T_NEWSLIDE
+    T_NEWSLIDE,
+    T_ATTRIBUTE_BEGIN,
+    T_ATTRIBUTE_END
     };
 
   e_type type;

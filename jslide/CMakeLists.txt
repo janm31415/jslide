@@ -30,6 +30,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imguifilesystem.cpp
 
 set(HDRS
 blit_gl.h
+colors.h
 debug.h
 defines.h
 font_gl.h
@@ -49,6 +50,7 @@ view.h
 	
 set(SRCS
 blit_gl.cpp
+colors.cpp
 debug.cpp
 font_gl.cpp
 image_helper.cpp
