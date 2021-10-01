@@ -63,7 +63,7 @@ namespace
   void read_attributes(tokens& tokes)
     {
     static auto color_map = get_color_map();
-    bool attributes_lines = popped_token.type == token::T_NEWLINE;
+    bool attributes_lines = popped_token.type == token::T_NEWLINE || popped_token.type == token::T_NEWSLIDE;
     require(tokes, "{:");
     while (current_type(tokes) != token::T_ATTRIBUTE_END)
       {
@@ -111,6 +111,24 @@ namespace
       return true;
       }
     return false;
+    }
+
+  std::string read_shader(tokens& tokes)
+    {    
+    require(tokes, "!\"");
+    auto t = take(tokes);
+    std::string shader = t.value;
+    require(tokes, "\"");
+    return shader;
+    }
+
+  std::string check_shader(tokens& tokes)
+    {
+    if (!tokes.empty() && current_type(tokes) == token::T_SHADER_BEGIN)
+      {
+      return read_shader(tokes);      
+      }
+    return std::string();
     }
 
   Text make_text(tokens& tokes)
@@ -183,6 +201,12 @@ namespace
         }     
       if (check_attributes(tokes))
         continue;
+      std::string shader = check_shader(tokes);
+      if (!shader.empty())
+        {
+        s.shader.swap(shader);
+        continue;
+        }
       s.blocks.push_back(make_block(tokes));
       }
     return s;
@@ -192,7 +216,7 @@ namespace
 
 Presentation make_presentation(tokens& tokes)
   {
-  popped_token = token(token::T_NEWLINE, "\\n", -1, -1);
+  popped_token = token(token::T_NEWSLIDE, "@", -1, -1);
   current_attributes = ActiveAttributes();
   std::reverse(tokes.begin(), tokes.end());
   Presentation pres;

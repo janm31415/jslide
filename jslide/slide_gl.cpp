@@ -55,32 +55,61 @@ namespace
     {
     _draw_expression(state, b.expr, b.left, b.right, b.top, b.bottom);
     }
+
+  bool _draw_shader(slide_t* state, const shader_parameters& params)
+    {
+    if (state->shader_gl_state.shader_program.is_linked())
+      {
+      state->shader_fbo.bind(10);      
+      draw_shader_data(&state->shader_gl_state, params);
+      state->shader_fbo.release();
+      return true;
+      }
+    return false;
+    }
   }
 
 void init_slide_data(slide_t* state, uint32_t width, uint32_t height)
   {
-  init_font(&state->font_gl_state, width, height);
+  init_font(&state->font_gl_state, width, height);  
 
   state->width = width;
   state->height = height;
 
-  state->fbo.create(width, height);
+  state->shader_width = 800;
+  state->shader_height = 450;
 
+  init_blit_data(&state->blit_gl_state, 0.f, 0.f, width, height, width, height);
+
+  state->fbo.create(width, height);  
   state->fbo.release();
+
+  state->shader_fbo.create(state->shader_width, state->shader_height);
+  state->shader_fbo.release();
   }
 
 void destroy_slide_data(slide_t* state)
   {
   destroy_font(&state->font_gl_state);
+  destroy_blit_data(&state->blit_gl_state);
+  if (state->shader_gl_state.shader_program.is_linked())
+    destroy_shader_data(&state->shader_gl_state);
   state->fbo.release();
+  state->shader_fbo.release();
   }
 
-void draw_slide_data(slide_t* state, const Slide& s)
+void draw_slide_data(slide_t* state, const Slide& s, const shader_parameters& params)
   {
+  bool background_shader = _draw_shader(state, params);
   state->fbo.bind(10);
   glViewport(0, 0, state->width, state->height);
-  glClearColor(0.f, 0.f, 0.f, 1.0f);
+  glClearColor(0.f, 0.f, 0.f, 1.f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  if (background_shader)
+    {
+    draw_blit_data(&state->blit_gl_state, state->shader_fbo.get_texture(), state->width, state->height);
+    }
 
   for (const auto& b : s.blocks)
     {
@@ -88,4 +117,12 @@ void draw_slide_data(slide_t* state, const Slide& s)
     }
 
   state->fbo.release();
+  }
+
+void init_slide_shader(slide_t* state, const std::string& script)
+  {
+  if (state->shader_gl_state.shader_program.is_linked())
+    destroy_shader_data(&state->shader_gl_state);
+  if (!script.empty())
+    init_shader_data(&state->shader_gl_state, script, state->shader_width, state->shader_height);
   }

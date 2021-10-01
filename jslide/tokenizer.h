@@ -12,7 +12,9 @@ struct token
     T_NEWLINE,
     T_NEWSLIDE,
     T_ATTRIBUTE_BEGIN,
-    T_ATTRIBUTE_END
+    T_ATTRIBUTE_END,
+    T_SHADER_BEGIN,
+    T_SHADER_END
     };
 
   e_type type;

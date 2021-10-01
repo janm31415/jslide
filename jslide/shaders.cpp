@@ -39,7 +39,7 @@ std::string get_blit_vertex_shader()
   precision mediump float;
   precision mediump int;
   layout (location = 0) in vec3 vPosition;
-  layout (location = 1) in vec2 vUV;
+  //layout (location = 1) in vec2 vUV;
   
   void main()
   {
@@ -65,4 +65,51 @@ std::string get_blit_fragment_shader()
   FragColor = texture(iChannel0, pos);
   }
   )");
+  }
+
+std::string get_shader_vertex_shader()
+  {
+  return std::string(R"(#version 330 core
+precision mediump float;
+precision mediump int;
+layout (location = 0) in vec3 vPosition;
+void main() 
+  {
+  gl_Position = vec4(vPosition, 1.0f);
+  }
+)");
+  }
+
+std::string get_shader_fragment_header()
+  {
+  return std::string(R"(#version 330 core
+precision mediump float;
+precision mediump int;
+//uniform sampler2D iChannel0;
+//uniform sampler2D iChannel1;
+//uniform sampler2D iChannel2;
+//uniform sampler2D iChannel3;
+uniform vec3 iResolution;
+uniform float iTime;
+uniform float iGlobalTime;
+//uniform float iChannelTime[4];
+//uniform vec4 iMouse;
+//uniform vec4 iDate;
+//uniform float iSampleRate;
+//uniform vec3 iChannelResolution[4];
+//uniform int iFrame;
+//uniform float iTimeDelta;
+//struct Channel {  vec3 resolution;  float time;};
+//uniform Channel iChannel[4];
+)");
+  }
+
+std::string get_shader_fragment_footer()
+  {
+  return std::string(R"(
+void main() 
+  {
+  mainImage(gl_FragColor.xyzw, gl_FragCoord.xy);
+  }
+)");
   }

@@ -105,6 +105,50 @@ tokens tokenize(const std::string& str)
       ++s;
       break;
       }
+      case '!':
+      {
+      if (newline && !attributes_list)
+        {
+        const char* t = s; ++t;
+        if (*t == '"') // shadercode
+          {
+          _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
+          tokes.emplace_back(token::T_SHADER_BEGIN, "!\"", line_nr, col_nr);
+          ++t;
+          col_nr += 2;
+          std::string shader_code;
+          while (*t && *t != '"')
+            {
+            shader_code.push_back(*t);
+            if (*t == '\n')
+              {
+              ++line_nr;
+              col_nr = 1;
+              }
+            else 
+              ++col_nr;
+            ++t;
+            }
+          if (*t)
+            ++t;
+          if (*t == '\n')
+            {
+            ++line_nr;
+            col_nr = 1;
+            newline = true;
+            ++t;
+            }
+          tokes.emplace_back(token::T_TEXT, shader_code, line_nr, col_nr);
+          tokes.emplace_back(token::T_SHADER_END, "\"", line_nr, col_nr);
+          s = t;
+          }
+        else if (*t == '[') // image
+          {
+          // todo
+          }
+        }
+      break;
+      }
       case '@':
       {
       if (newline && !attributes_list)

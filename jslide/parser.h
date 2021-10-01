@@ -44,6 +44,7 @@ class Block
 class Slide
   {
   public:
+    std::string shader;
     std::vector<Block> blocks;
   };
 

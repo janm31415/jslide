@@ -36,12 +36,11 @@ class view
     void _script_window();
     void _destroy_gl_objects();
     void _destroy_blit_gl_objects();
-    void _prepare_render();
     void _save();
     void _load(const std::string& filename);
     bool _ctrl_pressed();
     void _build();
-    void _render_current_slide();
+    void _prepare_current_slide();
     void _next_slide();
     void _previous_slide();
     void _set_fullscreen(bool on);
@@ -61,4 +60,5 @@ class view
     keyboard_handler _keyb;
     Presentation _presentation;
     uint32_t _slide_id;
+    shader_parameters _sp;
   };

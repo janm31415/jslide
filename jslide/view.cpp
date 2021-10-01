@@ -114,7 +114,6 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
     {
     _load(std::string(argv[1]));
     }
-  _prepare_render();
   }
 
 
@@ -359,7 +358,7 @@ void view::_load(const std::string& filename)
     _script = std::string();
     SDL_SetWindowTitle(_window, "JSlide");
     }
-  _render_current_slide();
+  _prepare_current_slide();
   }
 
 void view::_save()
@@ -443,7 +442,7 @@ void view::_imgui_ui()
         {
         if (ImGui::MenuItem("Fullscreen", NULL, &_settings.fullscreen))
           {
-          _set_fullscreen(_settings.fullscreen);         
+          _set_fullscreen(_settings.fullscreen);
           }
         ImGui::MenuItem("Log window", NULL, &_settings.log_window);
         ImGui::MenuItem("Script window", NULL, &_settings.script_window);
@@ -461,7 +460,6 @@ void view::_imgui_ui()
     {
     _settings.file_open_folder = open_script_dlg.getLastDirectory();
     _load(std::string(std::string(openScriptChosenPath)));
-    _prepare_render();
     }
 
   static ImGuiFs::Dialog save_script_dlg(false, true, true);
@@ -548,7 +546,7 @@ void view::_build()
     {
     Logging::Error() << e.what() << "\n";
     }
-  _render_current_slide();
+  _prepare_current_slide();
   }
 
 void view::_script_window()
@@ -581,10 +579,6 @@ void view::_script_window()
   ImGui::End();
   }
 
-void view::_prepare_render()
-  {
-  }
-
 void view::_log_window()
   {
   static AppLog log;
@@ -604,33 +598,49 @@ void view::_next_slide()
   {
   if ((_slide_id + 1) < _presentation.slides.size())
     ++_slide_id;
-  _render_current_slide();
+  _prepare_current_slide();
   }
 
 void view::_previous_slide()
   {
   if (_slide_id > 0)
     --_slide_id;
-  _render_current_slide();
+  _prepare_current_slide();
   }
 
-void view::_render_current_slide()
+void view::_prepare_current_slide()
   {
   if (_presentation.slides.empty())
     return;
   if (_slide_id >= _presentation.slides.size())
     _slide_id = 0;
-  draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id]);
+  try
+    {
+    init_slide_shader(_slide_gl_state, _presentation.slides[_slide_id].shader);
+    _sp.frame = 0;
+    _sp.time = 0.f;
+    }
+  catch (std::runtime_error& e)
+    {
+    Logging::Error() << e.what() << "\n";
+    }
   }
 
 void view::_do_mouse()
-  {  
+  {
   }
 
 void view::loop()
-  {
+  {  
+  _sp.frame = 0;
+  _sp.time = 0.f;
+  auto last_tic = std::chrono::high_resolution_clock::now();
   while (!_quit)
     {
+    auto tic = std::chrono::high_resolution_clock::now();
+    _sp.time_delta = (float)(std::chrono::duration_cast<std::chrono::microseconds>(tic - last_tic).count()) / 1000000.f;
+    last_tic = tic;
+
     _poll_for_events();
     _do_mouse();
 
@@ -639,7 +649,7 @@ void view::loop()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-
+    draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);
     draw_blit_data(_blit_gl_state, _slide_gl_state->fbo.get_texture(), _w, _h);
 
     if (!_settings.fullscreen)
@@ -650,5 +660,8 @@ void view::loop()
 
     std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(16.0));
     SDL_GL_SwapWindow(_window);
+
+    ++_sp.frame;
+    _sp.time += _sp.time_delta;
     }
   }

@@ -42,6 +42,7 @@ nester.h
 parser.h
 pref_file.h
 settings.h
+shader_gl.h
 shaders.h
 slide_gl.h
 sizing.h
@@ -62,6 +63,7 @@ nester.cpp
 parser.cpp
 pref_file.cpp
 settings.cpp
+shader_gl.cpp
 shaders.cpp
 slide_gl.cpp
 sizing.cpp
