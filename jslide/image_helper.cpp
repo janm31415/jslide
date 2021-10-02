@@ -41,27 +41,6 @@ image read_image(const std::string& filename)
   {
   image im;
   stbi_set_flip_vertically_on_load(true);
-  im.im = stbi_load(filename.c_str(), &im.w, &im.h, &im.nr_of_channels, 4);
-  if (im.nr_of_channels == 300)
-    {
-    image im2;
-    im2.im = (unsigned char*)malloc(im.w * im.h * 4);
-    im2.w = im.w;
-    im2.h = im.h;
-    im2.nr_of_channels = 4;
-    for (int y = 0; y < im.h; ++y)
-      {
-      unsigned char* p_im2 = im2.im + y * im.w * 4;
-      unsigned char* p_im = im.im + y * im.w * 3;
-      for (int x = 0; x < im.w; ++x)
-        {
-        *p_im2++ = *p_im++;
-        *p_im2++ = *p_im++;
-        *p_im2++ = *p_im++;
-        *p_im2++ = 255;
-        }
-      }
-    return im2;
-    }
+  im.im = stbi_load(filename.c_str(), &im.w, &im.h, &im.nr_of_channels, 0);  
   return im;
   }

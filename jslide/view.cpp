@@ -182,6 +182,11 @@ bool view::_ctrl_pressed()
   return (_keyb.is_down(SDLK_LCTRL) || _keyb.is_down(SDLK_RCTRL));
   }
 
+bool view::_shift_pressed()
+  {
+  return (_keyb.is_down(SDLK_LSHIFT) || _keyb.is_down(SDLK_RSHIFT));
+  }
+
 void view::_destroy_blit_gl_objects()
   {
   destroy_blit_data(_blit_gl_state);
@@ -341,6 +346,10 @@ void view::_poll_for_events()
         }
         case SDLK_F5:
         {
+        if (!_shift_pressed())
+          {
+          _first_slide();
+          }
         _set_fullscreen(true);
         break;
         }
@@ -464,12 +473,21 @@ void view::_imgui_ui()
           }
         ImGui::EndMenu();
         }
-      if (ImGui::BeginMenu("Window"))
+      if (ImGui::BeginMenu("Slideshow"))
         {
-        if (ImGui::MenuItem("Fullscreen", "F5", &_settings.fullscreen))
+        if (ImGui::MenuItem("From begin", "F5", &_settings.fullscreen))
+          {
+          _first_slide();
+          _set_fullscreen(_settings.fullscreen);
+          }
+        if (ImGui::MenuItem("From current", "shift+F5", &_settings.fullscreen))
           {
           _set_fullscreen(_settings.fullscreen);
           }
+        ImGui::EndMenu();
+        }
+      if (ImGui::BeginMenu("Window"))
+        {
         ImGui::MenuItem("CRT display", "F4", &_settings.crt_effect);                              
         ImGui::MenuItem("Log window", NULL, &_settings.log_window);
         ImGui::MenuItem("Script window", NULL, &_settings.script_window);

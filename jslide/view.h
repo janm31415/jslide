@@ -39,6 +39,7 @@ class view
     void _save();
     void _load(const std::string& filename);
     bool _ctrl_pressed();
+    bool _shift_pressed();
     void _build();
     void _prepare_current_slide();
     void _next_slide();
