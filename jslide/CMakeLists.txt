@@ -34,6 +34,7 @@ colors.h
 debug.h
 defines.h
 font_gl.h
+image_gl.h
 image_helper.h
 keyboard.h
 logging.h
@@ -56,6 +57,7 @@ blit_gl.cpp
 colors.cpp
 debug.cpp
 font_gl.cpp
+image_gl.cpp
 image_helper.cpp
 logging.cpp
 main.cpp

@@ -16,7 +16,13 @@ struct token
     T_ATTRIBUTE_END,
     T_SHADER_BEGIN,
     T_SHADER_END,
-    T_LINE
+    T_LINE,
+    T_IMAGE_DIM_BEGIN,
+    T_IMAGE_DIM,
+    T_IMAGE_DIM_END,
+    T_IMAGE_PATH_BEGIN,
+    T_IMAGE_PATH,
+    T_IMAGE_PATH_END
     };
 
   e_type type;

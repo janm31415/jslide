@@ -13,9 +13,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
-#define JTK_IMAGE_IMPLEMENTATION
-#include "jtk/image.h"
-
 #define JTK_FILE_UTILS_IMPLEMENTATION
 #include "jtk/file_utils.h"
 

@@ -1,4 +1,5 @@
 #include "tokenizer.h"
+#include "parser.h"
 
 namespace
   {
@@ -135,6 +136,8 @@ tokens tokenize(const std::string& str)
           tokes.emplace_back(token::T_SHADER_BEGIN, "!\"", line_nr, col_nr);
           ++t;
           col_nr += 2;
+          int text_col_nr = col_nr;
+          int text_line_nr = line_nr;
           std::string shader_code;
           while (*t && *t != '"')
             {
@@ -148,7 +151,7 @@ tokens tokenize(const std::string& str)
               ++col_nr;
             ++t;
             }
-          tokes.emplace_back(token::T_TEXT, shader_code, line_nr, col_nr);
+          tokes.emplace_back(token::T_TEXT, shader_code, text_line_nr, text_col_nr);
           tokes.emplace_back(token::T_SHADER_END, "\"", line_nr, col_nr);
           if (*t)
             ++t;
@@ -161,9 +164,50 @@ tokens tokenize(const std::string& str)
             }
           s = t;
           }
-        else if (*t == '[') // image
+        else if (*t == '[') // image, has format ![w h](/path/image.ext)
           {
-          // todo
+          _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
+          tokes.emplace_back(token::T_IMAGE_DIM_BEGIN, "![", line_nr, col_nr);
+          ++t;
+          col_nr += 2;
+          int dimensions_col_nr = col_nr;
+          std::string image_dimensions;
+          while (*t && *t != ']')
+            {
+            if (*t == '\n')
+              throw_parse_error(line_nr, col_nr, "No newline expected");
+            image_dimensions.push_back(*t);
+            ++t;
+            ++col_nr;
+            }
+          if (!*t)
+            throw_parse_error(line_nr, col_nr, "] expected");
+          tokes.emplace_back(token::T_IMAGE_DIM, image_dimensions, line_nr, dimensions_col_nr);
+          tokes.emplace_back(token::T_IMAGE_DIM_END, "]", line_nr, col_nr);
+          ++t;
+          ++col_nr;
+          if (*t != '(')
+            throw_parse_error(line_nr, col_nr, "( expected");
+          tokes.emplace_back(token::T_IMAGE_PATH_BEGIN, "(", line_nr, col_nr);
+          ++t;
+          ++col_nr;
+          int path_col_nr = col_nr;
+          std::string image_path;
+          while (*t && *t != ')')
+            {
+            if (*t == '\n')
+              throw_parse_error(line_nr, col_nr, "No newline expected");
+            image_path.push_back(*t);
+            ++t;
+            ++col_nr;
+            }
+          if (!*t)
+            throw_parse_error(line_nr, col_nr, ") expected");
+          tokes.emplace_back(token::T_IMAGE_PATH, image_path, line_nr, path_col_nr);
+          tokes.emplace_back(token::T_IMAGE_PATH_END, ")", line_nr, col_nr);
+          ++t;
+          ++col_nr;
+          s = t;
           }
         }
       break;

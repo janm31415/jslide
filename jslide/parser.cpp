@@ -5,21 +5,20 @@
 
 #include "colors.h"
 
+void throw_parse_error(int line_nr, int col_nr, const std::string& message)
+  {
+  if (line_nr <= 0)
+    throw std::runtime_error("parse error: " + message);
+  std::stringstream str;
+  str << line_nr << "(" << col_nr << ")";
+  throw std::runtime_error("parse error: " + str.str() + ": " + message);
+  }
+
 namespace
   {
   ActiveAttributes current_attributes;
 
   token popped_token(token::T_NEWLINE, "\\n", -1, -1);
-
-
-  void throw_parse_error(int line_nr, int col_nr, const std::string& message)
-    {
-    if (line_nr <= 0)
-      throw std::runtime_error("parse error: " + message);
-    std::stringstream str;
-    str << line_nr << "("<<col_nr << ")";
-    throw std::runtime_error("parse error: " + str.str() + ": " + message);
-    }
 
   void advance(tokens& tokes)
     {
@@ -172,6 +171,31 @@ namespace
     return l;
     }
 
+  void parse_image_dims(float& w, float& h, const std::string& dim)
+    {
+    std::stringstream str;
+    str << dim;
+    str >> w >> h;
+    }
+
+  Image make_image(tokens& tokes)
+    {
+    Image im;
+    im.attrib = current_attributes;
+    require(tokes, "![");
+    auto t = take(tokes);
+    parse_image_dims(im.w, im.h, t.value);
+    if (im.w < 0.f || im.h < 0.f || im.w > 1000.f || im.h > 1000.f)
+      throw_parse_error(t.line_nr, t.col_nr, "Invalid width and/or height. Expected to be in interval [0,1].");
+    require(tokes, "]");
+    require(tokes, "(");
+    t = take(tokes);
+    im.path = t.value;
+    require(tokes, ")");
+    im.im = read_image(im.path);
+    return im;
+    }
+
   Block make_block(tokens& tokes)
     {
     Block b;
@@ -189,6 +213,11 @@ namespace
       case token::T_LINE:
       {
         b.expr = make_line(tokes);
+        break;
+      }
+      case token::T_IMAGE_DIM_BEGIN:
+      {
+        b.expr = make_image(tokes);
         break;
       }
       default:

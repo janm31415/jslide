@@ -35,6 +35,11 @@ namespace
     _nest_text(t, state, left, right, top, bottom, sz);
     }
 
+  void _nest_image(Image& expr, float& left, float& right, float& top, float& bottom)
+    {
+    bottom = top - expr.h*2.f;
+    }
+
   void _nest_block(Block& b, font_t* state, float& left, float& right, float& top, float& bottom)
     {
     b.left = left;
@@ -47,6 +52,8 @@ namespace
       _nest_text(std::get<Text>(b.expr), state, b.left, b.right, b.top, b.bottom); 
     if (std::holds_alternative<Line>(b.expr))
       _nest_line(std::get<Line>(b.expr), state, b.left, b.right, b.top, b.bottom);
+    if (std::holds_alternative<Image>(b.expr))
+      _nest_image(std::get<Image>(b.expr), b.left, b.right, b.top, b.bottom);
     top = b.bottom;
     }
 

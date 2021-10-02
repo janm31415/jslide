@@ -301,6 +301,20 @@ void view::_poll_for_events()
         _last_slide();
         break;
         }
+        case SDLK_LEFT:
+        {
+        if (!_settings.fullscreen && ImGui::GetIO().WantCaptureKeyboard)
+          break;
+        _previous_slide();
+        break;
+        }
+        case SDLK_RIGHT:
+        {
+        if (!_settings.fullscreen && ImGui::GetIO().WantCaptureKeyboard)
+          break;
+        _next_slide();
+        break;
+        }
         case SDLK_b:
         {
         if (_ctrl_pressed())
@@ -313,8 +327,8 @@ void view::_poll_for_events()
           _save();
         break;
         }
-        break;
         }
+      break;
       }
       case SDL_KEYUP:
       {
@@ -328,6 +342,11 @@ void view::_poll_for_events()
         case SDLK_F5:
         {
         _set_fullscreen(true);
+        break;
+        }
+        case SDLK_F4:
+        {
+        _settings.crt_effect = !_settings.crt_effect;
         break;
         }
         }
@@ -451,6 +470,7 @@ void view::_imgui_ui()
           {
           _set_fullscreen(_settings.fullscreen);
           }
+        ImGui::MenuItem("CRT display", "F4", &_settings.crt_effect);                              
         ImGui::MenuItem("Log window", NULL, &_settings.log_window);
         ImGui::MenuItem("Script window", NULL, &_settings.script_window);
         ImGui::EndMenu();
@@ -640,7 +660,7 @@ void view::_prepare_current_slide()
     return;
   if (_slide_id >= _presentation.slides.size())
     _slide_id = 0;
-
+  clear_images(_slide_gl_state);
   bool should_compute_shader = _presentation.slides[_slide_id].reset_shaders;
   if (!should_compute_shader)
     {
@@ -661,6 +681,13 @@ void view::_prepare_current_slide()
     catch (std::runtime_error& e)
       {
       Logging::Error() << e.what() << "\n";
+      }
+    }
+  for (auto& b : _presentation.slides[_slide_id].blocks)
+    {
+    if (std::holds_alternative<Image>(b.expr))
+      {
+      add_image(_slide_gl_state, b);
       }
     }
   }

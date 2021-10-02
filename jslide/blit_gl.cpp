@@ -1,7 +1,7 @@
 #include "blit_gl.h"
 #include "shaders.h"
 
-void init_blit_data(blit_t* state, uint32_t blit_x, uint32_t blit_y, uint32_t blit_w, uint32_t blit_h, uint32_t view_w, uint32_t view_h)
+void init_blit_data(blit_t* state, int32_t blit_x, int32_t blit_y, uint32_t blit_w, uint32_t blit_h, uint32_t view_w, uint32_t view_h)
   {
   using namespace jtk;
   float width = 2.f * (float)blit_w / (float)view_w;
@@ -93,7 +93,7 @@ void draw_blit_data(blit_t* state, jtk::texture* tex, uint32_t vp_w, uint32_t vp
   gl_check_error("tex->bind_to_channel(0)");
   state->blit_program.set_uniform_value("iBlitResolution", (GLfloat)state->blit_w, (GLfloat)state->blit_h);
   //state->blit_program.set_uniform_value("iBlitOffset", (GLfloat)state->blit_x, (GLfloat)(vp_h - state->blit_y));
-  state->blit_program.set_uniform_value("iBlitOffset", (GLfloat)state->blit_x, vp_h-(state->blit_h+state->blit_y));
+  state->blit_program.set_uniform_value("iBlitOffset", (GLfloat)state->blit_x, (int32_t)vp_h-((int32_t)state->blit_h+(int32_t)state->blit_y));
   state->blit_program.set_uniform_value("iChannel0", 0);
   state->blit_program.set_uniform_value("iCrt", crt_blit ? 1 : 0);
 
@@ -106,5 +106,6 @@ void draw_blit_data(blit_t* state, jtk::texture* tex, uint32_t vp_w, uint32_t vp
   state->blit_ebo.release();
   state->blit_vbo.release();
   state->blit_vao.release();
+  tex->release();
   gl_check_error("draw_blit_data");
   }

@@ -1,10 +1,12 @@
 #pragma once
 
 #include "tokenizer.h"
+#include "image_helper.h"
 
 #include "jtk/vec.h"
 
 #include <variant>
+#include <string>
 
 enum class alignment
   {
@@ -13,23 +15,23 @@ enum class alignment
   T_RIGHT
   };
 
+void throw_parse_error(int line_nr, int col_nr, const std::string& message);
+
 struct ActiveAttributes
   {
   alignment e_alignment = alignment::T_CENTER;
-  jtk::vec3<float> color = jtk::vec3<float>(1,1,1);
+  jtk::vec3<float> color = jtk::vec3<float>(1, 1, 1);
   };
 
-class Text
+struct Text
   {
-  public:
-    std::vector<std::pair<std::string, ActiveAttributes>> words;    
+  std::vector<std::pair<std::string, ActiveAttributes>> words;
   };
 
-class Title
+struct Title
   {
-  public:
-    Text text;
-    int size;
+  Text text;
+  int size;
   };
 
 struct Line
@@ -37,7 +39,16 @@ struct Line
   ActiveAttributes attrib;
   };
 
-typedef std::variant<Text, Title, Line> Expression;
+struct Image
+  {
+  std::string path;
+  float w,h;
+  int link_to_image = -1;
+  image im;
+  ActiveAttributes attrib;
+  };
+
+typedef std::variant<Text, Title, Line, Image> Expression;
 
 class Block
   {

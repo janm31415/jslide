@@ -64,6 +64,15 @@ namespace
     _draw_text(state, t, left, right, top, bottom, sz);
     }
 
+  void _draw_image(slide_t* state, const Image& im)
+    {
+    if (im.link_to_image < 0)
+      return;
+    if (im.link_to_image >= state->image_gl_states.size())
+      return;
+    draw_image_data(state->image_gl_states[im.link_to_image]);
+    }
+
   void _draw_expression(slide_t* state, const Expression& expr, float left, float right, float top, float bottom)
     {
     if (std::holds_alternative<Title>(expr))
@@ -72,6 +81,8 @@ namespace
       _draw_text(state, std::get<Text>(expr), left, right, top, bottom);
     if (std::holds_alternative<Line>(expr))
       _draw_line(state, std::get<Line>(expr), left, right, top, bottom);
+    if (std::holds_alternative<Image>(expr))
+      _draw_image(state, std::get<Image>(expr));
     }
 
   void _draw_block(slide_t* state, const Block& b)
@@ -113,6 +124,7 @@ void init_slide_data(slide_t* state, uint32_t width, uint32_t height)
 
 void destroy_slide_data(slide_t* state)
   {
+  clear_images(state);
   destroy_font(&state->font_gl_state);
   destroy_blit_data(&state->blit_gl_state);
   if (state->shader_gl_state.shader_program.is_linked())
@@ -161,4 +173,39 @@ void init_slide_shader(slide_t* state, const std::string& script)
     else
       init_shader_data(&state->shader_gl_state, script, state->shader_width, state->shader_height);
     }
+  }
+
+void clear_images(slide_t* state)
+  {
+  for (auto& im : state->image_gl_states)
+    {
+    destroy_image_data(im);
+    delete im;
+    }
+  state->image_gl_states.clear();
+  }
+
+void add_image(slide_t* state, Block& b)
+  {
+  if (!std::holds_alternative<Image>(b.expr))
+    return;
+  Image& im = std::get<Image>(b.expr);
+  int id = state->image_gl_states.size();
+  if (id >= 9)
+    return;  
+  state->image_gl_states.push_back(new image_t());  
+  int32_t blit_x = 0;
+  switch (im.attrib.e_alignment)
+    {
+    case alignment::T_LEFT: blit_x = 0; break;
+    case alignment::T_RIGHT: blit_x = (int32_t)state->width*(1.f-im.w); break;
+    case alignment::T_CENTER: blit_x = (int32_t)state->width * (1.f - im.w)*0.5f; break;
+    }
+  int32_t blit_y = (-b.top+1.f)*0.5f*state->height;
+  uint32_t blit_w = state->width * im.w;
+  uint32_t blit_h = state->height * im.h;
+  uint32_t view_w = state->width;
+  uint32_t view_h = state->height;
+  init_image_data(state->image_gl_states.back(), im.im, blit_x, blit_y, blit_w, blit_h, view_w, view_h);
+  im.link_to_image = id;
   }

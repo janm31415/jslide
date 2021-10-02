@@ -1,47 +1,67 @@
 #include "image_helper.h"
 
-//#include "jtk/jtk/file_utils.h"
 #include "stb/stb_image.h"
 
-jtk::image<uint32_t> read_image(const std::string& filename)
+
+image::image() : im(nullptr), w(0), h(0), nr_of_channels(0)
   {
-  int w, h, nr_of_channels;
-  unsigned char* im = stbi_load(filename.c_str(), &w, &h, &nr_of_channels, 4);
-  if (!im || nr_of_channels != 4)
-    return jtk::image<uint32_t>();
-  jtk::image<uint32_t> out(w, h);
-  const unsigned char* p_im = im;
-  for (uint32_t y = 0; y < (uint32_t)h; ++y)
-    {
-    unsigned char* p_out = (unsigned char*)(out.data() + y * out.stride());
-    for (uint32_t x = 0; x < (uint32_t)w; ++x)
-      {
-      *p_out++ = *p_im++;
-      *p_out++ = *p_im++;
-      *p_out++ = *p_im++;
-      *p_out++ = *p_im++;
-      }
-    }
-  stbi_image_free(im);
-  return out;
   }
 
-jtk::image<uint8_t> read_image_gray(const std::string& filename)
+image::~image()
   {
-  int w, h, nr_of_channels;
-  unsigned char* im = stbi_load(filename.c_str(), &w, &h, &nr_of_channels, 1);
-  if (!im)
-    return jtk::image<uint8_t>();
-  jtk::image<uint8_t> out(w, h);
-  const unsigned char* p_im = im;
-  for (uint32_t y = 0; y < (uint32_t)h; ++y)
-    {
-    unsigned char* p_out = (unsigned char*)(out.data() + y * out.stride());
-    for (uint32_t x = 0; x < (uint32_t)w; ++x)
-      {
-      *p_out++ = *p_im++;     
-      }
-    }
   stbi_image_free(im);
-  return out;
+  im = nullptr;
+  w = 0;
+  h = 0;
+  nr_of_channels = 0;
+  }
+
+image::image(const image& other) : w(other.w), h(other.h), nr_of_channels(other.nr_of_channels)
+  {
+  im = (unsigned char*)malloc(w * h * nr_of_channels);
+  memcpy(im, other.im, w * h * nr_of_channels);
+  }
+
+image& image::operator = (const image& other)
+  {
+  image temp(other);
+  swap(temp);
+  return *this;
+  }
+
+void image::swap(image& other)
+  {
+  std::swap(w, other.w);
+  std::swap(h, other.h);
+  std::swap(nr_of_channels, other.nr_of_channels);
+  std::swap(im, other.im);
+  }
+
+image read_image(const std::string& filename)
+  {
+  image im;
+  stbi_set_flip_vertically_on_load(true);
+  im.im = stbi_load(filename.c_str(), &im.w, &im.h, &im.nr_of_channels, 4);
+  if (im.nr_of_channels == 300)
+    {
+    image im2;
+    im2.im = (unsigned char*)malloc(im.w * im.h * 4);
+    im2.w = im.w;
+    im2.h = im.h;
+    im2.nr_of_channels = 4;
+    for (int y = 0; y < im.h; ++y)
+      {
+      unsigned char* p_im2 = im2.im + y * im.w * 4;
+      unsigned char* p_im = im.im + y * im.w * 3;
+      for (int x = 0; x < im.w; ++x)
+        {
+        *p_im2++ = *p_im++;
+        *p_im2++ = *p_im++;
+        *p_im2++ = *p_im++;
+        *p_im2++ = 255;
+        }
+      }
+    return im2;
+    }
+  return im;
   }
