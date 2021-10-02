@@ -47,6 +47,7 @@ shader_gl.h
 shaders.h
 slide_gl.h
 sizing.h
+syntax_highlight.h
 tokenizer.h
 utils_gl.h
 view.h
@@ -69,6 +70,7 @@ shader_gl.cpp
 shaders.cpp
 slide_gl.cpp
 sizing.cpp
+syntax_highlight.cpp
 tokenizer.cpp
 utils_gl.cpp
 view.cpp
@@ -159,3 +161,6 @@ if (UNIX)
 add_custom_command(TARGET jslide POST_BUILD 
    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "$<TARGET_FILE_DIR:jslide>/shaders")
 endif (UNIX)    
+
+add_custom_command(TARGET jslide POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/jslide_syntax.json" "$<TARGET_FILE_DIR:jslide>/jslide_syntax.json")
