@@ -165,17 +165,56 @@ std::string get_transfer_fragment_shader()
   uniform sampler2D iChannel0;
   uniform float     iTime;
   uniform float     iMaxTime;
-
+  uniform int       iMethod;
   out vec4 FragColor;
   
 
   void main()
   {
-  float x = clamp(iTime / iMaxTime, 0, 1);
-  //float frac = (x-0.5f)*(x-0.5f)/0.25f;
-  float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
-  vec2 pos = gl_FragCoord.xy/iResolution;
-  FragColor = texture(iChannel0, pos)*frac;
+  if (iMethod == 3) // zoom
+    {
+    float x = clamp(iTime / iMaxTime, 0, 1);    
+    float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
+    vec2 pos = gl_FragCoord.xy/iResolution;
+    FragColor = texture(iChannel0, (2.0*pos-1.0)*frac*0.5+0.5);
+    }
+  else if (iMethod == 2) // split
+    {
+    float x = clamp(iTime / iMaxTime, 0, 1);
+    float frac = (abs(x-0.5f))/(0.5);
+    vec2 pos = gl_FragCoord.xy/iResolution;
+    if (pos.x < 0.5)
+      {
+      if (pos.x < frac*0.5)
+        FragColor = texture(iChannel0, pos+vec2((1-frac)*0.5,0));  
+      else
+        FragColor = vec4(0,0,0,1);
+      }
+    else
+      {
+      if (pos.x > 1.0-frac*0.5)
+        FragColor = texture(iChannel0, pos- vec2((1-frac)*0.5,0));  
+      else
+        FragColor = vec4(0,0,0,1);
+      }    
+    }
+  else if (iMethod == 1) // dia
+    {
+    float x = clamp(iTime / iMaxTime, 0, 1);    
+    float frac = 1.0-(abs(x-0.5f))/(0.5);
+    vec2 pos = gl_FragCoord.xy/iResolution + vec2(frac,0);
+    if (pos.x > 1)
+      FragColor = vec4(0,0,0,1);
+    else
+      FragColor = texture(iChannel0, pos);
+    }
+  else // fade
+    {
+    float x = clamp(iTime / iMaxTime, 0, 1);    
+    float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
+    vec2 pos = gl_FragCoord.xy/iResolution;
+    FragColor = texture(iChannel0, pos)*frac;
+    }
   }
   )");
   }

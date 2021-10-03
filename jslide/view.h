@@ -25,6 +25,7 @@ struct transfer_slides_data
   float time = 0.f;
   float total_transfer_time = 0.5f;
   bool active = false;
+  transfer_animation e_transfer_animation = transfer_animation::T_FADE;
   };
 
 class view

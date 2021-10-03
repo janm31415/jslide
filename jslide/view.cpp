@@ -650,6 +650,22 @@ void view::_log_window()
   log.Draw("Log window", &_settings.log_window);
   }
 
+namespace
+  {
+  float get_total_time(transfer_animation anim)
+    {
+    switch (anim)
+      {
+      case transfer_animation::T_NONE: return 0.f;
+      case transfer_animation::T_SPLIT: return 1.f;
+      case transfer_animation::T_FADE: return 0.5f;
+      case transfer_animation::T_DIA: return 0.5f;
+      case transfer_animation::T_ZOOM: return 0.5f;
+      }
+    return 0.5f;
+    }
+  }
+
 void view::_next_slide(bool with_cool_transfer)
   {
   if (_transfer_slides.active) // still in a previous active transfer
@@ -663,10 +679,12 @@ void view::_next_slide(bool with_cool_transfer)
     ++_slide_id;
   if (with_cool_transfer && _presentation.slides[_slide_id].reset_shaders)
     {
+    _transfer_slides.total_transfer_time = get_total_time(_presentation.slides[_previous_slide_id].attrib.e_transfer_animation);
     _transfer_slides.active = true;
     _transfer_slides.time = 0.f;
     _transfer_slides.slide_id_1 = _previous_slide_id;
     _transfer_slides.slide_id_2 = _slide_id;
+    _transfer_slides.e_transfer_animation = _presentation.slides[_previous_slide_id].attrib.e_transfer_animation;
     if (_transfer_slides.slide_id_1 == _transfer_slides.slide_id_2)
       _transfer_slides.active = false;
     }
@@ -776,7 +794,7 @@ void view::loop()
         else
           draw_slide_data(_slide_gl_state, _presentation.slides[_transfer_slides.slide_id_2], _sp);
 
-        draw_transfer_data(_transfer_gl_state, _slide_gl_state->fbo.get_texture(), _transfer_slides.time, _transfer_slides.total_transfer_time);
+        draw_transfer_data(_transfer_gl_state, _slide_gl_state->fbo.get_texture(), _transfer_slides.time, _transfer_slides.total_transfer_time, _transfer_slides.e_transfer_animation);
         blit_texture = _transfer_gl_state->fbo.get_texture();
         if (_transfer_slides.time >= _transfer_slides.total_transfer_time)
           _transfer_slides.active = false;

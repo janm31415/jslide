@@ -48,8 +48,17 @@ enum class textsize
   T_NORMAL,
   T_SMALL,
   T_LARGE,
-  T_VERYSMALL,
-  T_VERYLARGE
+  T_TINY,
+  T_HUGE
+  };
+
+enum class transfer_animation
+  {
+  T_NONE,
+  T_FADE,
+  T_DIA,
+  T_SPLIT,
+  T_ZOOM
   };
 
 std::string language_to_extension(language l);
@@ -63,6 +72,7 @@ struct ActiveAttributes
   code_block_colors code_color_scheme;
   jtk::vec3<float> color = jtk::vec3<float>(1, 1, 1);
   textsize e_textsize = textsize::T_NORMAL;
+  transfer_animation e_transfer_animation = transfer_animation::T_FADE;
   };
 
 int get_textsize(const ActiveAttributes& attrib);
@@ -108,6 +118,7 @@ class Slide
     std::string shader;
     std::vector<Block> blocks;
     bool reset_shaders = true;
+    ActiveAttributes attrib;
   };
 
 class Presentation

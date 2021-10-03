@@ -1,6 +1,21 @@
 #include "transfer_gl.h"
 #include "shaders.h"
 
+namespace
+  {
+  int transfer_animation_to_int(transfer_animation anim)
+    {
+    switch (anim)
+      {
+      case transfer_animation::T_NONE: return -1;
+      case transfer_animation::T_FADE: return 0;
+      case transfer_animation::T_DIA: return 1;
+      case transfer_animation::T_SPLIT: return 2;
+      case transfer_animation::T_ZOOM: return 3;
+      }
+    return 0;
+    }
+  }
 
 void init_transfer_data(transfer_t* state, uint32_t width, uint32_t height)
   {
@@ -68,10 +83,11 @@ void destroy_transfer_data(transfer_t* state)
   state->program.remove_all_shaders();
   }
 
-void draw_transfer_data(transfer_t* state, jtk::texture* tex, float time, float max_time)
+void draw_transfer_data(transfer_t* state, jtk::texture* tex, float time, float max_time, transfer_animation anim)
   {
   using namespace jtk;
   glViewport(0, 0, state->width, state->height);
+  int method = transfer_animation_to_int(anim);
   state->vao.bind();
   state->vbo.bind();
   state->ebo.bind();
@@ -83,6 +99,7 @@ void draw_transfer_data(transfer_t* state, jtk::texture* tex, float time, float 
   state->program.set_uniform_value("iChannel0", 0);
   state->program.set_uniform_value("iTime", (GLfloat)time);
   state->program.set_uniform_value("iMaxTime", (GLfloat)max_time);
+  state->program.set_uniform_value("iMethod", (GLint)method);
 
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   gl_check_error("glDrawElements");

@@ -22,8 +22,8 @@ int get_textsize(const ActiveAttributes& attrib)
     case textsize::T_NORMAL: return 5;
     case textsize::T_SMALL: return 6;
     case textsize::T_LARGE: return 4;
-    case textsize::T_VERYSMALL: return 7;
-    case textsize::T_VERYLARGE: return 3;
+    case textsize::T_TINY: return 7;
+    case textsize::T_HUGE: return 3;
     }
   return 5;
   }
@@ -68,14 +68,25 @@ namespace
 
   token popped_token(token::T_NEWLINE, "\\n", -1, -1);
 
+  std::map<std::string, transfer_animation> get_transfer_animation_map()
+    {
+    std::map<std::string, transfer_animation> m;
+    m[".notransfer"] = transfer_animation::T_NONE;
+    m[".fade"] = transfer_animation::T_FADE;
+    m[".dia"] = transfer_animation::T_DIA;
+    m[".split"] = transfer_animation::T_SPLIT;
+    m[".zoom"] = transfer_animation::T_ZOOM;
+    return m;
+    }
+
   std::map<std::string, textsize> get_textsize_map()
     {
     std::map<std::string, textsize> m;
     m[".normal"] = textsize::T_NORMAL;
     m[".small"] = textsize::T_SMALL;
     m[".large"] = textsize::T_LARGE;
-    m[".verysmall"] = textsize::T_VERYSMALL;
-    m[".verylarge"] = textsize::T_VERYLARGE;
+    m[".tiny"] = textsize::T_TINY;
+    m[".huge"] = textsize::T_HUGE;
     return m;
     }
 
@@ -153,6 +164,7 @@ namespace
     static auto code_block_color_map = get_code_block_color_map();
     static auto language_map = get_language_map();
     static auto textsize_map = get_textsize_map();
+    static auto transfer_animation_map = get_transfer_animation_map();
     bool attributes_lines = popped_token.type == token::T_NEWLINE || popped_token.type == token::T_NEWSLIDE || popped_token.type == token::T_ADDTOSLIDE;
     require(tokes, "{:");
     while (current_type(tokes) != token::T_ATTRIBUTE_END)
@@ -182,6 +194,12 @@ namespace
       if (it4 != textsize_map.end())
         {
         current_attributes.e_textsize = it4->second;
+        continue;
+        }
+      auto it5 = transfer_animation_map.find(t.value);
+      if (it5 != transfer_animation_map.end())
+        {
+        current_attributes.e_transfer_animation = it5->second;
         continue;
         }
       if (t.value == std::string(".left"))
@@ -388,6 +406,7 @@ namespace
         }
       s.blocks.push_back(make_block(tokes));
       }
+    s.attrib = current_attributes;
     return s;
     }
 
@@ -402,6 +421,7 @@ namespace
     tt.text = t;
     b.expr = tt;
     s.blocks.push_back(b);
+    s.attrib = current_attributes;
     return s;
     }
   } // namespace
