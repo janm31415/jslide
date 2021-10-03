@@ -163,14 +163,19 @@ std::string get_transfer_fragment_shader()
   precision mediump int;
   uniform vec2      iResolution;
   uniform sampler2D iChannel0;
+  uniform float     iTime;
+  uniform float     iMaxTime;
 
   out vec4 FragColor;
   
 
   void main()
   {
+  float x = clamp(iTime / iMaxTime, 0, 1);
+  //float frac = (x-0.5f)*(x-0.5f)/0.25f;
+  float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
   vec2 pos = gl_FragCoord.xy/iResolution;
-  FragColor = texture(iChannel0, pos)*0.5;
+  FragColor = texture(iChannel0, pos)*frac;
   }
   )");
   }

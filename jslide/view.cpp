@@ -776,7 +776,7 @@ void view::loop()
         else
           draw_slide_data(_slide_gl_state, _presentation.slides[_transfer_slides.slide_id_2], _sp);
 
-        draw_transfer_data(_transfer_gl_state, _slide_gl_state->fbo.get_texture());
+        draw_transfer_data(_transfer_gl_state, _slide_gl_state->fbo.get_texture(), _transfer_slides.time, _transfer_slides.total_transfer_time);
         blit_texture = _transfer_gl_state->fbo.get_texture();
         if (_transfer_slides.time >= _transfer_slides.total_transfer_time)
           _transfer_slides.active = false;

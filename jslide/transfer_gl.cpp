@@ -68,7 +68,7 @@ void destroy_transfer_data(transfer_t* state)
   state->program.remove_all_shaders();
   }
 
-void draw_transfer_data(transfer_t* state, jtk::texture* tex)
+void draw_transfer_data(transfer_t* state, jtk::texture* tex, float time, float max_time)
   {
   using namespace jtk;
   glViewport(0, 0, state->width, state->height);
@@ -81,6 +81,8 @@ void draw_transfer_data(transfer_t* state, jtk::texture* tex)
   gl_check_error("tex->bind_to_channel(0)");
   state->program.set_uniform_value("iResolution", (GLfloat)state->width, (GLfloat)state->height);    
   state->program.set_uniform_value("iChannel0", 0);
+  state->program.set_uniform_value("iTime", (GLfloat)time);
+  state->program.set_uniform_value("iMaxTime", (GLfloat)max_time);
 
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   gl_check_error("glDrawElements");
