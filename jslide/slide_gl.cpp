@@ -40,7 +40,7 @@ namespace
   std::string read_next_word(std::string::const_iterator it, std::string::const_iterator it_end)
     {
     std::string out;
-    while (it != it_end && *it != ' ' && *it != ',' && *it != '(' && *it != '{' && *it != ')' && *it != '}' && *it != '[' && *it != ']' && *it != '\n' && *it != '\t' && *it != '\r')
+    while (it != it_end && *it != ' ' && *it != ',' && *it != '(' && *it != '{' && *it != ')' && *it != '}' && *it != '[' && *it != ']' && *it != '\n' && *it != '\t' && *it != '\r' && *it != '<' && *it != '>' && *it != '&' && *it != '*')
       {
       out.push_back(*it);
       ++it;

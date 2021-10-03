@@ -33,7 +33,7 @@
 #define V_Y 50
 
 view::view(int argc, char** argv) : _w(1600), _h(900), _quit(false),
-_blit_gl_state(nullptr), _slide_gl_state(nullptr), _viewport_w(V_W), _viewport_h(V_H),
+_blit_gl_state(nullptr), _slide_gl_state(nullptr), _transfer_gl_state(nullptr), _viewport_w(V_W), _viewport_h(V_H),
 _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0), _previous_slide_id(0)
   {
   SDL_DisplayMode dm;
@@ -160,6 +160,8 @@ void view::_setup_gl_objects()
   {
   _slide_gl_state = new slide_t();
   init_slide_data(_slide_gl_state, _max_w, _max_h);
+  _transfer_gl_state = new transfer_t();
+  init_transfer_data(_transfer_gl_state, _max_w, _max_h);
   }
 
 void view::_destroy_gl_objects()
@@ -170,6 +172,12 @@ void view::_destroy_gl_objects()
     destroy_slide_data(_slide_gl_state);
     delete _slide_gl_state;
     _slide_gl_state = nullptr;
+    }
+  if (_transfer_gl_state)
+    {
+    destroy_transfer_data(_transfer_gl_state);
+    delete _transfer_gl_state;
+    _transfer_gl_state = nullptr;
     }
   }
 
@@ -265,7 +273,7 @@ void view::_poll_for_events()
         _md.left_dragging = false;
         if (_settings.fullscreen || !ImGui::GetIO().WantCaptureMouse)
           {
-          _next_slide();
+          _next_slide(true);
           }
         }
       else if (event.button.button == 3)
@@ -317,7 +325,7 @@ void view::_poll_for_events()
         {
         if (!_settings.fullscreen && ImGui::GetIO().WantCaptureKeyboard)
           break;
-        _next_slide();
+        _next_slide(true);
         break;
         }
         case SDLK_b:
@@ -619,7 +627,7 @@ void view::_script_window()
   ImGui::SameLine();
   if (ImGui::Button(">>"))
     {
-    _next_slide();
+    _next_slide(true);
     }
   ImGui::SameLine();
   ImGui::Checkbox("CRT", &_settings.crt_effect);
@@ -642,16 +650,33 @@ void view::_log_window()
   log.Draw("Log window", &_settings.log_window);
   }
 
-void view::_next_slide()
+void view::_next_slide(bool with_cool_transfer)
   {
+  if (_transfer_slides.active) // still in a previous active transfer
+    {
+    float half_time = _transfer_slides.total_transfer_time * 0.5f;
+    if (_transfer_slides.time < half_time)
+      _prepare_current_slide();
+    }
   _previous_slide_id = _slide_id;
   if ((_slide_id + 1) < _presentation.slides.size())
     ++_slide_id;
-  _prepare_current_slide();
+  if (with_cool_transfer && _presentation.slides[_slide_id].reset_shaders)
+    {
+    _transfer_slides.active = true;
+    _transfer_slides.time = 0.f;
+    _transfer_slides.slide_id_1 = _previous_slide_id;
+    _transfer_slides.slide_id_2 = _slide_id;
+    if (_transfer_slides.slide_id_1 == _transfer_slides.slide_id_2)
+      _transfer_slides.active = false;
+    }
+  else
+    _prepare_current_slide();
   }
 
 void view::_previous_slide()
   {
+  _transfer_slides.active = false;
   _previous_slide_id = _slide_id;
   if (_slide_id > 0)
     --_slide_id;
@@ -660,6 +685,7 @@ void view::_previous_slide()
 
 void view::_first_slide()
   {
+  _transfer_slides.active = false;
   _previous_slide_id = _slide_id;  
   _slide_id = 0;
   _prepare_current_slide();
@@ -667,6 +693,7 @@ void view::_first_slide()
 
 void view::_last_slide()
   {
+  _transfer_slides.active = false;
   _previous_slide_id = _slide_id;
   _slide_id = _presentation.slides.empty() ? 0 : _presentation.slides.size()-1;
   _prepare_current_slide();
@@ -732,11 +759,32 @@ void view::loop()
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    jtk::texture* blit_texture = _slide_gl_state->fbo.get_texture();
+
     if (!_presentation.slides.empty())
       {
-      draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);
+      if (_transfer_slides.active)
+        {
+        float half_time = _transfer_slides.total_transfer_time * 0.5f;
+        if ((_transfer_slides.time < half_time && _transfer_slides.time+_sp.time_delta>= half_time) || half_time == 0.f)
+          {
+          _prepare_current_slide();
+          }
+        _transfer_slides.time += _sp.time_delta;   
+        if (_transfer_slides.time < half_time)
+          draw_slide_data(_slide_gl_state, _presentation.slides[_transfer_slides.slide_id_1], _sp);
+        else
+          draw_slide_data(_slide_gl_state, _presentation.slides[_transfer_slides.slide_id_2], _sp);
+
+        draw_transfer_data(_transfer_gl_state, _slide_gl_state->fbo.get_texture());
+        blit_texture = _transfer_gl_state->fbo.get_texture();
+        if (_transfer_slides.time >= _transfer_slides.total_transfer_time)
+          _transfer_slides.active = false;
+        }
+      else
+        draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);
       }
-    draw_blit_data(_blit_gl_state, _slide_gl_state->fbo.get_texture(), _w, _h, _settings.crt_effect);
+    draw_blit_data(_blit_gl_state, blit_texture, _w, _h, _settings.crt_effect);
 
     if (!_settings.fullscreen)
       {

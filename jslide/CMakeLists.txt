@@ -49,6 +49,7 @@ slide_gl.h
 sizing.h
 syntax_highlight.h
 tokenizer.h
+transfer_gl.h
 utils_gl.h
 view.h
     )
@@ -72,6 +73,7 @@ slide_gl.cpp
 sizing.cpp
 syntax_highlight.cpp
 tokenizer.cpp
+transfer_gl.cpp
 utils_gl.cpp
 view.cpp
 )
