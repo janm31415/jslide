@@ -17,6 +17,8 @@ struct code_block_colors
   uint32_t keyword_2 = 0xfff993bd;
   };
 
+std::map<std::string, code_block_colors> get_code_block_color_map();
+
 code_block_colors dracula_colors();
 code_block_colors solarized_colors();
 code_block_colors solarized_dark_colors();
@@ -28,3 +30,4 @@ code_block_colors acme_colors();
 code_block_colors dark_colors();
 code_block_colors matrix_colors();
 code_block_colors light_colors();
+code_block_colors no_colors();

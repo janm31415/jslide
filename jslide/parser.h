@@ -2,6 +2,7 @@
 
 #include "tokenizer.h"
 #include "image_helper.h"
+#include "colors.h"
 
 #include "jtk/vec.h"
 
@@ -15,17 +16,61 @@ enum class alignment
   T_RIGHT
   };
 
+enum class language
+  {
+  T_ASM,
+  T_BASIC,
+  T_BATCH,
+  T_C,
+  T_CPP,
+  T_CS,
+  T_CMAKE,
+  T_FORTRAN,
+  T_HTML,
+  T_JAVA,
+  T_JSON,
+  T_JS,
+  T_LISP,
+  T_LUA,
+  T_METAL,
+  T_OBJECTIVE_C,
+  T_PASCAL,
+  T_PYTHON,
+  T_RUBY,
+  T_RUST,
+  T_SCHEME,
+  T_SWIFT,
+  T_XML
+  };
+
+enum class textsize
+  {
+  T_NORMAL,
+  T_SMALL,
+  T_LARGE,
+  T_VERYSMALL,
+  T_VERYLARGE
+  };
+
+std::string language_to_extension(language l);
+
 void throw_parse_error(int line_nr, int col_nr, const std::string& message);
 
 struct ActiveAttributes
   {
   alignment e_alignment = alignment::T_CENTER;
+  language e_language = language::T_CPP;
+  code_block_colors code_color_scheme;
   jtk::vec3<float> color = jtk::vec3<float>(1, 1, 1);
+  textsize e_textsize = textsize::T_NORMAL;
   };
+
+int get_textsize(const ActiveAttributes& attrib);
 
 struct Text
   {
   std::vector<std::pair<std::string, ActiveAttributes>> words;
+  int mask = 0;
   };
 
 struct Title
@@ -54,7 +99,7 @@ class Block
   {
   public:
     float top, bottom, left, right;
-    Expression expr;
+    Expression expr;    
   };
 
 class Slide

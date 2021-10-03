@@ -19,6 +19,36 @@ std::map<std::string, jtk::vec3<float>> get_color_map()
   return m;
   }
 
+std::map<std::string, code_block_colors> get_code_block_color_map()
+  {
+  std::map<std::string, code_block_colors> m;
+
+  m[".dracula"] = dracula_colors();
+  m[".solarized"] = solarized_colors();
+  m[".solarizeddark"] = solarized_dark_colors();
+  m[".tomorrownight"] = tomorrow_night_colors();
+  m[".tomorrow"] = tomorrow_colors();
+  m[".gruvbox"] = gruvbox_colors();
+  m[".gruvboxlight"] = gruvbox_light_colors();
+  m[".acme"] = acme_colors();
+  m[".dark"] = dark_colors();
+  m[".matrix"] = matrix_colors();
+  m[".light"] = light_colors();
+  m[".none"] = no_colors();
+  return m;
+  }
+
+code_block_colors no_colors()
+  {
+  code_block_colors c;
+  c.text = 0;
+  c.comment = 0;
+  c.string = 0;
+  c.keyword = 0;
+  c.keyword_2 = 0;
+  return c;
+  }
+
 code_block_colors dracula_colors()
   {
   code_block_colors c;

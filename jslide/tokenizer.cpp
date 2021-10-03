@@ -115,6 +115,41 @@ tokens tokenize(const std::string& str)
         }
       break;
       }
+      case '`':
+      {
+      _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
+      tokes.emplace_back(token::T_CODE_BLOCK_BEGIN, "`", line_nr, col_nr);
+      const char* t = s; ++t;
+      ++col_nr;
+      int code_block_col_nr = col_nr;
+      int code_block_line_nr = line_nr;
+      std::string code;
+      while (*t && *t != '`')
+        {
+        code.push_back(*t);
+        if (*t == '\n')
+          {
+          code.pop_back();
+          if (!code.empty())
+            tokes.emplace_back(token::T_TEXT, code, code_block_line_nr, code_block_col_nr);
+          tokes.emplace_back(token::T_NEWLINE, code, line_nr, col_nr);
+          ++line_nr;
+          col_nr = 1;
+          code_block_line_nr = line_nr;
+          code_block_col_nr = col_nr;
+          code.clear();
+          }
+        else
+          ++col_nr;
+        ++t;
+        }     
+      if (!code.empty())
+        tokes.emplace_back(token::T_TEXT, code, code_block_line_nr, code_block_col_nr);
+      tokes.emplace_back(token::T_CODE_BLOCK_END, "`", line_nr, col_nr);
+      ++t;
+      s = t;
+      break;
+      }
       case '\n':
       {
       _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);

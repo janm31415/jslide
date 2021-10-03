@@ -23,13 +23,13 @@ namespace
 
   void _nest_text(Text& expr, font_t* state, float& left, float& right, float& top, float& bottom)
     {
-    float sz = get_size(NORMAL_TEXT_SIZE);
+    float sz = get_size(expr.words.empty() ? NORMAL_TEXT_SIZE : get_textsize(expr.words.front().second));
     _nest_text(expr, state, left, right, top, bottom, sz);
     }
 
   void _nest_line(Line& expr, font_t* state, float& left, float& right, float& top, float& bottom)
     {
-    float sz = get_size(NORMAL_TEXT_SIZE);
+    float sz = get_size(get_textsize(expr.attrib));
     Text t;
     t.words.emplace_back("d", expr.attrib);
     _nest_text(t, state, left, right, top, bottom, sz);

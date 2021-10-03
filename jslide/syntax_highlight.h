@@ -15,7 +15,7 @@ struct comment_data
 
 struct keyword_data
   {
-  std::vector<std::wstring> keywords_1, keywords_2;
+  std::vector<std::string> keywords_1, keywords_2;
   };
 
 class syntax_highlighter
@@ -27,7 +27,7 @@ class syntax_highlighter
     bool extension_or_filename_has_syntax_highlighter(const std::string& ext_or_filename) const;
     bool extension_or_filename_has_keywords(const std::string& ext_or_filename) const;
 
-    comment_data get_syntax_highlighter(const std::string& ext_or_filename) const;
+    const comment_data& get_syntax_highlighter(const std::string& ext_or_filename) const;
 
     const keyword_data& get_keywords(const std::string& ext_or_filename) const;
 

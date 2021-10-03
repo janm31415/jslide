@@ -7,6 +7,8 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <vector>
+
 typedef struct text_vert_t {
     GLfloat x;
     GLfloat y;
@@ -63,6 +65,7 @@ void create_font_atlas(font_t *state);
 void init_font(font_t *state, int screen_width, int screen_height);
 int add_text_coords(font_t *state, char *text, text_vert_t* verts, float *color, float x, float y, float sx, float sy);
 void render_text(font_t* state, const char* text, float x, float y, float sx, float sy, const jtk::vec3<float>& color);
+void render_text(font_t* state, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& colors);
 void get_render_size(float& width, float& height, font_t* state, const char* text, float sx, float sy);
 
 void destroy_font(font_t* state);

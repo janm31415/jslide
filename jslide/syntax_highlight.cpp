@@ -15,9 +15,9 @@ namespace
     return folder + filename;
     }
 
-  std::vector<std::wstring> break_string(std::string in)
+  std::vector<std::string> break_string(std::string in)
     {
-    std::vector<std::wstring> out;
+    std::vector<std::string> out;
     while (!in.empty())
       {
       auto splitpos = in.find_first_of(' ');
@@ -26,7 +26,7 @@ namespace
         in.erase(0, splitpos + 1);
       else
         in.clear();
-      out.push_back(jtk::convert_string_to_wstring(keyword));
+      out.push_back(keyword);
       }
     return out;
     }
@@ -322,9 +322,8 @@ namespace
             auto extensions = break_string(ext_it.key());
             for (const auto& we : extensions)
               {
-              std::string e = jtk::convert_wstring_to_string(we);
-              m[e] = cd;
-              k[e] = kd;
+              m[we] = cd;
+              k[we] = kd;
               }
             }
           }
@@ -363,7 +362,7 @@ bool syntax_highlighter::extension_or_filename_has_keywords(const std::string& e
   return extension_to_keywords.find(ext_or_filename) != extension_to_keywords.end();
   }
 
-comment_data syntax_highlighter::get_syntax_highlighter(const std::string& ext_or_filename) const
+const comment_data& syntax_highlighter::get_syntax_highlighter(const std::string& ext_or_filename) const
   {
   assert(extension_or_filename_has_syntax_highlighter(ext_or_filename));
   return extension_to_data.find(ext_or_filename)->second;

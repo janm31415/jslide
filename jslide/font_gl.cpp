@@ -188,8 +188,74 @@ void get_render_size(float& width, float& height, font_t* state, const char* tex
     }
   }
 
+void render_text(font_t* state, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& colors)
+  {
+  state->program.bind();
+  jtk::gl_check_error("state->program.bind();");
+  state->vao.bind();
+  jtk::gl_check_error("state->vao.bind();");
+  state->vbo.bind();
+  jtk::gl_check_error("state->vbo.bind();");
+  state->program.set_attribute_buffer(state->coord_location, GL_FLOAT, 0, 4, 7 * sizeof(GLfloat));
+  jtk::gl_check_error("state->program.set_attribute_buffer");
+  state->program.set_attribute_buffer(state->color_location, GL_FLOAT, 4 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
+  jtk::gl_check_error("state->program.set_attribute_buffer");
+  state->tex.bind_to_channel(0);
+  state->program.set_uniform_value("tex", 0);
+  state->program.enable_attribute_array(state->coord_location);
+  state->program.enable_attribute_array(state->color_location);
+
+  // Blend is required to show cleared color when the frag shader draws transparent pixels
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  //sx = 2.f / state->screen_width;
+  //sy = 2.f / state->screen_height;
+
+  std::vector<text_vert_t> verts(6 * strlen(text));
+
+  int n = 0;
+
+  char_info_t* c = state->char_info;
+
+  const char* p;
+  auto color_it = colors.begin();
+  for (p = text; *p; p++, ++color_it) {
+    float x2 = x + c[*p].bl * sx;
+    float y2 = -y - c[*p].bt * sy;
+    float w = c[*p].bw * sx;
+    float h = c[*p].bh * sy;
+
+    // Advance cursor to start of next char
+    x += c[*p].ax * sx;
+    y += c[*p].ay * sy;
+
+    // Skip 0 pixel glyphs
+    if (!w || !h)
+      continue;
+
+    const auto& color = *color_it;
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2, c[*p].tx, c[*p].ty, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / state->atlas_height, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / state->atlas_height, color[0], color[1], color[2]);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2 - h, c[*p].tx + c[*p].bw / state->atlas_width, c[*p].ty + c[*p].bh / state->atlas_height, color[0], color[1], color[2]);
+    }
+
+  state->vbo.allocate(NULL, n * sizeof(text_vert_t));
+  state->vbo.allocate(verts.data(), n * sizeof(text_vert_t));
+
+  // Draw text
+  glDrawArrays(GL_TRIANGLES, 0, n);
+  jtk::gl_check_error("glDrawArrays");
+  state->program.release();
+  state->vao.release();
+  state->vbo.release();
+  }
+
 // Render single string
-// Assumes arrays and program already steup
+// Assumes arrays and program already setup
 void render_text(font_t* state, const char* text, float x, float y, float sx, float sy, const jtk::vec3<float>& color)
   {
   state->program.bind();

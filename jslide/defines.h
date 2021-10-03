@@ -1,3 +1,6 @@
 #pragma once
 
 #define NORMAL_TEXT_SIZE 5
+
+#define TEXT_MASK_CODEBLOCK 1
+#define TEXT_MASK_BEGINOFCODEBLOCK 2

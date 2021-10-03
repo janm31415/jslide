@@ -22,7 +22,9 @@ struct token
     T_IMAGE_DIM_END,
     T_IMAGE_PATH_BEGIN,
     T_IMAGE_PATH,
-    T_IMAGE_PATH_END
+    T_IMAGE_PATH_END,
+    T_CODE_BLOCK_BEGIN,
+    T_CODE_BLOCK_END
     };
 
   e_type type;
