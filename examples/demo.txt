@@ -39,8 +39,9 @@ by Jan Maes
 {: .center}
 ##### {: .orange}Different {: .yellow} colors {: .gray} are {: .white} possible
 
-{:: Transition to the next slide is also controlled with attributes.
-    You can use .dia, .split, .fade, .zoom, or .notransfer}
+{:: Transition to the next slide is also controlled with 
+    attributes. You can use .dia, .split, .fade, .zoom, 
+    or .notransfer}
 
 {: .split}
 
@@ -93,7 +94,7 @@ I like c++
 {:: Code snippets (between quotes `) have automatic 
     syntax highlighting. Several languages are available as 
     an attribute: .asm, .basic, .batch, .c, .cpp, .csharp, 
-    .cmake, .fortran, .html, .java, .json, .javascript, lisp,
+    .cmake, .fortran, .html, .java, .json, .javascript, .lisp,
     .lua, .metal, .objectivec, .pascal, .python, .ruby,
     .rust, .scheme, .swift, .xml }
 {:: Several highlighting schemes are available:
@@ -119,8 +120,11 @@ Images
 ----
 {:: Images have the following syntax: ![w h](path/image.ext).
     Here w and h are floating point values between 0 and 1 
-    indicating the width and height with respect to the slide.}
+    indicating the width and height of the image with respect 
+    to the slide.}
 
 {: .center}
 ![0.3 0.6](yoda.jpg)
 my dog
+
+
