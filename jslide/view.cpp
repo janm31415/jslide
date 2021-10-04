@@ -342,13 +342,7 @@ void view::_poll_for_events()
         if (_ctrl_pressed())
           _save();
         break;
-        }
-        case SDLK_p:
-        {
-        if (_ctrl_pressed())
-          _write_to_pdf("C:/_Dev/jslide/slide.pdf");
-        break;
-        }
+        }        
         }
       break;
       }
@@ -448,6 +442,7 @@ void view::_imgui_ui()
   bool open = true;
   static bool open_script = false;
   static bool save_script = false;
+  static bool save_pdf = false;
   if (ImGui::Begin("jslide", &open, window_flags))
     {
     if (!open)
@@ -479,6 +474,10 @@ void view::_imgui_ui()
         if (ImGui::MenuItem("Save as"))
           {
           save_script = true;
+          }
+        if (ImGui::MenuItem("Export to PDF"))
+          {
+          save_pdf = true;
           }
         if (ImGui::MenuItem("Build", "CTRL+b"))
           {
@@ -543,6 +542,15 @@ void view::_imgui_ui()
       }
     else
       Logging::Error() << "Could not save as " << std::string(saveScriptChosenPath) << "\n";
+    }
+
+  static ImGuiFs::Dialog save_pdf_dlg(false, true, true);
+  const char* savePDFChosenPath = save_pdf_dlg.saveFileDialog(save_pdf, _settings.file_open_folder.c_str(), 0, ".pdf", "Export to PDF");
+  save_pdf = false;
+  if (strlen(savePDFChosenPath) > 0)
+    {
+    std::string filename(savePDFChosenPath);
+    _write_to_pdf(filename);    
     }
 
   if (_settings.log_window)
@@ -784,7 +792,7 @@ void view::_write_to_pdf(const std::string& filename)
   {
   if (_presentation.slides.empty())
     return;
-  char* title = "JSlide", * author = "JSlide", * keywords = "JSlide", * subject = "JSlide", * creator = "JSlide";
+  char* title = "JSlide (https://github.com/janm31415/jslide)", * author = "Jan Maes", * keywords = "JSlide (https://github.com/janm31415/jslide)", * subject = "JSlide (https://github.com/janm31415/jslide)", * creator = "Jan Maes";
   double pageWidth = 8.27, pageHeight = 11.69, pageMargins = 0;
   bool cropWidth = false, cropHeight = false;
   PageOrientation pageOrientation = Landscape;
@@ -820,6 +828,7 @@ void view::_write_to_pdf(const std::string& filename)
   FILE* fp = fopen(filename.c_str(), "wb");
   fwrite(pdfBuf.data(), sizeof(uint8_t), pdfSize, fp);
   fclose(fp);
+  Logging::Info() << "Exported slides to " << filename << "\n";
   _slide_id = _slide_id_save;
   _prepare_current_slide();
   }

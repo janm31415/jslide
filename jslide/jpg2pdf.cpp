@@ -30,7 +30,7 @@ PJPEG2PDF Jpeg2PDF_BeginDocument(double pdfW, double pdfH, double margin) { // w
 
     pPDF->currentOffSet = 0;
     Jpeg2PDF_SetXREF(pPDF, 0, pPDF->currentOffSet, 'f');
-    pPDF->currentOffSet += sprintf(pPDF->pdfHeader, "%%PDF-1.4\n%%%cJpeg2PDF Engine By: arbin%c\n", 0xFF, 0xFF);
+    pPDF->currentOffSet += sprintf(pPDF->pdfHeader, "%%PDF-1.4\n%%%cJpeg2PDF Engine By: HH [ihaohu@gmail.com]%c\n", 0xFF, 0xFF);
 
     pPDF->imgObj = 0;
     pPDF->pdfObj = 2;		/* 0 & 1 was reserved for xref & document Root */

@@ -1,5 +1,9 @@
 #pragma once
 
+/*
+From https://sourceforge.net/projects/jpeg2pdf/
+*/
+
 #include <stdint.h>
 
 #define MAX_PDF_PAGES		15256
