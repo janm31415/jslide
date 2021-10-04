@@ -806,8 +806,6 @@ void view::_write_to_pdf(const std::string& filename)
   PageOrientation pageOrientation = Landscape;
   ScaleMethod scale = ScaleFit;
   PJPEG2PDF pdfId = Jpeg2PDF_BeginDocument(pageWidth, pageHeight, pageMargins); /* Letter is 8.5x11 inch */
-  if (pdfId < 0)
-    return;
   uint32_t _slide_id_save = _slide_id;
   std::vector<uint8_t> image_buffer(_slide_gl_state->width * _slide_gl_state->height * 4);
   my_context ctxt;

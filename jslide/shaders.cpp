@@ -128,6 +128,8 @@ uniform int iFrame;
 uniform float iTimeDelta;
 //struct Channel {  vec3 resolution;  float time;};
 //uniform Channel iChannel[4];
+
+out vec4 FragColor;
 )");
   }
 
@@ -136,7 +138,7 @@ std::string get_shader_fragment_footer()
   return std::string(R"(
 void main() 
   {
-  mainImage(gl_FragColor.xyzw, gl_FragCoord.xy);
+  mainImage(FragColor, gl_FragCoord.xy);
   }
 )");
   }
