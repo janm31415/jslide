@@ -685,6 +685,8 @@ namespace
 
 void view::_next_slide(bool with_cool_transfer)
   {
+  if (_presentation.slides.empty())
+    return;
   if (_transfer_slides.active) // still in a previous active transfer
     {
     float half_time = _transfer_slides.total_transfer_time * 0.5f;
@@ -711,6 +713,8 @@ void view::_next_slide(bool with_cool_transfer)
 
 void view::_previous_slide()
   {
+  if (_presentation.slides.empty())
+    return;
   _transfer_slides.active = false;
   _previous_slide_id = _slide_id;
   if (_slide_id > 0)
@@ -720,6 +724,8 @@ void view::_previous_slide()
 
 void view::_first_slide()
   {
+  if (_presentation.slides.empty())
+    return;
   _transfer_slides.active = false;
   _previous_slide_id = _slide_id;  
   _slide_id = 0;
@@ -728,6 +734,8 @@ void view::_first_slide()
 
 void view::_last_slide()
   {
+  if (_presentation.slides.empty())
+    return;
   _transfer_slides.active = false;
   _previous_slide_id = _slide_id;
   _slide_id = _presentation.slides.empty() ? 0 : _presentation.slides.size()-1;
