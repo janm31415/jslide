@@ -2,6 +2,8 @@
 
 #include "stb/stb_image.h"
 
+#include <string.h>
+
 
 image::image() : im(nullptr), w(0), h(0), nr_of_channels(0)
   {
