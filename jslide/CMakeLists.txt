@@ -151,20 +151,16 @@ add_custom_command(TARGET jslide POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data" "${CMAKE_CURRENT_BINARY_DIR}/data")
 endif (WIN32)
 
-if (UNIX)
 add_custom_command(TARGET jslide POST_BUILD 
-   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data" "$<TARGET_FILE_DIR:jslide>/data")
-endif (UNIX)    
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data" "$<TARGET_FILE_DIR:jslide>/data")
 
 if (WIN32)
 add_custom_command(TARGET jslide POST_BUILD 
    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/shaders")
 endif (WIN32)
 
-if (UNIX)
 add_custom_command(TARGET jslide POST_BUILD 
    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "$<TARGET_FILE_DIR:jslide>/shaders")
-endif (UNIX)    
 
 add_custom_command(TARGET jslide POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/jslide_syntax.json" "$<TARGET_FILE_DIR:jslide>/jslide_syntax.json")
