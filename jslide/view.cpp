@@ -25,6 +25,9 @@
 #include "parser.h"
 #include "nester.h"
 
+#include "stb/stb_image_write.h"
+#include "jpg2pdf.h"
+
 #include <thread>
 
 #define V_W 960
@@ -338,6 +341,12 @@ void view::_poll_for_events()
         {
         if (_ctrl_pressed())
           _save();
+        break;
+        }
+        case SDLK_p:
+        {
+        if (_ctrl_pressed())
+          _write_to_pdf("C:/_Dev/jslide/slide.pdf");
         break;
         }
         }
@@ -753,6 +762,66 @@ void view::_prepare_current_slide()
       add_image(_slide_gl_state, b);
       }
     }
+  }
+
+namespace
+  {
+  struct my_context
+    {
+    std::vector<uint8_t> buffer;
+    };
+
+  void my_stbi_write_func(void* context, void* data, int size)
+    {
+    my_context* p_ctxt = (my_context*)context;
+    uint8_t* p_data = (uint8_t*)data;
+    for (int i = 0; i < size; ++i)
+      p_ctxt->buffer.push_back(*p_data++);
+    }
+  }
+
+void view::_write_to_pdf(const std::string& filename)
+  {
+  if (_presentation.slides.empty())
+    return;
+  char* title = "JSlide", * author = "JSlide", * keywords = "JSlide", * subject = "JSlide", * creator = "JSlide";
+  double pageWidth = 8.27, pageHeight = 11.69, pageMargins = 0;
+  bool cropWidth = false, cropHeight = false;
+  PageOrientation pageOrientation = Landscape;
+  ScaleMethod scale = ScaleFit;
+  PJPEG2PDF pdfId = Jpeg2PDF_BeginDocument(pageWidth, pageHeight, pageMargins); /* Letter is 8.5x11 inch */
+  if (pdfId < 0)
+    return;
+  uint32_t _slide_id_save = _slide_id;
+  std::vector<uint8_t> image_buffer(_slide_gl_state->width * _slide_gl_state->height * 4);
+  my_context ctxt;
+  ctxt.buffer.reserve(image_buffer.size());
+  stbi_flip_vertically_on_write(true); 
+  for (_slide_id = 0; _slide_id < _presentation.slides.size(); ++_slide_id)
+    {
+    _prepare_current_slide();
+    glViewport(0, 0, _w, _h);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);
+    _slide_gl_state->fbo.get_texture()->bind_to_channel(0);  
+    jtk::gl_check_error("_slide_gl_state->fbo.get_texture()->bind_to_channel(0);");
+    _slide_gl_state->fbo.get_texture()->fill_pixels((GLubyte*)image_buffer.data(), 4);
+    _slide_gl_state->fbo.get_texture()->release();
+    ctxt.buffer.clear();
+    stbi_write_jpg_to_func(&my_stbi_write_func, (void*)&ctxt, _slide_gl_state->width, _slide_gl_state->height, 4, image_buffer.data(), 100);
+    Jpeg2PDF_AddJpeg(pdfId, _slide_gl_state->width, _slide_gl_state->height, ctxt.buffer.size(), ctxt.buffer.data(), true, pageOrientation, 300.0, 300.0, scale, cropHeight, cropWidth);
+    }
+  char timestamp[40] = { 0 };
+  uint32_t pdfSize = Jpeg2PDF_EndDocument(pdfId, timestamp, title, author, keywords, subject, creator);
+  std::vector<uint8_t> pdfBuf(pdfSize);
+  Jpeg2PDF_GetFinalDocumentAndCleanup(pdfId, pdfBuf.data(), &pdfSize);
+  FILE* fp = fopen(filename.c_str(), "wb");
+  fwrite(pdfBuf.data(), sizeof(uint8_t), pdfSize, fp);
+  fclose(fp);
+  _slide_id = _slide_id_save;
+  _prepare_current_slide();
   }
 
 void view::_do_mouse()

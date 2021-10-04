@@ -124,7 +124,7 @@ uniform float iGlobalTime;
 //uniform vec4 iDate;
 //uniform float iSampleRate;
 //uniform vec3 iChannelResolution[4];
-//uniform int iFrame;
+uniform int iFrame;
 uniform float iTimeDelta;
 //struct Channel {  vec3 resolution;  float time;};
 //uniform Channel iChannel[4];

@@ -58,6 +58,7 @@ class view
     void _last_slide();
     void _set_fullscreen(bool on);
     void _do_mouse();
+    void _write_to_pdf(const std::string& filename);
 
   private:
     SDL_Window* _window;    

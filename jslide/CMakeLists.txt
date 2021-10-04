@@ -36,6 +36,7 @@ defines.h
 font_gl.h
 image_gl.h
 image_helper.h
+jpg2pdf.h
 keyboard.h
 logging.h
 mouse_data.h
@@ -61,6 +62,7 @@ debug.cpp
 font_gl.cpp
 image_gl.cpp
 image_helper.cpp
+jpg2pdf.cpp
 logging.cpp
 main.cpp
 nester.cpp
