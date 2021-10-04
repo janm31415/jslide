@@ -226,6 +226,8 @@ void view::_poll_for_events()
         _destroy_gl_objects();
         _w = event.window.data1;
         _h = event.window.data2;
+        _windowed_w = _w;
+        _windowed_h = _h;
         glViewport(0, 0, _w, _h);
         _setup_gl_objects();
         _setup_blit_gl_objects(_settings.fullscreen);
