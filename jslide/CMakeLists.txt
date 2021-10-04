@@ -1,12 +1,15 @@
 if (WIN32)
   set(OPENGL_LIBRARIES opengl32.lib CACHE FILEPATH "opengl lib file")
+  set(GLX_LIBRARIES "")
 endif (WIN32)
 
 if (UNIX)
   if (APPLE)
     set(OPENGL_LIBRARIES "/System/Library/Frameworks/OpenGL.framework/OpenGL" CACHE FILEPATH "opengl lib file")
+    set(GLX_LIBRARIES "")
   else()
     set(OPENGL_LIBRARIES "/usr/lib/x86_64-linux-gnu/libOpenGL.so.0.0.0" CACHE FILEPATH "opengl lib file")
+    set(GLX_LIBRARIES "/usr/lib/x86_64-linux-gnu/libGLX.so" CACHE FILEPATH "glx lib files")
   endif(APPLE)
 endif (UNIX)
 
@@ -143,6 +146,7 @@ target_link_libraries(jslide
     SDL2main     
     freetype
     ${OPENGL_LIBRARIES} 
+    ${GLX_LIBRARIES}
     )	
     
       
