@@ -11,7 +11,7 @@
     The attributes .left, .right, and .center can be used}
 
 {: .right}
-JSlide
+jslide
 
 {:: The text size can by controlled by using hashes, from one 
     hash # for very large text to up to 8 hashes ######## for

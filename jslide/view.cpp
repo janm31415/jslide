@@ -65,7 +65,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 
   //SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-  _window = SDL_CreateWindow("JSlide",
+  _window = SDL_CreateWindow("jslide",
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
     _w, _h,
     SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
@@ -389,7 +389,7 @@ void view::_load(const std::string& filename)
     _previous_slide_id = 0;
     Logging::Info() << "Loaded " << _current_filename << "\n";
     std::stringstream title;
-    title << "JSlide (" << _current_filename << ")";
+    title << "jslide (" << _current_filename << ")";
     SDL_SetWindowTitle(_window, title.str().c_str());
     _build();
     }
@@ -397,7 +397,7 @@ void view::_load(const std::string& filename)
     {
     _current_filename = std::string();
     _script = std::string();
-    SDL_SetWindowTitle(_window, "JSlide");
+    SDL_SetWindowTitle(_window, "jslide");
     }
   _prepare_current_slide();
   }
@@ -411,7 +411,7 @@ void view::_save()
     t.close();
     Logging::Info() << "Saved as " << _current_filename << "\n";
     std::stringstream title;
-    title << "JSlide (" << _current_filename << ")";
+    title << "jslide (" << _current_filename << ")";
     SDL_SetWindowTitle(_window, title.str().c_str());
     }
   else
@@ -456,7 +456,7 @@ void view::_imgui_ui()
           _current_filename = std::string();
           _script = std::string();
           _build();
-          SDL_SetWindowTitle(_window, "JSlide");
+          SDL_SetWindowTitle(_window, "jslide");
           }
         if (ImGui::MenuItem("Load"))
           {
@@ -536,7 +536,7 @@ void view::_imgui_ui()
       t.close();
       _current_filename = std::string(saveScriptChosenPath);
       std::stringstream title;
-      title << "JSlide (" << _current_filename << ")";
+      title << "jslide (" << _current_filename << ")";
       SDL_SetWindowTitle(_window, title.str().c_str());
       Logging::Info() << "Saved " << _current_filename << "\n";
       }
@@ -800,7 +800,7 @@ void view::_write_to_pdf(const std::string& filename)
   {
   if (_presentation.slides.empty())
     return;
-  char* title = "JSlide (https://github.com/janm31415/jslide)", * author = "Jan Maes", * keywords = "JSlide (https://github.com/janm31415/jslide)", * subject = "JSlide (https://github.com/janm31415/jslide)", * creator = "Jan Maes";
+  char* title = "jslide (https://github.com/janm31415/jslide)", * author = "Jan Maes", * keywords = "jslide (https://github.com/janm31415/jslide)", * subject = "jslide (https://github.com/janm31415/jslide)", * creator = "Jan Maes";
   double pageWidth = 8.27, pageHeight = 11.69, pageMargins = 0;
   bool cropWidth = false, cropHeight = false;
   PageOrientation pageOrientation = Landscape;
