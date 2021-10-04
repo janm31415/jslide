@@ -164,3 +164,11 @@ add_custom_command(TARGET jslide POST_BUILD
 
 add_custom_command(TARGET jslide POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/jslide_syntax.json" "$<TARGET_FILE_DIR:jslide>/jslide_syntax.json")
+
+if (WIN32)
+add_custom_command(TARGET jslide POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../images/yoda.jpg" "${CMAKE_CURRENT_BINARY_DIR}/yoda.jpg")
+endif (WIN32)
+
+add_custom_command(TARGET jslide POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../images/yoda.jpg" "$<TARGET_FILE_DIR:jslide>/yoda.jpg")

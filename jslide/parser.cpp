@@ -302,6 +302,8 @@ namespace
     Line l;
     l.attrib = current_attributes;
     require(tokes, "----");
+    while (!tokes.empty() && tokes.back().value != "\\n")
+      advance(tokes);
     if (!tokes.empty())
       require(tokes, "\\n"); // pop the newline
     return l;

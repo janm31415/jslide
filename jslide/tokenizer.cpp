@@ -16,7 +16,7 @@ namespace
     {
     if (!buff.empty())
       {
-      if (buff.size()>=4 && _has_dashes_only(buff))
+      if (buff.size() >= 4 && _has_dashes_only(buff))
         tokes.emplace_back(token::T_LINE, "----", line_nr, col_nr);
       else
         tokes.emplace_back(token::T_TEXT, buff, line_nr, col_nr);
@@ -48,6 +48,7 @@ tokens tokenize(const std::string& str)
   bool newline = true;
 
   bool attributes_list = false;
+  bool attributes_list_started_at_newline = false;
 
   while (s < s_end)
     {
@@ -56,17 +57,47 @@ tokens tokenize(const std::string& str)
     switch (*s)
       {
       case '{':
-      {      
+      {
       const char* t = s; ++t;
       if (*t == ':')
         {
         _treat_buffer(buff, tokes, line_nr, buff_start_col_nr);
-        s = t+1;
-        tokes.emplace_back(token::T_ATTRIBUTE_BEGIN, "{:", line_nr, col_nr);
-        col_nr += 2;
-        newline = false;
-        attributes_list = true;
-        }        
+        s = t + 1;
+        if (*s == ':') // this is comment
+          {
+          col_nr += 2;
+          while (*s && !(*s == '}'))
+            {
+            if (*s == '\n')
+              {
+              ++line_nr;
+              col_nr = 1;
+              }
+            else
+              ++col_nr;
+            ++s;
+            }
+          if (*s)
+            ++s;
+          if (newline && *s == '\n')            
+            {
+            ++s;
+            newline = true;
+            ++line_nr;
+            col_nr = 1;
+            }
+          else
+            newline = false;
+          }
+        else
+          {
+          attributes_list_started_at_newline = newline;
+          tokes.emplace_back(token::T_ATTRIBUTE_BEGIN, "{:", line_nr, col_nr);
+          col_nr += 2;
+          newline = false;
+          attributes_list = true;
+          }
+        }
       break;
       }
       case '}':
@@ -78,6 +109,13 @@ tokens tokenize(const std::string& str)
         tokes.emplace_back(token::T_ATTRIBUTE_END, "}", line_nr, col_nr);
         ++col_nr;
         attributes_list = false;
+        if (attributes_list_started_at_newline && *s == '\n')
+          {
+          ++s;
+          newline = true;
+          ++line_nr;
+          col_nr = 1;
+          }
         }
       break;
       }
@@ -142,7 +180,7 @@ tokens tokenize(const std::string& str)
         else
           ++col_nr;
         ++t;
-        }     
+        }
       if (!code.empty())
         tokes.emplace_back(token::T_TEXT, code, code_block_line_nr, code_block_col_nr);
       tokes.emplace_back(token::T_CODE_BLOCK_END, "`", line_nr, col_nr);
@@ -182,7 +220,7 @@ tokens tokenize(const std::string& str)
               ++line_nr;
               col_nr = 1;
               }
-            else 
+            else
               ++col_nr;
             ++t;
             }
@@ -252,9 +290,9 @@ tokens tokenize(const std::string& str)
       if (newline && !attributes_list)
         {
         const char* t = s; ++t;
-        if (*t == '\n')
+        if (*t == '\n' || *t == 0)
           {
-          s+=2;
+          s += 2;
           tokes.emplace_back(token::T_NEWSLIDE, "@", line_nr, col_nr);
           col_nr = 1;
           ++line_nr;

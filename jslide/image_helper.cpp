@@ -37,10 +37,47 @@ void image::swap(image& other)
   std::swap(im, other.im);
   }
 
+namespace {
+
+  image dummy_image()
+    {
+    image im;
+    im.w = 256;
+    im.h = 256;
+    im.im = (unsigned char*)malloc(im.w*im.h*4);
+    im.nr_of_channels = 4;
+    unsigned char* p_im = im.im;
+    for (int y = 0; y < im.h; ++y)
+      {
+      for (int x = 0; x < im.w; ++x)
+        {
+        if (((x/16)&1) == ((y/16)&1))          
+          {
+          *p_im++ = 255;
+          *p_im++ = 255;
+          *p_im++ = 255;
+          *p_im++ = 255;
+          }
+        else
+          {
+          *p_im++ = 255;
+          *p_im++ = 0;
+          *p_im++ = 0;
+          *p_im++ = 0;
+          }
+        }
+      }
+    return im;
+    }
+
+  }
+
 image read_image(const std::string& filename)
   {
   image im;
   stbi_set_flip_vertically_on_load(true);
-  im.im = stbi_load(filename.c_str(), &im.w, &im.h, &im.nr_of_channels, 0);  
+  im.im = stbi_load(filename.c_str(), &im.w, &im.h, &im.nr_of_channels, 0);
+  if (im.im == nullptr)
+    return dummy_image();
   return im;
   }
