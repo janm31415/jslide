@@ -515,7 +515,7 @@ void view::_imgui_ui()
     }
 
   static ImGuiFs::Dialog open_script_dlg(false, true, true);
-  const char* openScriptChosenPath = open_script_dlg.chooseFileDialog(open_script, _settings.file_open_folder.c_str(), ".md", "Open script", ImVec2(-1, -1), ImVec2(50, 50));
+  const char* openScriptChosenPath = open_script_dlg.chooseFileDialog(open_script, _settings.file_open_folder.c_str(), ".txt", "Open script", ImVec2(-1, -1), ImVec2(50, 50));
   open_script = false;
   if (strlen(openScriptChosenPath) > 0)
     {
@@ -524,7 +524,7 @@ void view::_imgui_ui()
     }
 
   static ImGuiFs::Dialog save_script_dlg(false, true, true);
-  const char* saveScriptChosenPath = save_script_dlg.saveFileDialog(save_script, _settings.file_open_folder.c_str(), 0, ".md", "Save script");
+  const char* saveScriptChosenPath = save_script_dlg.saveFileDialog(save_script, _settings.file_open_folder.c_str(), 0, ".txt", "Save script");
   save_script = false;
   if (strlen(saveScriptChosenPath) > 0)
     {
