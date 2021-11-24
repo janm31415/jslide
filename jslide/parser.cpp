@@ -79,6 +79,16 @@ namespace
     return m;
     }
 
+  std::map<std::string, movie_speed> get_movie_speed_map()
+    {
+    std::map<std::string, movie_speed> m;
+    m[".speedx1"] = movie_speed::T_SPEED_NORMAL;
+    m[".speedx2"] = movie_speed::T_SPEED_TIMES_TWO;
+    m[".speedx4"] = movie_speed::T_SPEED_TIMES_FOUR;
+    m[".speedx8"] = movie_speed::T_SPEED_TIMES_EIGHT;
+    return m;
+    }
+
   std::map<std::string, textsize> get_textsize_map()
     {
     std::map<std::string, textsize> m;
@@ -165,6 +175,7 @@ namespace
     static auto language_map = get_language_map();
     static auto textsize_map = get_textsize_map();
     static auto transfer_animation_map = get_transfer_animation_map();
+    static auto movie_speed_map = get_movie_speed_map();
     bool attributes_lines = popped_token.type == token::T_NEWLINE || popped_token.type == token::T_NEWSLIDE || popped_token.type == token::T_ADDTOSLIDE;
     require(tokes, "{:");
     while (current_type(tokes) != token::T_ATTRIBUTE_END)
@@ -200,6 +211,12 @@ namespace
       if (it5 != transfer_animation_map.end())
         {
         current_attributes.e_transfer_animation = it5->second;
+        continue;
+        }
+      auto it6 = movie_speed_map.find(t.value);
+      if (it6 != movie_speed_map.end())
+        {
+        current_attributes.e_movie_speed = it6->second;
         continue;
         }
       if (t.value == std::string(".left"))

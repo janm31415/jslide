@@ -5,6 +5,7 @@
 #include "image_helper.h"
 #include "video_reader.h"
 #include "shader_gl.h"
+#include "parser.h"
 
 typedef struct image_t {
 
@@ -19,4 +20,4 @@ void init_video_data(image_t* state, const VideoReaderState& vstate, int32_t bli
 
 void destroy_image_data(image_t* state);
 void draw_image_data(image_t* state);
-void draw_video_data(image_t* state, const shader_parameters& params);
+void draw_video_data(image_t* state, const shader_parameters& params, movie_speed speed);

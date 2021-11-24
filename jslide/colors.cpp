@@ -11,11 +11,15 @@ std::map<std::string, jtk::vec3<float>> get_color_map()
   m[".gray"] = jtk::vec3<float>(0.5, 0.5, 0.5);
   m[".green"] = jtk::vec3<float>(0, 1, 0);
   m[".orange"] = jtk::vec3<float>(1, 0.5f, 0);
-  m[".purple"] = jtk::vec3<float>(1, 0, 1);
+  m[".magenta"] = jtk::vec3<float>(1, 0, 1);
   m[".red"] = jtk::vec3<float>(1, 0, 0);  
   m[".white"] = jtk::vec3<float>(1, 1, 1);
   m[".yellow"] = jtk::vec3<float>(1, 1, 0);
 
+  m[".purple"] = jtk::vec3<float>(0.384314, 0, 0.9333333);
+  m[".bluepurple"] = jtk::vec3<float>(0.215686, 0, 0.701961);
+  m[".teal"] = jtk::vec3<float>(0.0117647, 0.854902, 0.772549);
+  m[".darkred"] = jtk::vec3<float>(0.690196, 0, 0.12549);
   return m;
   }
 

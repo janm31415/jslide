@@ -62,6 +62,14 @@ enum class transfer_animation
   T_ZOOM
   };
 
+enum class movie_speed
+  {
+  T_SPEED_NORMAL,
+  T_SPEED_TIMES_TWO,
+  T_SPEED_TIMES_FOUR,
+  T_SPEED_TIMES_EIGHT
+  };
+
 std::string language_to_extension(language l);
 
 void throw_parse_error(int line_nr, int col_nr, const std::string& message);
@@ -74,6 +82,7 @@ struct ActiveAttributes
   jtk::vec3<float> color = jtk::vec3<float>(1, 1, 1);
   textsize e_textsize = textsize::T_NORMAL;
   transfer_animation e_transfer_animation = transfer_animation::T_FADE;
+  movie_speed e_movie_speed = movie_speed::T_SPEED_NORMAL;
   };
 
 int get_textsize(const ActiveAttributes& attrib);

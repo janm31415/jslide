@@ -300,7 +300,7 @@ namespace
     if (im.link_to_image >= state->image_gl_states.size())
       return;
     if (im.video.width > 0 && im.video.height > 0)
-      draw_video_data(state->image_gl_states[im.link_to_image], params);
+      draw_video_data(state->image_gl_states[im.link_to_image], params, im.attrib.e_movie_speed);
     else
       draw_image_data(state->image_gl_states[im.link_to_image]);
     }
