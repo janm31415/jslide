@@ -293,19 +293,19 @@ namespace
     _draw_text(state, t, left, right, top, bottom, sz);
     }
 
-  void _draw_image(slide_t* state, const Image& im)
+  void _draw_image(slide_t* state, const Image& im, const shader_parameters& params)
     {
     if (im.link_to_image < 0)
       return;
     if (im.link_to_image >= state->image_gl_states.size())
       return;
     if (im.video.width > 0 && im.video.height > 0)
-      draw_video_data(state->image_gl_states[im.link_to_image]);
+      draw_video_data(state->image_gl_states[im.link_to_image], params);
     else
       draw_image_data(state->image_gl_states[im.link_to_image]);
     }
 
-  void _draw_expression(slide_t* state, const Expression& expr, float left, float right, float top, float bottom)
+  void _draw_expression(slide_t* state, const Expression& expr, float left, float right, float top, float bottom, const shader_parameters& params)
     {
     if (std::holds_alternative<Title>(expr))
       _draw_title(state, std::get<Title>(expr), left, right, top, bottom);
@@ -314,12 +314,12 @@ namespace
     if (std::holds_alternative<Line>(expr))
       _draw_line(state, std::get<Line>(expr), left, right, top, bottom);
     if (std::holds_alternative<Image>(expr))
-      _draw_image(state, std::get<Image>(expr));
+      _draw_image(state, std::get<Image>(expr), params);
     }
 
-  void _draw_block(slide_t* state, const Block& b)
+  void _draw_block(slide_t* state, const Block& b, const shader_parameters& params)
     {
-    _draw_expression(state, b.expr, b.left, b.right, b.top, b.bottom);
+    _draw_expression(state, b.expr, b.left, b.right, b.top, b.bottom, params);
     }
 
   bool _draw_shader(slide_t* state, const shader_parameters& params)
@@ -380,7 +380,7 @@ void draw_slide_data(slide_t* state, const Slide& s, const shader_parameters& pa
 
   for (const auto& b : s.blocks)
     {
-    _draw_block(state, b);
+    _draw_block(state, b, params);
     }
 
   state->fbo.release();

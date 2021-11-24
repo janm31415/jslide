@@ -898,7 +898,7 @@ void view::loop()
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
       }
 
-    std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(16.0));
+    std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(1.0));
     SDL_GL_SwapWindow(_window);
 
     ++_sp.frame;
