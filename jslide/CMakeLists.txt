@@ -1,6 +1,18 @@
 if (WIN32)
   set(OPENGL_LIBRARIES opengl32.lib CACHE FILEPATH "opengl lib file")
   set(GLX_LIBRARIES "")
+  list(APPEND FFMPEG_LIBRARIES
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/lib/avcodec.lib
+    #${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/lib/avdevice.lib 
+    #${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/lib/avfilter.lib
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/lib/avformat.lib 
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/lib/avutil.lib 
+    #${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/lib/postproc.lib 
+    #${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/lib/swresample.lib 
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/lib/swscale.lib 
+  )
+  set(FFMPEG_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/include)
+  add_definitions(-D_FFMPEG_SUPPORTED)
 endif (WIN32)
 
 if (UNIX)
@@ -55,6 +67,7 @@ syntax_highlight.h
 tokenizer.h
 transfer_gl.h
 utils_gl.h
+video_reader.h
 view.h
     )
 	
@@ -80,6 +93,7 @@ syntax_highlight.cpp
 tokenizer.cpp
 transfer_gl.cpp
 utils_gl.cpp
+video_reader.cpp
 view.cpp
 )
 
@@ -138,6 +152,7 @@ source_group("ThirdParty/stb" FILES ${STB})
     ${CMAKE_CURRENT_SOURCE_DIR}/../json/
     ${CMAKE_CURRENT_SOURCE_DIR}/../SDL2/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/../stb/
+    ${FFMPEG_INCLUDE_DIR}
     )	
 	
 target_link_libraries(jslide
@@ -147,12 +162,17 @@ target_link_libraries(jslide
     freetype
     ${OPENGL_LIBRARIES} 
     ${GLX_LIBRARIES}
+    ${FFMPEG_LIBRARIES}
     )	
     
       
 if (WIN32)
 add_custom_command(TARGET jslide POST_BUILD 
    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data" "${CMAKE_CURRENT_BINARY_DIR}/data")
+add_custom_command(TARGET jslide POST_BUILD 
+   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/bin" "${CMAKE_CURRENT_BINARY_DIR}")
+add_custom_command(TARGET jslide POST_BUILD 
+   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/../ffmpeg/bin" "$<TARGET_FILE_DIR:jslide>")
 endif (WIN32)
 
 add_custom_command(TARGET jslide POST_BUILD 

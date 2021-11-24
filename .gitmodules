@@ -7,3 +7,6 @@
 [submodule "freetype"]
 	path = freetype
 	url = https://github.com/janm31415/freetype
+[submodule "ffmpeg"]
+	path = ffmpeg
+	url = https://github.com/janm31415/ffmpeg-win64-shared

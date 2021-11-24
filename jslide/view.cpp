@@ -123,6 +123,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 view::~view()
   {
   write_settings(_settings, "jslide.cfg");
+  destroy_presentation(_presentation);
   _destroy_gl_objects();
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplSDL2_Shutdown();
@@ -612,6 +613,7 @@ void view::_build()
     //  {
     //  Logging::Info() << "t: " << t.type << "  -  " << t.value << "  -  " << t.line_nr << ":" << t.col_nr << "\n";
     //  }
+    destroy_presentation(_presentation);
     _presentation = make_presentation(tokes);
     nest_blocks(_presentation, &_slide_gl_state->font_gl_state);
     }

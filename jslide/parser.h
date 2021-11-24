@@ -2,6 +2,7 @@
 
 #include "tokenizer.h"
 #include "image_helper.h"
+#include "video_reader.h"
 #include "colors.h"
 
 #include "jtk/vec.h"
@@ -100,6 +101,7 @@ struct Image
   float w,h;
   int link_to_image = -1;
   image im;
+  VideoReaderState video;
   ActiveAttributes attrib;
   };
 
@@ -128,3 +130,5 @@ class Presentation
   };
 
 Presentation make_presentation(tokens& tokes);
+
+void destroy_presentation(Presentation& p);

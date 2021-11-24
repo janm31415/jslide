@@ -330,7 +330,10 @@ namespace
     t = take(tokes);
     im.path = t.value;
     require(tokes, ")");
-    im.im = read_image(im.path);
+    if (!read_image(im.im, im.path))
+      {
+      video_reader_open(&im.video, im.path.c_str());
+      }
     return im;
     }
 
@@ -426,6 +429,24 @@ namespace
     s.attrib = current_attributes;
     return s;
     }
+
+  void destroy_image(Image& i)
+    {
+    if (i.video.width > 0)
+      video_reader_close(&i.video);
+    }
+
+  void destroy_block(Block& b)
+    {
+    if (std::holds_alternative<Image>(b.expr))
+      destroy_image(std::get<Image>(b.expr));
+    }
+
+  void destroy_slide(Slide& s)
+    {
+    for (auto& b : s.blocks)
+      destroy_block(b);
+    }
   } // namespace
 
 Presentation make_presentation(tokens& tokes)
@@ -443,4 +464,11 @@ Presentation make_presentation(tokens& tokes)
     }
   pres.slides.push_back(make_ending_slide());
   return pres;
+  }
+
+
+void destroy_presentation(Presentation& p)
+  {
+  for (auto& s : p.slides)
+    destroy_slide(s);
   }

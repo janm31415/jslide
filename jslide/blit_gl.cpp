@@ -81,7 +81,7 @@ void destroy_blit_data(blit_t* state)
   gl_check_error("destroy_blit_data");
   }
 
-void draw_blit_data(blit_t* state, jtk::texture* tex, uint32_t vp_w, uint32_t vp_h, bool crt_blit)
+void draw_blit_data(blit_t* state, jtk::texture* tex, uint32_t vp_w, uint32_t vp_h, bool crt_blit, bool flip)
   {
   using namespace jtk;
   glViewport(0, 0, vp_w, vp_h);
@@ -96,6 +96,7 @@ void draw_blit_data(blit_t* state, jtk::texture* tex, uint32_t vp_w, uint32_t vp
   state->blit_program.set_uniform_value("iBlitOffset", (GLfloat)state->blit_x, (int32_t)vp_h-((int32_t)state->blit_h+(int32_t)state->blit_y));
   state->blit_program.set_uniform_value("iChannel0", 0);
   state->blit_program.set_uniform_value("iCrt", crt_blit ? 1 : 0);
+  state->blit_program.set_uniform_value("iFlip", flip ? 1 : 0);
 
   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

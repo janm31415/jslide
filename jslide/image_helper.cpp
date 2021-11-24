@@ -74,12 +74,14 @@ namespace {
 
   }
 
-image read_image(const std::string& filename)
+bool read_image(image& im, const std::string& filename)
   {
-  image im;
   stbi_set_flip_vertically_on_load(true);
   im.im = stbi_load(filename.c_str(), &im.w, &im.h, &im.nr_of_channels, 0);
   if (im.im == nullptr)
-    return dummy_image();
-  return im;
+    {
+    im = dummy_image();
+    return false;
+    }
+  return true;
   }

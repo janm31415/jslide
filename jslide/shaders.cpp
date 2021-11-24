@@ -57,6 +57,7 @@ std::string get_blit_fragment_shader()
   uniform vec2      iBlitOffset;
   uniform sampler2D iChannel0;
   uniform int       iCrt;  
+  uniform int       iFlip;
 
   out vec4 FragColor;
   
@@ -79,6 +80,8 @@ std::string get_blit_fragment_shader()
   void main()
   {
   vec2 pos = (gl_FragCoord.xy - iBlitOffset)/iBlitResolution;
+  if (iFlip > 0)
+    pos.y = 1 - pos.y;
   if (iCrt > 0)
     {
     vec2 crtpos = CRTCurveUV( pos ); 

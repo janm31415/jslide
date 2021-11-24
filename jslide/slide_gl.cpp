@@ -299,7 +299,10 @@ namespace
       return;
     if (im.link_to_image >= state->image_gl_states.size())
       return;
-    draw_image_data(state->image_gl_states[im.link_to_image]);
+    if (im.video.width > 0 && im.video.height > 0)
+      draw_video_data(state->image_gl_states[im.link_to_image]);
+    else
+      draw_image_data(state->image_gl_states[im.link_to_image]);
     }
 
   void _draw_expression(slide_t* state, const Expression& expr, float left, float right, float top, float bottom)
@@ -435,6 +438,9 @@ void add_image(slide_t* state, Block& b)
   uint32_t blit_h = state->height * im.h;
   uint32_t view_w = state->width;
   uint32_t view_h = state->height;
-  init_image_data(state->image_gl_states.back(), im.im, blit_x, blit_y, blit_w, blit_h, view_w, view_h);
+  if (im.video.width > 0 && im.video.height > 0)
+    init_video_data(state->image_gl_states.back(), im.video, blit_x, blit_y, blit_w, blit_h, view_w, view_h);
+  else
+    init_image_data(state->image_gl_states.back(), im.im, blit_x, blit_y, blit_w, blit_h, view_w, view_h);
   im.link_to_image = id;
   }
