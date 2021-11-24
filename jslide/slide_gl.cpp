@@ -300,9 +300,9 @@ namespace
     if (im.link_to_image >= state->image_gl_states.size())
       return;
     if (im.video.width > 0 && im.video.height > 0)
-      draw_video_data(state->image_gl_states[im.link_to_image], params, im.attrib.e_movie_speed);
+      draw_video_data(state->image_gl_states[im.link_to_image], params, im.attrib.e_movie_speed, im.attrib.e_image_orientation);
     else
-      draw_image_data(state->image_gl_states[im.link_to_image]);
+      draw_image_data(state->image_gl_states[im.link_to_image], im.attrib.e_image_orientation);
     }
 
   void _draw_expression(slide_t* state, const Expression& expr, float left, float right, float top, float bottom, const shader_parameters& params)

@@ -25,18 +25,32 @@ void destroy_image_data(image_t* state)
   delete[] state->video_frame_data;
   }
 
-void draw_image_data(image_t* state)
+void draw_image_data(image_t* state, image_orientation orientation)
   {
-  draw_blit_data(&state->blit_gl_state, &state->tex, state->blit_gl_state.view_w, state->blit_gl_state.view_h, false);
+  int rotation = 0;
+  switch (orientation)
+    {
+    case image_orientation::T_ORIENTATION_90DEG: rotation = 90; break;
+    case image_orientation::T_ORIENTATION_180DEG: rotation = 180; break;
+    case image_orientation::T_ORIENTATION_270DEG: rotation = 270; break;
+    }
+  draw_blit_data(&state->blit_gl_state, &state->tex, state->blit_gl_state.view_w, state->blit_gl_state.view_h, false, false, rotation);
   }
 
-void draw_video_data(image_t* state, const shader_parameters& params, movie_speed speed)
+void draw_video_data(image_t* state, const shader_parameters& params, movie_speed speed, image_orientation orientation)
   {  
   int64_t pts;
   if (video_reader_read_frame(&state->video_state, state->video_frame_data, &pts))
     {
+    int rotation = 0;
+    switch (orientation)
+      {
+      case image_orientation::T_ORIENTATION_90DEG: rotation = 90; break;
+      case image_orientation::T_ORIENTATION_180DEG: rotation = 180; break;
+      case image_orientation::T_ORIENTATION_270DEG: rotation = 270; break;
+      }
     state->tex.load_from_pixels(state->video_frame_data, state->video_state.width, state->video_state.height, 4, jtk::texture::pixel_type::byte);
-    draw_blit_data(&state->blit_gl_state, &state->tex, state->blit_gl_state.view_w, state->blit_gl_state.view_h, false, true);
+    draw_blit_data(&state->blit_gl_state, &state->tex, state->blit_gl_state.view_w, state->blit_gl_state.view_h, false, true, rotation);
     double time_for_one_frame = (double)(state->video_state.time_base.num) / (double)(state->video_state.time_base.den);
     switch (speed)
       {

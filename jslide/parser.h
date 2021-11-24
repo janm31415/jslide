@@ -70,6 +70,14 @@ enum class movie_speed
   T_SPEED_TIMES_EIGHT
   };
 
+enum class image_orientation
+  {
+  T_ORIENTATION_NORMAL,
+  T_ORIENTATION_90DEG,
+  T_ORIENTATION_180DEG,
+  T_ORIENTATION_270DEG
+  };
+
 std::string language_to_extension(language l);
 
 void throw_parse_error(int line_nr, int col_nr, const std::string& message);
@@ -83,6 +91,7 @@ struct ActiveAttributes
   textsize e_textsize = textsize::T_NORMAL;
   transfer_animation e_transfer_animation = transfer_animation::T_FADE;
   movie_speed e_movie_speed = movie_speed::T_SPEED_NORMAL;
+  image_orientation e_image_orientation = image_orientation::T_ORIENTATION_NORMAL;
   };
 
 int get_textsize(const ActiveAttributes& attrib);

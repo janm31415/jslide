@@ -19,5 +19,5 @@ void init_image_data(image_t* state, const image& im, int32_t blit_x, int32_t bl
 void init_video_data(image_t* state, const VideoReaderState& vstate, int32_t blit_x, int32_t blit_y, uint32_t blit_w, uint32_t blit_h, uint32_t view_w, uint32_t view_h);
 
 void destroy_image_data(image_t* state);
-void draw_image_data(image_t* state);
-void draw_video_data(image_t* state, const shader_parameters& params, movie_speed speed);
+void draw_image_data(image_t* state, image_orientation orientation);
+void draw_video_data(image_t* state, const shader_parameters& params, movie_speed speed, image_orientation orientation);

@@ -89,6 +89,16 @@ namespace
     return m;
     }
 
+  std::map<std::string, image_orientation> get_image_orientation_map()
+    {
+    std::map<std::string, image_orientation> m;
+    m[".rotate0deg"] = image_orientation::T_ORIENTATION_NORMAL;
+    m[".rotate90deg"] = image_orientation::T_ORIENTATION_90DEG;
+    m[".rotate180deg"] = image_orientation::T_ORIENTATION_180DEG;
+    m[".rotate270deg"] = image_orientation::T_ORIENTATION_270DEG;
+    return m;
+    }
+
   std::map<std::string, textsize> get_textsize_map()
     {
     std::map<std::string, textsize> m;
@@ -176,6 +186,7 @@ namespace
     static auto textsize_map = get_textsize_map();
     static auto transfer_animation_map = get_transfer_animation_map();
     static auto movie_speed_map = get_movie_speed_map();
+    static auto image_orientation_map = get_image_orientation_map();
     bool attributes_lines = popped_token.type == token::T_NEWLINE || popped_token.type == token::T_NEWSLIDE || popped_token.type == token::T_ADDTOSLIDE;
     require(tokes, "{:");
     while (current_type(tokes) != token::T_ATTRIBUTE_END)
@@ -217,6 +228,12 @@ namespace
       if (it6 != movie_speed_map.end())
         {
         current_attributes.e_movie_speed = it6->second;
+        continue;
+        }
+      auto it7 = image_orientation_map.find(t.value);
+      if (it7 != image_orientation_map.end())
+        {
+        current_attributes.e_image_orientation = it7->second;
         continue;
         }
       if (t.value == std::string(".left"))

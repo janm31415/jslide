@@ -58,6 +58,7 @@ std::string get_blit_fragment_shader()
   uniform sampler2D iChannel0;
   uniform int       iCrt;  
   uniform int       iFlip;
+  uniform int       iRotation;
 
   out vec4 FragColor;
   
@@ -80,6 +81,23 @@ std::string get_blit_fragment_shader()
   void main()
   {
   vec2 pos = (gl_FragCoord.xy - iBlitOffset)/iBlitResolution;
+  if (iRotation == 90)
+    {
+    float tmp = pos.x;
+    pos.x = 1-pos.y;
+    pos.y = tmp;
+    }
+  else if (iRotation == 180)
+    {
+    pos.x = 1 - pos.x;
+    pos.y = 1 - pos.y;
+    }
+  else if (iRotation == 270)
+    {
+    float tmp = pos.x;
+    pos.x = pos.y;
+    pos.y = 1-tmp;
+    }
   if (iFlip > 0)
     pos.y = 1 - pos.y;
   if (iCrt > 0)
