@@ -13,7 +13,7 @@ On MacOs you have to install FFmpeg first. You can do this with the command
     brew install ffmpeg
     
 It's possible that the links to the macos installed version of ffmpeg are incorrect in the CMakeLists.txt file. In that case you'll have to fix the links and let them point to the correct location.
-It's also possible to build without FFmpeg. In that case, uncomment the line
+It's also possible to build without FFmpeg. In that case, remove any occurence of the line
 
     add_definitions(-D_FFMPEG_SUPPORTED)
 
