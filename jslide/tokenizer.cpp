@@ -33,8 +33,14 @@ namespace
     }
   }
 
-tokens tokenize(const std::string& str)
+tokens tokenize(std::string str)
   {
+  std::string::size_type pos = 0;
+  while ((pos = str.find("\r\n", pos)) != std::string::npos)
+    {
+    str.replace(pos, 2, "\n");
+    }
+  
   tokens tokes;
   std::string buff;
 
@@ -52,7 +58,6 @@ tokens tokenize(const std::string& str)
 
   while (s < s_end)
     {
-
     const char* s_copy = s;
     switch (*s)
       {

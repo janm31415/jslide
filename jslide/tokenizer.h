@@ -36,4 +36,4 @@ struct token
   };
 
 typedef std::vector<token> tokens;
-tokens tokenize(const std::string& str);
+tokens tokenize(std::string str);
