@@ -1,7 +1,5 @@
 #pragma once
-#include "GL/glew.h"
 #include "SDL.h"
-#include "SDL_opengl.h"
 #include <string>
 #include <chrono>
 #include <array>
@@ -60,7 +58,10 @@ class view
     void _write_to_pdf(const std::string& filename);
 
   private:
-    SDL_Window* _window;    
+    SDL_Window* _window;
+    #if defined(RENDERDOOS_METAL)
+    SDL_MetalView _metalView;
+    #endif
     uint32_t _w, _h, _viewport_w, _viewport_h, _viewport_pos_x, _viewport_pos_y, _max_w, _max_h, _windowed_w, _windowed_h;
     bool _quit;
     settings _settings;        

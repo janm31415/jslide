@@ -17,13 +17,15 @@ endif (WIN32)
 
 if (UNIX)
   if (APPLE)
-    set(OPENGL_LIBRARIES "/System/Library/Frameworks/OpenGL.framework/OpenGL" CACHE FILEPATH "opengl lib file")
+    set(OPENGL_LIBRARIES "" CACHE FILEPATH "opengl lib file")
     set(GLX_LIBRARIES "")
     link_directories(/opt/homebrew/Cellar/ffmpeg/6.0/lib)
     set(FFMPEG_INCLUDE_DIR /opt/homebrew/Cellar/ffmpeg/6.0/include)
     list(APPEND FFMPEG_LIBRARIES
     avcodec avformat avutil swscale)
     add_definitions(-D_FFMPEG_SUPPORTED)
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework QuartzCore -framework Metal")
+    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -framework Cocoa -framework QuartzCore -framework Metal")
   else()
     set(OPENGL_LIBRARIES "/usr/lib/x86_64-linux-gnu/libOpenGL.so.0.0.0" CACHE FILEPATH "opengl lib file")
     set(GLX_LIBRARIES "/usr/lib/x86_64-linux-gnu/libGLX.so" CACHE FILEPATH "glx lib files")
@@ -64,12 +66,9 @@ list(APPEND IMGUI ${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_impl_opengl3.cpp)
 endif (APPLE)
 
 set(HDRS
-blit_gl.h
 colors.h
 debug.h
 defines.h
-font_gl.h
-image_gl.h
 image_helper.h
 jpg2pdf.h
 keyboard.h
@@ -80,24 +79,17 @@ nester.h
 parser.h
 pref_file.h
 settings.h
-shader_gl.h
 shaders.h
-slide_gl.h
 sizing.h
 syntax_highlight.h
 tokenizer.h
-transfer_gl.h
-utils_gl.h
 video_reader.h
 view.h
     )
 	
 set(SRCS
-blit_gl.cpp
 colors.cpp
 debug.cpp
-font_gl.cpp
-image_gl.cpp
 image_helper.cpp
 jpg2pdf.cpp
 logging.cpp
@@ -107,14 +99,10 @@ nester.cpp
 parser.cpp
 pref_file.cpp
 settings.cpp
-shader_gl.cpp
 shaders.cpp
-slide_gl.cpp
 sizing.cpp
 syntax_highlight.cpp
 tokenizer.cpp
-transfer_gl.cpp
-utils_gl.cpp
 video_reader.cpp
 view.cpp
 )
@@ -153,7 +141,7 @@ add_definitions(-D_UNICODE)
 add_definitions(-DUNICODE)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLEW)
+#add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLEW)
 
 if (WIN32)
 add_executable(jslide WIN32 ${HDRS} ${SRCS} ${SHADERS} ${IMGUI} ${JSON} jslide.rc resource.h)
@@ -168,7 +156,6 @@ endif (APPLE)
 
 source_group("Header Files" FILES ${hdrs})
 source_group("Source Files" FILES ${srcs})
-source_group("ThirdParty/Glew" FILES ${GLEW})
 source_group("ThirdParty/ImGui" FILES ${IMGUI})
 source_group("ThirdParty/json" FILES ${JSON})
 source_group("ThirdParty/stb" FILES ${STB})
@@ -207,6 +194,7 @@ target_link_libraries(jslide
     SDL2
     SDL2main     
     freetype
+    ${FFMPEG_LIBRARIES}
     )
 endif (${JSLIDE_PLATFORM} STREQUAL "win32")
       
