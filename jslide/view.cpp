@@ -50,7 +50,7 @@
 #define V_Y 50
 
 view::view(int argc, char** argv) : _w(1600), _h(900), _quit(false),
-_blit_gl_state(nullptr), _slide_gl_state(nullptr), _transfer_gl_state(nullptr), _viewport_w(V_W), _viewport_h(V_H),
+_viewport_w(V_W), _viewport_h(V_H),
 _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0), _previous_slide_id(0)
   {
   SDL_DisplayMode dm;
@@ -124,6 +124,10 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
     throw std::runtime_error("GLEW initialization failed");
   glGetError(); // hack https://stackoverflow.com/questions/36326333/openglglfw-glgenvertexarrays-returns-gl-invalid-operation
 
+  SDL_GL_MakeCurrent(_window, gl_context);
+
+  _engine.init(nullptr, nullptr, RenderDoos::renderer_type::OPENGL);
+
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
@@ -133,8 +137,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   ImGui_ImplSDL2_InitForOpenGL(_window, gl_context);
   const char* glsl_version = "#version 130";
   ImGui_ImplOpenGL3_Init(glsl_version);
-
-  SDL_GL_MakeCurrent(_window, gl_context);
+  
   
   // Setup Style
   ImGui::StyleColorsDark();
@@ -146,9 +149,6 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 
 
   _settings = read_settings("jslide.cfg");
-
-  _setup_gl_objects();
-  _setup_blit_gl_objects(_settings.fullscreen);
 
   _md.left_dragging = false;
   _md.right_dragging = false;
@@ -173,7 +173,6 @@ view::~view()
   {
   write_settings(_settings, "jslide.cfg");
   destroy_presentation(_presentation);
-  _destroy_gl_objects();
   #if defined(RENDERDOOS_METAL)
   ImGui_ImplMetal_Shutdown();
   #else
@@ -181,61 +180,10 @@ view::~view()
   #endif
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
+
+  _engine.destroy();
+
   SDL_DestroyWindow(_window);
-  }
-
-void view::_setup_blit_gl_objects(bool fullscreen)
-  {
-  using namespace jtk;
-  _viewport_w = V_W;
-  _viewport_h = V_H;
-  _viewport_pos_x = V_X;
-  _viewport_pos_y = V_Y;
-
-  int pos_x = _viewport_pos_x;
-  int pos_y = _viewport_pos_y;
-  _w = _windowed_w;
-  _h = _windowed_h;
-
-  if (fullscreen)
-    {
-    pos_x = 0;
-    pos_y = 0;
-    _viewport_w = _max_w;
-    _viewport_h = _max_h;
-    _viewport_pos_x = 0;
-    _viewport_pos_y = 0;
-    _w = _max_w;
-    _h = _max_h;
-    }
-
-  _blit_gl_state = new blit_t();
-  init_blit_data(_blit_gl_state, _viewport_pos_x, _viewport_pos_y, _viewport_w, _viewport_h, _w, _h);
-  }
-
-void view::_setup_gl_objects()
-  {
-  _slide_gl_state = new slide_t();
-  init_slide_data(_slide_gl_state, _max_w, _max_h);
-  _transfer_gl_state = new transfer_t();
-  init_transfer_data(_transfer_gl_state, _max_w, _max_h);
-  }
-
-void view::_destroy_gl_objects()
-  {
-  _destroy_blit_gl_objects();
-  if (_slide_gl_state)
-    {
-    destroy_slide_data(_slide_gl_state);
-    delete _slide_gl_state;
-    _slide_gl_state = nullptr;
-    }
-  if (_transfer_gl_state)
-    {
-    destroy_transfer_data(_transfer_gl_state);
-    delete _transfer_gl_state;
-    _transfer_gl_state = nullptr;
-    }
   }
 
 bool view::_ctrl_pressed()
@@ -250,13 +198,6 @@ bool view::_ctrl_pressed()
 bool view::_shift_pressed()
   {
   return (_keyb.is_down(SDLK_LSHIFT) || _keyb.is_down(SDLK_RSHIFT));
-  }
-
-void view::_destroy_blit_gl_objects()
-  {
-  destroy_blit_data(_blit_gl_state);
-  delete _blit_gl_state;
-  _blit_gl_state = nullptr;
   }
 
 void view::_poll_for_events()
@@ -276,15 +217,12 @@ void view::_poll_for_events()
       case SDL_WINDOWEVENT:
       {
       if (event.window.event == SDL_WINDOWEVENT_RESIZED)
-        {
-        _destroy_gl_objects();
+        {        
         _w = event.window.data1;
         _h = event.window.data2;
         _windowed_w = _w;
         _windowed_h = _h;
-        glViewport(0, 0, _w, _h);
-        _setup_gl_objects();
-        _setup_blit_gl_objects(_settings.fullscreen);
+        assert(0); //todo
         }
       break;
       }
@@ -480,7 +418,9 @@ void view::_save()
 void view::_imgui_ui()
   {
   // Start the Dear ImGui frame
+#if defined(RENDERDOOS_OPENGL)
   ImGui_ImplOpenGL3_NewFrame();
+#endif
   ImGui_ImplSDL2_NewFrame(_window);
   ImGui::NewFrame();
 
@@ -615,6 +555,9 @@ void view::_imgui_ui()
   if (_settings.script_window)
     _script_window();
   ImGui::Render();
+#if defined(RENDERDOOS_OPENGL)
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
   }
 
 void view::_set_fullscreen(bool on)
@@ -627,8 +570,7 @@ void view::_set_fullscreen(bool on)
   else
     SDL_SetWindowSize(_window, _windowed_w, _windowed_h);
   SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-  _destroy_blit_gl_objects();
-  _setup_blit_gl_objects(_settings.fullscreen);
+  
   }
 
 namespace
@@ -668,7 +610,7 @@ void view::_build()
     //  }
     destroy_presentation(_presentation);
     _presentation = make_presentation(tokes);
-    nest_blocks(_presentation, &_slide_gl_state->font_gl_state);
+    nest_blocks(_presentation, &_font_material);
     }
   catch (std::runtime_error& e)
     {
@@ -805,7 +747,7 @@ void view::_prepare_current_slide()
     return;
   if (_slide_id >= _presentation.slides.size())
     _slide_id = 0;
-  clear_images(_slide_gl_state);
+  //clear_images(_slide_gl_state);
   bool should_compute_shader = _presentation.slides[_slide_id].reset_shaders;
   if (!should_compute_shader)
     {
@@ -819,9 +761,9 @@ void view::_prepare_current_slide()
     {
     try
       {
-      init_slide_shader(_slide_gl_state, _presentation.slides[_slide_id].shader);
-      _sp.frame = 0;
-      _sp.time = 0.f;
+      //init_slide_shader(_slide_gl_state, _presentation.slides[_slide_id].shader);
+      //_sp.frame = 0;
+      //_sp.time = 0.f;
       }
     catch (std::runtime_error& e)
       {
@@ -832,7 +774,7 @@ void view::_prepare_current_slide()
     {
     if (std::holds_alternative<Image>(b.expr))
       {
-      add_image(_slide_gl_state, b);
+      //add_image(_slide_gl_state, b);
       }
     }
   }
@@ -855,6 +797,7 @@ namespace
 
 void view::_write_to_pdf(const std::string& filename)
   {
+  /*
   if (_presentation.slides.empty())
     return;
   char* title = "jslide (https://github.com/janm31415/jslide)", * author = "Jan Maes", * keywords = "jslide (https://github.com/janm31415/jslide)", * subject = "jslide (https://github.com/janm31415/jslide)", * creator = "Jan Maes";
@@ -862,7 +805,7 @@ void view::_write_to_pdf(const std::string& filename)
   bool cropWidth = false, cropHeight = false;
   PageOrientation pageOrientation = Landscape;
   ScaleMethod scale = ScaleFit;
-  PJPEG2PDF pdfId = Jpeg2PDF_BeginDocument(pageWidth, pageHeight, pageMargins); /* Letter is 8.5x11 inch */
+  PJPEG2PDF pdfId = Jpeg2PDF_BeginDocument(pageWidth, pageHeight, pageMargins); // Letter is 8.5x11 inch
   uint32_t _slide_id_save = _slide_id;
   std::vector<uint8_t> image_buffer(_slide_gl_state->width * _slide_gl_state->height * 4);
   my_context ctxt;
@@ -894,6 +837,7 @@ void view::_write_to_pdf(const std::string& filename)
   Logging::Info() << "Exported slides to " << filename << "\n";
   _slide_id = _slide_id_save;
   _prepare_current_slide();
+  */
   }
 
 void view::_do_mouse()
@@ -902,18 +846,18 @@ void view::_do_mouse()
 
 void view::loop()
   {
-  _sp.frame = 0;
-  _sp.time = 0.f;
+  //_sp.frame = 0;
+  //_sp.time = 0.f;
   auto last_tic = std::chrono::high_resolution_clock::now();
   while (!_quit)
     {
     auto tic = std::chrono::high_resolution_clock::now();
-    _sp.time_delta = (float)(std::chrono::duration_cast<std::chrono::microseconds>(tic - last_tic).count()) / 1000000.f;
+    //_sp.time_delta = (float)(std::chrono::duration_cast<std::chrono::microseconds>(tic - last_tic).count()) / 1000000.f;
     last_tic = tic;
 
     _poll_for_events();
     _do_mouse();
-
+    /*
     glViewport(0, 0, _w, _h);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -944,17 +888,56 @@ void view::loop()
         draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);
       }
     draw_blit_data(_blit_gl_state, blit_texture, _w, _h, _settings.crt_effect);
+    */
+
+    RenderDoos::render_drawables drawables;
+#if defined(RENDERDOOS_METAL)
+    void* layer = SDL_Metal_GetLayer(_metalView);
+    auto drawable = next_drawable(layer);
+    drawables.metal_drawable = (void*)drawable.drawable;
+    drawables.metal_screen_texture = (void*)drawable.texture;
+#endif
+
+    _engine.frame_begin(drawables);
+
+    RenderDoos::renderpass_descriptor descr;
+    descr.clear_color = 0xff808080;
+    descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
+    descr.w = _w;
+    descr.h = _h;
+    _engine.renderpass_begin(descr);
+    _engine.renderpass_end();
+
 
     if (!_settings.fullscreen)
       {
+#if defined(RENDERDOOS_METAL)
+      MTL::CommandBuffer* p_command_buffer = (MTL::CommandBuffer*)_engine.get_command_buffer();
+      if (p_command_buffer)
+        {
+        MTL::RenderPassDescriptor* p_descriptor = MTL::RenderPassDescriptor::alloc()->init();
+        p_descriptor->colorAttachments()->object(0)->setTexture(drawable.texture);
+        p_descriptor->colorAttachments()->object(0)->setLoadAction(MTL::LoadActionLoad);
+        p_descriptor->colorAttachments()->object(0)->setStoreAction(MTL::StoreActionStore);
+        MTL::RenderCommandEncoder* p_render_command_encoder = p_command_buffer->renderCommandEncoder(p_descriptor);
+        ImGui_ImplMetal_NewFrame(p_descriptor);
+        _imgui_ui();
+        ImGui_ImplMetal_RenderDrawData(ImGui::GetDrawData(), p_command_buffer, p_render_command_encoder);
+        p_descriptor->release();
+        p_render_command_encoder->endEncoding();
+        }
+#else   
       _imgui_ui();
-      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
       }
+    _engine.frame_end();
 
     std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(1.0));
+#if defined(RENDERDOOS_OPENGL)
     SDL_GL_SwapWindow(_window);
+#endif
 
-    ++_sp.frame;
-    _sp.time += _sp.time_delta;
+    //++_sp.frame;
+    //_sp.time += _sp.time_delta;
     }
   }

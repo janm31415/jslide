@@ -1,19 +1,22 @@
 #pragma once
-#include <GL/glew.h>
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include "GL/glew.h"
+#include "SDL.h"
+#include "SDL_opengl.h"
 #include <string>
 #include <chrono>
 #include <array>
 #include <memory>
 
+#if defined(RENDERDOOS_METAL)
+#include "SDL_metal.h"
+#endif
+#include "RenderDoos/render_engine.h"
+#include "material.h"
+
 #include "keyboard.h"
 
 #include "settings.h"
 #include "mouse_data.h"
-#include "blit_gl.h"
-#include "slide_gl.h"
-#include "transfer_gl.h"
 
 #include "parser.h"
 
@@ -39,13 +42,9 @@ class view
 
   private:
     void _poll_for_events();
-    void _imgui_ui();
-    void _setup_blit_gl_objects(bool fullscreen);
-    void _setup_gl_objects();
+    void _imgui_ui();   
     void _log_window();
     void _script_window();
-    void _destroy_gl_objects();
-    void _destroy_blit_gl_objects();
     void _save();
     void _load(const std::string& filename);
     bool _ctrl_pressed();
@@ -64,10 +63,7 @@ class view
     SDL_Window* _window;    
     uint32_t _w, _h, _viewport_w, _viewport_h, _viewport_pos_x, _viewport_pos_y, _max_w, _max_h, _windowed_w, _windowed_h;
     bool _quit;
-    settings _settings;    
-    blit_t* _blit_gl_state;
-    slide_t* _slide_gl_state;
-    transfer_t* _transfer_gl_state;
+    settings _settings;        
     mouse_data _md;    
     std::string _script;    
     int _line_nr, _col_nr;
@@ -75,6 +71,10 @@ class view
     keyboard_handler _keyb;
     Presentation _presentation;
     uint32_t _slide_id, _previous_slide_id;
-    shader_parameters _sp;    
+    //shader_parameters _sp;    
     transfer_slides_data _transfer_slides;
+
+    RenderDoos::render_engine _engine;
+
+    font_material _font_material;
   };

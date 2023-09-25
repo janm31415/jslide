@@ -1,7 +1,7 @@
 #include "sizing.h"
 
 
-void get_text_sizes(float& text_width, float& text_height, font_t* state, const Text& expr, float sz)
+void get_text_sizes(float& text_width, float& text_height, font_material* state, const Text& expr, float sz)
   {
   text_width = 0;
   text_height = 0;

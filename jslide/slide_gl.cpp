@@ -232,7 +232,7 @@ namespace
     {
     float text_width = 0;
     float text_height = 0;
-    get_text_sizes(text_width, text_height, &state->font_gl_state, expr, sz);
+    //get_text_sizes(text_width, text_height, &state->font_gl_state, expr, sz);
 
     float offset = 0.f;
     if (!expr.words.empty())
@@ -283,7 +283,7 @@ namespace
     t.words.emplace_back("_", expr.attrib);
     float text_width = 0;
     float text_height = 0;
-    get_text_sizes(text_width, text_height, &state->font_gl_state, t, sz);
+    //get_text_sizes(text_width, text_height, &state->font_gl_state, t, sz);
     int nr_of_chars = (int)std::floor((right - left) / text_width);
     std::string line;
     line.reserve(nr_of_chars);
