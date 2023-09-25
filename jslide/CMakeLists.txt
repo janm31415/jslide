@@ -31,22 +31,37 @@ if (UNIX)
 endif (UNIX)
 
 set(IMGUI
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui.h
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_impl_opengl3.h
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_impl_sdl.h
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_stdlib.h
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/dirent_portable.h
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imguifilesystem.h
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_draw.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_demo.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_impl_opengl3.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_impl_sdl.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_stdlib.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_tables.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imgui_widgets.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/imguifilesystem.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imconfig.h
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui.h
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_internal.h
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imstb_rectpack.h
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imstb_textedit.h
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imstb_truetype.h
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_draw.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_demo.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_tables.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_widgets.cpp
+
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_impl_sdl2.h
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_impl_sdl2.cpp
+
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/dirent_portable.h
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imguifilesystem.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imguifilesystem.h
+
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_stdlib.h
+${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_stdlib.cpp
 )
+
+if (APPLE)
+list(APPEND IMGUI ${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_impl_metal.h)
+list(APPEND IMGUI ${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_impl_metal.mm)
+else (APPLE)
+list(APPEND IMGUI ${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_impl_opengl3.h)
+list(APPEND IMGUI ${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_impl_opengl3_loader.h)
+list(APPEND IMGUI ${CMAKE_CURRENT_SOURCE_DIR}/../imgui/imgui_impl_opengl3.cpp)
+endif (APPLE)
 
 set(HDRS
 blit_gl.h
@@ -102,10 +117,6 @@ video_reader.cpp
 view.cpp
 )
 
-set(GLEW
-glew.cpp
-)
-
 set(JSON
 ${CMAKE_CURRENT_SOURCE_DIR}/../json/json.hpp
 )
@@ -135,9 +146,9 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLEW)
 
 if (WIN32)
-add_executable(jslide WIN32 ${HDRS} ${SRCS} ${GLEW} ${IMGUI} ${JSON} jslide.rc resource.h)
+add_executable(jslide WIN32 ${HDRS} ${SRCS} ${IMGUI} ${JSON} jslide.rc resource.h)
 else()
-add_executable(jslide ${HDRS} ${SRCS} ${GLEW} ${IMGUI} ${JSON} ${STB})
+add_executable(jslide ${HDRS} ${SRCS} ${IMGUI} ${JSON} ${STB})
 endif(WIN32)
 source_group("Header Files" FILES ${hdrs})
 source_group("Source Files" FILES ${srcs})
@@ -151,25 +162,36 @@ source_group("ThirdParty/stb" FILES ${STB})
     ${CMAKE_CURRENT_SOURCE_DIR}/../
     ${CMAKE_CURRENT_SOURCE_DIR}/../freetype/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../jtk
-   	${CMAKE_CURRENT_SOURCE_DIR}/../glew/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../glew/include/glew
-    ${CMAKE_CURRENT_SOURCE_DIR}/../imgui_sdl/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../imgui/
     ${CMAKE_CURRENT_SOURCE_DIR}/../json/
     ${CMAKE_CURRENT_SOURCE_DIR}/../SDL2/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/../stb/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../RenderDoos/glew/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../RenderDoos/glew/include/glew
     ${FFMPEG_INCLUDE_DIR}
     )	
 	
+if (${JSLIDE_PLATFORM} STREQUAL "win32")
 target_link_libraries(jslide
     PRIVATE	
+    RenderDoos
     SDL2
     SDL2main     
     freetype
+    libglew
     ${OPENGL_LIBRARIES} 
     ${GLX_LIBRARIES}
     ${FFMPEG_LIBRARIES}
     )	
-    
+else (${JSLIDE_PLATFORM} STREQUAL "win32")
+target_link_libraries(jslide
+    PRIVATE	
+    RenderDoos
+    SDL2
+    SDL2main     
+    freetype
+    )
+endif (${JSLIDE_PLATFORM} STREQUAL "win32")
       
 if (WIN32)
 add_custom_command(TARGET jslide POST_BUILD 

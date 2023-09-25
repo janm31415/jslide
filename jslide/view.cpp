@@ -3,7 +3,7 @@
 #include <SDL_syswm.h>
 
 #include "imgui.h"
-#include "imgui_impl_sdl.h"
+#include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_stdlib.h"
 #include "imguifilesystem.h"
@@ -87,7 +87,8 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 
   // Setup Platform/Renderer bindings
   ImGui_ImplSDL2_InitForOpenGL(_window, gl_context);
-  ImGui_ImplOpenGL3_Init();
+  const char* glsl_version = "#version 130";
+  ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Setup Style
   ImGui::StyleColorsDark();
