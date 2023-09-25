@@ -19,8 +19,8 @@ if (UNIX)
   if (APPLE)
     set(OPENGL_LIBRARIES "/System/Library/Frameworks/OpenGL.framework/OpenGL" CACHE FILEPATH "opengl lib file")
     set(GLX_LIBRARIES "")
-    link_directories(/opt/homebrew/Cellar/ffmpeg/4.4.1_3/lib)
-    set(FFMPEG_INCLUDE_DIR /opt/homebrew/Cellar/ffmpeg/4.4.1_3/include)
+    link_directories(/opt/homebrew/Cellar/ffmpeg/6.0/lib)
+    set(FFMPEG_INCLUDE_DIR /opt/homebrew/Cellar/ffmpeg/6.0/include)
     list(APPEND FFMPEG_LIBRARIES
     avcodec avformat avutil swscale)
     add_definitions(-D_FFMPEG_SUPPORTED)
@@ -126,7 +126,15 @@ ${CMAKE_CURRENT_SOURCE_DIR}/../stb/stb_image.h
 ${CMAKE_CURRENT_SOURCE_DIR}/../stb/stb_image_write.h
 )
 
+set(SHADERS
+)
 
+if (APPLE)
+list(APPEND HDRS ../SDL-metal/SDL_metal.h)
+list(APPEND SRCS ../SDL-metal/SDL_metal.mm)
+list(APPEND SHADERS ../RenderDoos/RenderDoos/shaders.metal)
+#list(APPEND SHADERS jslide_shaders.metal)
+endif (APPLE)
 
 if (WIN32)
 set(CMAKE_C_FLAGS_DEBUG "/W4 /MP /GF /RTCu /Od /MDd /Zi")
@@ -146,10 +154,16 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLEW)
 
 if (WIN32)
-add_executable(jslide WIN32 ${HDRS} ${SRCS} ${IMGUI} ${JSON} jslide.rc resource.h)
+add_executable(jslide WIN32 ${HDRS} ${SRCS} ${SHADERS} ${IMGUI} ${JSON} jslide.rc resource.h)
 else()
-add_executable(jslide ${HDRS} ${SRCS} ${IMGUI} ${JSON} ${STB})
+add_executable(jslide ${HDRS} ${SRCS} ${IMGUI} ${SHADERS} ${JSON} ${STB})
 endif(WIN32)
+
+if (APPLE)
+set_source_files_properties(${SHADERS} PROPERTIES LANGUAGE METAL)
+endif (APPLE)
+
+
 source_group("Header Files" FILES ${hdrs})
 source_group("Source Files" FILES ${srcs})
 source_group("ThirdParty/Glew" FILES ${GLEW})
@@ -166,6 +180,7 @@ source_group("ThirdParty/stb" FILES ${STB})
     ${CMAKE_CURRENT_SOURCE_DIR}/../json/
     ${CMAKE_CURRENT_SOURCE_DIR}/../SDL2/include/
     ${CMAKE_CURRENT_SOURCE_DIR}/../stb/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../RenderDoos/
     ${CMAKE_CURRENT_SOURCE_DIR}/../RenderDoos/glew/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../RenderDoos/glew/include/glew
     ${FFMPEG_INCLUDE_DIR}

@@ -1,14 +1,27 @@
 #include "view.h"
 #include <iostream>
-#include <SDL_syswm.h>
+
+#if defined(RENDERDOOS_METAL)
+#define NS_PRIVATE_IMPLEMENTATION
+#define CA_PRIVATE_IMPLEMENTATION
+#define MTL_PRIVATE_IMPLEMENTATION
+
+#include "metal/Metal.hpp"
+#include "../SDL-metal/SDL_metal.h"
+#include "SDL_metal.h"
+#else
+#include "glew/GL/glew.h"
+#endif
 
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
+#if defined(RENDERDOOS_METAL)
+#include "imgui_impl_metal.h"
+#else
 #include "imgui_impl_opengl3.h"
+#endif
 #include "imgui_stdlib.h"
 #include "imguifilesystem.h"
-
-#include <glew/GL/glew.h>
 
 #include <stdexcept>
 #include <chrono>
@@ -52,7 +65,35 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
     _max_w = _w;
     _max_h = _h;
     }
+#if defined(RENDERDOOS_METAL)
+  SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
 
+  _window = SDL_CreateWindow("jTop",
+    SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    _w, _h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+
+  _metalView = SDL_Metal_CreateView(_window);
+  void* layer = SDL_Metal_GetLayer(_metalView);
+  MTL::Device* metalDevice = MTL::CreateSystemDefaultDevice();
+  assign_device(layer, metalDevice);
+  if (!_window)
+    throw std::runtime_error("SDL can't create a window");
+
+
+  _engine.init(metalDevice, nullptr, RenderDoos::renderer_type::METAL);
+
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  (void)io;
+
+  ImGui_ImplMetal_Init(metalDevice);
+  ImGui_ImplSDL2_InitForMetal(_window);
+
+  // Setup Style
+  ImGui::StyleColorsDark();
+
+#else
   // Setup window
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -84,17 +125,23 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-
+  ImGuiIO& io = ImGui::GetIO();
+  (void)io;
+  
   // Setup Platform/Renderer bindings
   ImGui_ImplSDL2_InitForOpenGL(_window, gl_context);
   const char* glsl_version = "#version 130";
   ImGui_ImplOpenGL3_Init(glsl_version);
 
+  SDL_GL_MakeCurrent(_window, gl_context);
+  
   // Setup Style
   ImGui::StyleColorsDark();
+  #endif
+  
   ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive];
 
-  SDL_GL_MakeCurrent(_window, gl_context);
+
 
 
   _settings = read_settings("jslide.cfg");
@@ -126,7 +173,11 @@ view::~view()
   write_settings(_settings, "jslide.cfg");
   destroy_presentation(_presentation);
   _destroy_gl_objects();
+  #if defined(RENDERDOOS_METAL)
+  ImGui_ImplMetal_Shutdown();
+  #else
   ImGui_ImplOpenGL3_Shutdown();
+  #endif
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
   SDL_DestroyWindow(_window);
