@@ -10,6 +10,7 @@
 #include "../SDL-metal/SDL_metal.h"
 #include "SDL_metal.h"
 #else
+#include <windows.h>
 #include "glew/GL/glew.h"
 #endif
 

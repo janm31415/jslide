@@ -2,7 +2,7 @@
 #define _SDL_main_h
 #endif
 
-#include <SDL.h>
+#include "SDL.h"
 
 #include <stdio.h>
 #include <string.h>
