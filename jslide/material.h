@@ -28,6 +28,7 @@ public:
   void compile(RenderDoos::render_engine* engine);
   void bind(RenderDoos::render_engine* engine,
     int32_t texture_handle,
+    const jtk::vec2<float>& viewResolution,
     const jtk::vec2<float>& blitResolution,
     const jtk::vec2<float>& blitOffset,
     int32_t crt,
@@ -40,6 +41,7 @@ public:
 private:
   int32_t vs_handle, fs_handle;
   int32_t shader_program_handle;
+  int32_t iViewResolution;
   int32_t iBlitResolution;
   int32_t iBlitOffset;
   int32_t iChannel0;

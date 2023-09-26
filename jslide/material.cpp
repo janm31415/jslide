@@ -10,6 +10,7 @@ blit_material::blit_material() {
   vs_handle = -1;
   fs_handle = -1;
   shader_program_handle = -1;
+  iViewResolution = -1;
   iBlitResolution = -1;
   iBlitOffset = -1;
   iChannel0 = -1;
@@ -33,6 +34,7 @@ void blit_material::compile(RenderDoos::render_engine* engine) {
     fs_handle = engine->add_shader(get_blit_fragment_shader().c_str(), SHADER_FRAGMENT, nullptr);
   }
   shader_program_handle = engine->add_program(vs_handle, fs_handle);
+  iViewResolution = engine->add_uniform("iViewResolution", RenderDoos::uniform_type::vec2, 1);
   iBlitResolution = engine->add_uniform("iBlitResolution", RenderDoos::uniform_type::vec2, 1);
   iBlitOffset = engine->add_uniform("iBlitOffset", RenderDoos::uniform_type::vec2, 1);
   iChannel0 = engine->add_uniform("iChannel0", RenderDoos::uniform_type::sampler, 1);
@@ -94,6 +96,7 @@ void blit_material::compile(RenderDoos::render_engine* engine) {
 
 void blit_material::bind(RenderDoos::render_engine* engine,
     int32_t texture_handle,
+    const jtk::vec2<float>& viewResolution,
     const jtk::vec2<float>& blitResolution,
     const jtk::vec2<float>& blitOffset,
     int crt,
@@ -101,6 +104,8 @@ void blit_material::bind(RenderDoos::render_engine* engine,
     int rotation
   ) {
     engine->bind_program(shader_program_handle);
+    engine->set_uniform(iViewResolution, (void*)(&viewResolution.x));
+    engine->bind_uniform(shader_program_handle, iViewResolution);
     engine->set_uniform(iBlitResolution, (void*)(&blitResolution.x));
     engine->bind_uniform(shader_program_handle, iBlitResolution);
     engine->set_uniform(iBlitOffset, (void*)(&blitOffset.x));
@@ -116,7 +121,7 @@ void blit_material::bind(RenderDoos::render_engine* engine,
     engine->bind_uniform(shader_program_handle, iRotation);
     const RenderDoos::texture* tex = engine->get_texture(texture_handle);
     assert(tex != nullptr);
-    int32_t texture_flags = TEX_WRAP_REPEAT | TEX_FILTER_NEAREST;
+    int32_t texture_flags = TEX_WRAP_CLAMP_TO_EDGE | TEX_FILTER_NEAREST;
     engine->bind_texture_to_channel(texture_handle, channel, texture_flags);
 }
 
@@ -124,6 +129,7 @@ void blit_material::destroy(RenderDoos::render_engine* engine) {
   engine->remove_shader(vs_handle);
   engine->remove_shader(fs_handle);
   engine->remove_program(shader_program_handle);
+  engine->remove_uniform(iViewResolution);  
   engine->remove_uniform(iBlitResolution);
   engine->remove_uniform(iBlitOffset);
   engine->remove_uniform(iChannel0);
