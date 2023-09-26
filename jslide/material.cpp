@@ -577,7 +577,20 @@ void shadertoy_material::destroy(RenderDoos::render_engine* engine)
   engine->remove_uniform(time_delta_handle);
   engine->remove_uniform(frame_handle);
   engine->remove_geometry(geometry_id);
+  vs_handle = -1;
+  fs_handle = -1;
+  shader_program_handle = -1;
+  res_handle = -1;
+  time_handle = -1;
+  global_time_handle = -1;
+  time_delta_handle = -1;
+  frame_handle = -1;
 }
+
+bool shadertoy_material::is_compiled()
+  {
+  return shader_program_handle >= 0;
+  }
 
 void shadertoy_material::draw(uint32_t res_w, uint32_t res_h, uint32_t framebuffer_id, RenderDoos::render_engine* engine)
   {

@@ -351,7 +351,9 @@ void _draw_block(slide_t* state, RenderDoos::render_engine* engine, uint32_t fra
 
 bool _draw_shader(slide_t* state, RenderDoos::render_engine* engine, uint32_t framebuffer_id, const shadertoy_material::properties& params)
 {
-  state->shader_state->draw(framebuffer_id, state->shader_width, state->shader_height, engine);
+  if (!state->shader_state->is_compiled())
+    return false;
+  state->shader_state->draw(state->shader_width, state->shader_height, framebuffer_id, engine);
   return true;
 }
 }
@@ -376,7 +378,8 @@ void destroy_slide_data(slide_t* state, RenderDoos::render_engine* engine)
 }
 
 void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Slide& s, const shadertoy_material::properties& params)
-{
+{  
+  bool background_shader = _draw_shader(state, engine, state->shader_framebuffer_id, params);
   RenderDoos::renderpass_descriptor descr;
   descr.clear_color = 0xff000000;
   descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
@@ -385,7 +388,28 @@ void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Sl
   descr.frame_buffer_handle = state->framebuffer_id;
   descr.frame_buffer_channel = 10;
   engine->renderpass_begin(descr);
+  
+  if (background_shader)
+    {
+    jtk::vec2<float> viewResolution(state->width, state->height);
+    jtk::vec2<float> blitResolution(state->width, state->height);
+    jtk::vec2<float> blitOffset(0, 0);
+#if defined(RENDERDOOS_METAL)
+    int flip = 1;
+#else
+    int flip = 0;
+#endif
+    state->blit_state->bind(engine,
+      engine->get_frame_buffer(state->shader_framebuffer_id)->texture_handle,
+      viewResolution,
+      blitResolution,
+      blitOffset,
+      0, flip, 0);
+    state->blit_state->draw(engine);
+    }
+  
   engine->renderpass_end();
+
   for (const auto& b : s.blocks)
   {
     _draw_block(state, engine, state->framebuffer_id, b, params);
@@ -415,6 +439,7 @@ void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Sl
 
 void init_slide_shader(slide_t* state, RenderDoos::render_engine* engine, const std::string& script)
 {
+  state->shader_state->destroy(engine);
   if (!script.empty())
   {
     if (jtk::file_exists(script))
@@ -424,14 +449,12 @@ void init_slide_shader(slide_t* state, RenderDoos::render_engine* engine, const 
       {
         std::string scr((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
         f.close();
-        state->shader_state->destroy(engine);
         state->shader_state->set_script(scr);
         state->shader_state->compile(engine);
       }
     }
     else
     {
-      state->shader_state->destroy(engine);
       state->shader_state->set_script(script);
       state->shader_state->compile(engine);
     }

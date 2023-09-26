@@ -127,6 +127,8 @@ public:
   void destroy(RenderDoos::render_engine* engine);
   void draw(uint32_t framebuffer_id, uint32_t res_w, uint32_t res_h, RenderDoos::render_engine* engine);
   
+  bool is_compiled();
+
 private:
   int32_t vs_handle, fs_handle;
   int32_t shader_program_handle;
