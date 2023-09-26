@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <algorithm>
+#include <cassert>
 
 #include "RenderDoos/render_context.h"
 #include "RenderDoos/render_engine.h"
@@ -222,13 +223,13 @@ void _draw_code(slide_t* state, RenderDoos::render_engine* engine, const std::st
 {
   if (attrib.code_color_scheme.text == 0) // no color scheme
   {
-    state->font_state.render_text(engine, text.c_str(), left, top - text_height, sz * get_font_ratio(), sz, attrib.color);
+    state->font_state->render_text(engine, text.c_str(), left, top - text_height, sz * get_font_ratio(), sz, attrib.color);
   }
   else
   {
     std::vector<jtk::vec3<float>> colors;
     _compute_colors_par_character(colors, text, attrib);
-    state->font_state.render_text(engine, text.c_str(), left, top - text_height, sz * get_font_ratio(), sz, colors);
+    state->font_state->render_text(engine, text.c_str(), left, top - text_height, sz * get_font_ratio(), sz, colors);
   }
 }
 
@@ -236,7 +237,7 @@ void _draw_text(slide_t* state, RenderDoos::render_engine* engine, const Text& e
 {
   float text_width = 0;
   float text_height = 0;
-  get_text_sizes(text_width, text_height, &state->font_state, expr, sz);
+  get_text_sizes(text_width, text_height, state->font_state, expr, sz);
   
   float offset = 0.f;
   if (!expr.words.empty())
@@ -260,9 +261,9 @@ void _draw_text(slide_t* state, RenderDoos::render_engine* engine, const Text& e
   {
     for (const auto& word : expr.words)
     {
-      state->font_state.render_text(engine, word.first.c_str(), offset + left, top - text_height, sz * get_font_ratio(), sz, word.second.color);
+      state->font_state->render_text(engine, word.first.c_str(), offset + left, top - text_height, sz * get_font_ratio(), sz, word.second.color);
       float tw, th;
-      state->font_state.get_render_size(tw, th, word.first.c_str(), sz * get_font_ratio(), sz);
+      state->font_state->get_render_size(tw, th, word.first.c_str(), sz * get_font_ratio(), sz);
       left += tw;
     }
   }
@@ -287,7 +288,7 @@ void _draw_line(slide_t* state, RenderDoos::render_engine* engine, const Line& e
   t.words.emplace_back("_", expr.attrib);
   float text_width = 0;
   float text_height = 0;
-  get_text_sizes(text_width, text_height, &state->font_state, t, sz);
+  get_text_sizes(text_width, text_height, state->font_state, t, sz);
   int nr_of_chars = (int)std::floor((right - left) / text_width);
   std::string line;
   line.reserve(nr_of_chars);
@@ -321,21 +322,21 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
   if (std::holds_alternative<Title>(expr))
   {
     engine->renderpass_begin(descr);
-    state->font_state.bind(engine);
+    state->font_state->bind(engine);
     _draw_title(state, engine, std::get<Title>(expr), left, right, top, bottom);
     engine->renderpass_end();
   }
   if (std::holds_alternative<Text>(expr))
     {
     engine->renderpass_begin(descr);
-    state->font_state.bind(engine);
+    state->font_state->bind(engine);
     _draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
     engine->renderpass_end();
     }
   if (std::holds_alternative<Line>(expr))
     {
     engine->renderpass_begin(descr);
-    state->font_state.bind(engine);
+    state->font_state->bind(engine);
     _draw_line(state, engine, std::get<Line>(expr), left, right, top, bottom);
     engine->renderpass_end();
     }
@@ -350,17 +351,13 @@ void _draw_block(slide_t* state, RenderDoos::render_engine* engine, uint32_t fra
 
 bool _draw_shader(slide_t* state, RenderDoos::render_engine* engine, uint32_t framebuffer_id, const shadertoy_material::properties& params)
 {
-  state->shader_state.draw(framebuffer_id, state->shader_width, state->shader_height, engine);
+  state->shader_state->draw(framebuffer_id, state->shader_width, state->shader_height, engine);
   return true;
 }
 }
 
 void init_slide_data(slide_t* state, RenderDoos::render_engine* engine, uint32_t width, uint32_t height)
 {
-  state->blit_state.compile(engine);
-  state->shader_state.compile(engine);
-  state->font_state.compile(engine);
-  
   state->width = width;
   state->height = height;
   
@@ -376,9 +373,6 @@ void destroy_slide_data(slide_t* state, RenderDoos::render_engine* engine)
   clear_images(state, engine);
   engine->remove_frame_buffer(state->framebuffer_id);
   engine->remove_frame_buffer(state->shader_framebuffer_id);
-  state->blit_state.destroy(engine);
-  state->shader_state.destroy(engine);
-  state->font_state.destroy(engine);
 }
 
 void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Slide& s, const shadertoy_material::properties& params)
@@ -430,16 +424,16 @@ void init_slide_shader(slide_t* state, RenderDoos::render_engine* engine, const 
       {
         std::string scr((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
         f.close();
-        state->shader_state.destroy(engine);
-        state->shader_state.set_script(scr);
-        state->shader_state.compile(engine);
+        state->shader_state->destroy(engine);
+        state->shader_state->set_script(scr);
+        state->shader_state->compile(engine);
       }
     }
     else
     {
-      state->shader_state.destroy(engine);
-      state->shader_state.set_script(script);
-      state->shader_state.compile(engine);
+      state->shader_state->destroy(engine);
+      state->shader_state->set_script(script);
+      state->shader_state->compile(engine);
     }
   }
 }

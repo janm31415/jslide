@@ -73,7 +73,8 @@ image dummy_image()
 bool read_image(image& im, const std::string& filename)
   {
   stbi_set_flip_vertically_on_load(true);
-  im.im = stbi_load(filename.c_str(), &im.w, &im.h, &im.nr_of_channels, 0);
+  im.im = stbi_load(filename.c_str(), &im.w, &im.h, &im.nr_of_channels, 4);
+  im.nr_of_channels = 4;
   if (im.im == nullptr)
     {
     im = dummy_image();

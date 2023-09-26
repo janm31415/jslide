@@ -13,9 +13,9 @@ class render_engine;
 }
 
 typedef struct slide_t {
-  font_material font_state;
-  shadertoy_material shader_state;
-  blit_material blit_state;
+  font_material* font_state;
+  shadertoy_material* shader_state;
+  blit_material* blit_state;
 
   uint32_t framebuffer_id;
   

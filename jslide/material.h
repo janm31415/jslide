@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 #include "jtk/vec.h"
 #include "ft2build.h"
 #include FT_FREETYPE_H

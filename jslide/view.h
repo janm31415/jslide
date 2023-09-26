@@ -81,6 +81,7 @@ class view
 
     blit_material _blit_material;
     shadertoy_material _shadertoy_material;
+    font_material _font_material;
     
     int32_t _dummy_image_handle;
     uint32_t _framebuffer_id;

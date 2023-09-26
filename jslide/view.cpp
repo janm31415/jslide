@@ -151,9 +151,13 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 
   _blit_material.compile(&_engine);
   _shadertoy_material.compile(&_engine);
+  _font_material.compile(&_engine);
   _framebuffer_id = _engine.add_frame_buffer(_viewport_w, _viewport_h, false);
 
   _slide_state = new slide_t();
+  _slide_state->blit_state = &_blit_material;
+  _slide_state->shader_state = &_shadertoy_material;
+  _slide_state->font_state = &_font_material;
   init_slide_data(_slide_state, &_engine, _max_w, _max_h);
   
   _make_dummy_image();
@@ -194,6 +198,7 @@ view::~view()
   _engine.remove_texture(_dummy_image_handle);
   _blit_material.destroy(&_engine);
   _shadertoy_material.destroy(&_engine);
+  _font_material.destroy(&_engine);
   _engine.destroy();
 
   SDL_DestroyWindow(_window);
@@ -628,7 +633,7 @@ void view::_build()
     //  }
     destroy_presentation(_presentation);
     _presentation = make_presentation(tokes);
-    nest_blocks(_presentation, &_slide_state->font_state);
+    nest_blocks(_presentation, _slide_state->font_state);
     }
   catch (std::runtime_error& e)
     {
@@ -923,7 +928,7 @@ void view::loop()
     if (!_presentation.slides.empty())
       {
        draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
-      }
+      }   
         
     //_shadertoy_material.set_shadertoy_properties(_sp);
     //_shadertoy_material.draw(_viewport_w, _viewport_h, _framebuffer_id, &_engine);
@@ -938,12 +943,17 @@ void view::loop()
     jtk::vec2<float> viewResolution(_w, _h);
     jtk::vec2<float> blitResolution(_viewport_w, _viewport_h);
     jtk::vec2<float> blitOffset(_viewport_pos_x,_viewport_pos_y);
+#if defined(RENDERDOOS_METAL)
+    int flip = 1;
+#else
+    int flip = 0;
+#endif
     _blit_material.bind(&_engine,
     _engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle,
     viewResolution,
     blitResolution,
     blitOffset,
-    _settings.crt_effect ? 1 : 0,1,0);
+    _settings.crt_effect ? 1 : 0,flip,0);
     _blit_material.draw(&_engine);
     _engine.renderpass_end();
 
