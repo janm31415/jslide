@@ -4,7 +4,7 @@
 #include "RenderDoos/render_engine.h"
 #include "RenderDoos/types.h"
 
-
+#include <cassert>
 
 blit_material::blit_material() {
   vs_handle = -1;
