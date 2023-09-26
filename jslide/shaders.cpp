@@ -98,6 +98,8 @@ std::string get_blit_fragment_shader()
     pos.x = pos.y;
     pos.y = 1-tmp;
     }
+  if (pos.x < 0 || pos.y < 0 || pos.x > 1 || pos.y > 1)
+    discard;
   if (iFlip > 0)
     pos.y = 1 - pos.y;
   if (iCrt > 0)
