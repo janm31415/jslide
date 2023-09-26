@@ -920,7 +920,7 @@ void view::loop()
 
     jtk::vec2<float> viewResolution(_w, _h);
     jtk::vec2<float> blitResolution(_viewport_w, _viewport_h);
-    jtk::vec2<float> blitOffset(_viewport_pos_x,_h-(_viewport_pos_y)-_viewport_h);
+    jtk::vec2<float> blitOffset(_viewport_pos_x,_viewport_pos_y);
     _blit_material.bind(&_engine,
     _dummy_image_handle,
     viewResolution,
