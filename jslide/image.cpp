@@ -8,7 +8,6 @@
 void init_image_data(image_t* state, RenderDoos::render_engine* engine, const image& im, int32_t blit_x, int32_t blit_y, int32_t blit_w, int32_t blit_h, int32_t view_w, int32_t view_h)
 {
   state->tex_handle = engine->add_texture(im.w, im.h, RenderDoos::texture_format_rgba8, im.im);
-  state->blit_state.compile(engine);
   state->blit_x = blit_x;
   state->blit_y = blit_y;
   state->blit_w = blit_w;
@@ -22,7 +21,6 @@ void init_video_data(image_t* state, RenderDoos::render_engine* engine, const Vi
   state->video_state = vstate;
   state->video_frame_data = new uint8_t[vstate.width * vstate.height * 4];
   state->tex_handle = engine->add_texture(vstate.width, vstate.height, RenderDoos::texture_format_rgba8, (const uint8_t*)nullptr);
-  state->blit_state.compile(engine);
   state->blit_x = blit_x;
   state->blit_y = blit_y;
   state->blit_w = blit_w;
@@ -34,7 +32,6 @@ void init_video_data(image_t* state, RenderDoos::render_engine* engine, const Vi
 void destroy_image_data(image_t* state, RenderDoos::render_engine* engine)
 {
   engine->remove_texture(state->tex_handle);
-  state->blit_state.destroy(engine);
   delete[] state->video_frame_data;
 }
 
@@ -60,13 +57,13 @@ void draw_image_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
   jtk::vec2<float> viewResolution(state->view_w, state->view_h);
   jtk::vec2<float> blitResolution(state->blit_w, state->blit_h);
   jtk::vec2<float> blitOffset(state->blit_x,state->blit_y);
-  state->blit_state.bind(engine,
+  state->blit_state->bind(engine,
                          state->tex_handle,
                          viewResolution,
                          blitResolution,
                          blitOffset,
                          0,0,rotation);
-  state->blit_state.draw(engine);
+  state->blit_state->draw(engine);
   engine->renderpass_end();
 }
 
@@ -98,13 +95,13 @@ void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
     jtk::vec2<float> viewResolution(state->view_w, state->view_h);
     jtk::vec2<float> blitResolution(state->blit_w, state->blit_h);
     jtk::vec2<float> blitOffset(state->blit_x,state->blit_y);
-    state->blit_state.bind(engine,
+    state->blit_state->bind(engine,
                            state->tex_handle,
                            viewResolution,
                            blitResolution,
                            blitOffset,
                            0,0,rotation);
-    state->blit_state.draw(engine);
+    state->blit_state->draw(engine);
     engine->renderpass_end();
     
     double time_for_one_frame = (double)(state->video_state.time_base.num) / (double)(state->video_state.time_base.den);

@@ -707,6 +707,7 @@ namespace
 
 void view::_next_slide(bool with_cool_transfer)
   {
+  /*
   with_cool_transfer = false;
   if (_presentation.slides.empty())
     return;
@@ -732,6 +733,12 @@ void view::_next_slide(bool with_cool_transfer)
     }
   else
     _prepare_current_slide();
+  */
+  if (_presentation.slides.empty())
+    return;
+  if ((_slide_id + 1) < _presentation.slides.size())
+    ++_slide_id;
+  _prepare_current_slide();
   }
 
 void view::_previous_slide()
@@ -927,7 +934,7 @@ void view::loop()
     
     if (!_presentation.slides.empty())
       {
-       draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
+      draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
       }   
         
     //_shadertoy_material.set_shadertoy_properties(_sp);

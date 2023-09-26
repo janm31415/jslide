@@ -328,20 +328,20 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
   }
   if (std::holds_alternative<Text>(expr))
     {
-    engine->renderpass_begin(descr);
-    state->font_state->bind(engine);
-    _draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
-    engine->renderpass_end();
+    //engine->renderpass_begin(descr);
+    //state->font_state->bind(engine);
+    //_draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
+    //engine->renderpass_end();
     }
   if (std::holds_alternative<Line>(expr))
     {
-    engine->renderpass_begin(descr);
-    state->font_state->bind(engine);
-    _draw_line(state, engine, std::get<Line>(expr), left, right, top, bottom);
-    engine->renderpass_end();
+    //engine->renderpass_begin(descr);
+    //state->font_state->bind(engine);
+    //_draw_line(state, engine, std::get<Line>(expr), left, right, top, bottom);
+    //engine->renderpass_end();
     }
-  if (std::holds_alternative<Image>(expr))
-    _draw_image(state, engine, framebuffer_id, std::get<Image>(expr), params);
+  //if (std::holds_alternative<Image>(expr))
+  //  _draw_image(state, engine, framebuffer_id, std::get<Image>(expr), params);
 }
 
 void _draw_block(slide_t* state, RenderDoos::render_engine* engine, uint32_t framebuffer_id, const Block& b, const shadertoy_material::properties& params)
@@ -381,7 +381,7 @@ void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Sl
 {  
   bool background_shader = _draw_shader(state, engine, state->shader_framebuffer_id, params);
   RenderDoos::renderpass_descriptor descr;
-  descr.clear_color = 0xff000000;
+  descr.clear_color = 0xff0000ff;
   descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
   descr.w = state->width;
   descr.h = state->height;
@@ -480,6 +480,7 @@ void add_image(slide_t* state, RenderDoos::render_engine* engine, Block& b)
   if (id >= 9)
     return;
   state->image_states.push_back(new image_t());
+  state->image_states.back()->blit_state = state->blit_state;
   int32_t blit_x = 0;
   switch (im.attrib.e_alignment)
   {

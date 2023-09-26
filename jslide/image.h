@@ -12,7 +12,7 @@ class render_engine;
 
 typedef struct image_t {
   uint32_t tex_handle;
-  blit_material blit_state;
+  blit_material* blit_state;
   uint8_t* video_frame_data = nullptr;
   VideoReaderState video_state;
   int32_t blit_x, blit_y, blit_w, blit_h, view_w, view_h;

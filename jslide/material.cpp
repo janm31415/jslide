@@ -302,7 +302,7 @@ void font_material::bind(RenderDoos::render_engine* engine)
   engine->set_uniform(width_handle, (void*)&atlas_width);
   engine->set_uniform(height_handle, (void*)&atlas_height);
   
-  engine->bind_texture_to_channel(atlas_texture_id, 0, TEX_FILTER_NEAREST | TEX_WRAP_REPEAT);
+  engine->bind_texture_to_channel(atlas_texture_id, 1, TEX_FILTER_NEAREST | TEX_WRAP_REPEAT);
   
   engine->bind_uniform(shader_program_handle, width_handle);
   engine->bind_uniform(shader_program_handle, height_handle);
@@ -595,11 +595,12 @@ bool shadertoy_material::is_compiled()
 void shadertoy_material::draw(uint32_t res_w, uint32_t res_h, uint32_t framebuffer_id, RenderDoos::render_engine* engine)
   {
   RenderDoos::renderpass_descriptor descr;
-  descr.clear_color = 0xffff0000;
+  descr.clear_color = 0xff00ff00;
   descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
   descr.frame_buffer_handle = framebuffer_id;
   descr.frame_buffer_channel = 10;
-      
+  descr.w = res_w;
+  descr.h = res_h;
   engine->renderpass_begin(descr);
   bind(res_w, res_h, engine);
   engine->geometry_draw(geometry_id);
