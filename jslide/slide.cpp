@@ -314,7 +314,7 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
 {
   RenderDoos::renderpass_descriptor descr;
   descr.clear_color = 0xff808080;
-  descr.clear_flags = 0;
+  descr.clear_flags = CLEAR_DEPTH;
   descr.w = state->width;
   descr.h = state->height;
   descr.frame_buffer_handle = framebuffer_id;
@@ -386,7 +386,7 @@ void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Sl
 {  
   bool background_shader = _draw_shader(state, engine, state->shader_framebuffer_id, params);
   RenderDoos::renderpass_descriptor descr;
-  descr.clear_color = 0xff0000ff;
+  descr.clear_color = 0xff000000;
   descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
   descr.w = state->width;
   descr.h = state->height;
