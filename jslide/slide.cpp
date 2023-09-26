@@ -319,6 +319,7 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
   descr.h = state->height;
   descr.frame_buffer_handle = framebuffer_id;
   descr.frame_buffer_channel = 10;
+  return;
   if (std::holds_alternative<Title>(expr))
   {
     engine->renderpass_begin(descr);
@@ -328,20 +329,20 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
   }
   if (std::holds_alternative<Text>(expr))
     {
-    //engine->renderpass_begin(descr);
-    //state->font_state->bind(engine);
-    //_draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
-    //engine->renderpass_end();
+    engine->renderpass_begin(descr);
+    state->font_state->bind(engine);
+    _draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
+    engine->renderpass_end();
     }
   if (std::holds_alternative<Line>(expr))
     {
-    //engine->renderpass_begin(descr);
-    //state->font_state->bind(engine);
-    //_draw_line(state, engine, std::get<Line>(expr), left, right, top, bottom);
-    //engine->renderpass_end();
+    engine->renderpass_begin(descr);
+    state->font_state->bind(engine);
+    _draw_line(state, engine, std::get<Line>(expr), left, right, top, bottom);
+    engine->renderpass_end();
     }
-  //if (std::holds_alternative<Image>(expr))
-  //  _draw_image(state, engine, framebuffer_id, std::get<Image>(expr), params);
+  if (std::holds_alternative<Image>(expr))
+    _draw_image(state, engine, framebuffer_id, std::get<Image>(expr), params);
 }
 
 void _draw_block(slide_t* state, RenderDoos::render_engine* engine, uint32_t framebuffer_id, const Block& b, const shadertoy_material::properties& params)
@@ -353,6 +354,7 @@ bool _draw_shader(slide_t* state, RenderDoos::render_engine* engine, uint32_t fr
 {
   if (!state->shader_state->is_compiled())
     return false;
+  state->shader_state->set_shadertoy_properties(params);
   state->shader_state->draw(state->shader_width, state->shader_height, framebuffer_id, engine);
   return true;
 }
