@@ -84,6 +84,7 @@ public:
   void prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& clrs);
   void get_render_size(float& width, float& height, const char* text, float sx, float sy);
   
+  void clear_text(RenderDoos::render_engine* engine);
   void draw_text(RenderDoos::render_engine* engine);
   
 private:

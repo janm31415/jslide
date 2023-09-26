@@ -319,6 +319,7 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
   descr.h = state->height;
   descr.frame_buffer_handle = framebuffer_id;
   descr.frame_buffer_channel = 10;
+  state->font_state->clear_text(engine);
   if (std::holds_alternative<Title>(expr))
   {
     _draw_title(state, engine, std::get<Title>(expr), left, right, top, bottom);

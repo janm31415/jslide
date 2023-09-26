@@ -269,7 +269,7 @@ void font_material::_init_font(RenderDoos::render_engine* engine)
   }
   
   atlas_texture_id = engine->add_texture(w, h, RenderDoos::texture_format_r8ui, (const uint8_t*)raw_bitmap, TEX_USAGE_READ | TEX_USAGE_RENDER_TARGET);
-  engine->bind_texture_to_channel(atlas_texture_id, 9, TEX_FILTER_NEAREST | TEX_WRAP_REPEAT);
+  engine->bind_texture_to_channel(atlas_texture_id, 7, TEX_FILTER_NEAREST | TEX_WRAP_REPEAT);
   delete[] raw_bitmap;
 }
 
@@ -302,7 +302,7 @@ void font_material::bind(RenderDoos::render_engine* engine)
   engine->set_uniform(width_handle, (void*)&atlas_width);
   engine->set_uniform(height_handle, (void*)&atlas_height);
   
-  engine->bind_texture_to_channel(atlas_texture_id, 9, TEX_FILTER_NEAREST | TEX_WRAP_REPEAT);
+  engine->bind_texture_to_channel(atlas_texture_id, 7, TEX_FILTER_NEAREST | TEX_WRAP_REPEAT);
   
   engine->bind_uniform(shader_program_handle, width_handle);
   engine->bind_uniform(shader_program_handle, height_handle);
@@ -345,9 +345,6 @@ void font_material::draw_text(RenderDoos::render_engine* engine)
   
 void font_material::prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, uint32_t clr)
 {
-  for (auto id : geometry_ids)
-    engine->remove_geometry(id);
-  geometry_ids.clear();
   
   const float x_orig = x;
   
@@ -417,13 +414,16 @@ void font_material::prepare_text(RenderDoos::render_engine* engine, const char* 
   uint32_t c = 0xff000000 | ((uint32_t)(clr.z*255.f) << 16) | ((uint32_t)(clr.y*255.f) << 8) | ((uint32_t)(clr.x*255.f));
   prepare_text(engine, text, x, y, sx, sy, c);
   }
-  
-void font_material::prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& colors)
+
+void font_material::clear_text(RenderDoos::render_engine* engine)
   {
   for (auto id : geometry_ids)
     engine->remove_geometry(id);
   geometry_ids.clear();
+  }
   
+void font_material::prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& colors)
+  {
   const float x_orig = x;
   
   std::vector<text_vert_t> verts(6 * strlen(text));
