@@ -107,7 +107,7 @@ vertex FontVertexOut font_material_vertex_shader(const device FontVertexIn *vert
   return out;
 }
 
-fragment float4 font_material_fragment_shader(const FontVertexOut vertexIn [[stage_in]], texture2d<uint> texture [[texture(1)]], constant FontMaterialUniforms& input [[buffer(10)]]) {
+fragment float4 font_material_fragment_shader(const FontVertexOut vertexIn [[stage_in]], texture2d<uint> texture [[texture(9)]], constant FontMaterialUniforms& input [[buffer(10)]]) {
   int x = int(vertexIn.texcoord.x * float(input.width));
   int y = int(vertexIn.texcoord.y * float(input.height));
   float a = texture.read(uint2(x,y)).r/255.0;

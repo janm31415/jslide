@@ -79,10 +79,12 @@ public:
   void bind(RenderDoos::render_engine* engine);
   void destroy(RenderDoos::render_engine* engine);
   
-  void render_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, uint32_t clr);
-  void render_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const jtk::vec3<float>& clr);
-  void render_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& clrs);  
+  void prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, uint32_t clr);
+  void prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const jtk::vec3<float>& clr);
+  void prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& clrs);
   void get_render_size(float& width, float& height, const char* text, float sx, float sy);
+  
+  void draw_text(RenderDoos::render_engine* engine);
   
 private:
   
@@ -92,7 +94,7 @@ private:
   int32_t vs_handle, fs_handle;
   int32_t shader_program_handle;
   int32_t width_handle, height_handle;
-  int32_t geometry_id;
+  std::vector<int32_t> geometry_ids;
   
   int32_t atlas_texture_id;
   

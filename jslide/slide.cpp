@@ -223,13 +223,13 @@ void _draw_code(slide_t* state, RenderDoos::render_engine* engine, const std::st
 {
   if (attrib.code_color_scheme.text == 0) // no color scheme
   {
-    state->font_state->render_text(engine, text.c_str(), left, top - text_height, sz * get_font_ratio(), sz, attrib.color);
+    state->font_state->prepare_text(engine, text.c_str(), left, top - text_height, sz * get_font_ratio(), sz, attrib.color);
   }
   else
   {
     std::vector<jtk::vec3<float>> colors;
     _compute_colors_par_character(colors, text, attrib);
-    state->font_state->render_text(engine, text.c_str(), left, top - text_height, sz * get_font_ratio(), sz, colors);
+    state->font_state->prepare_text(engine, text.c_str(), left, top - text_height, sz * get_font_ratio(), sz, colors);
   }
 }
 
@@ -261,7 +261,7 @@ void _draw_text(slide_t* state, RenderDoos::render_engine* engine, const Text& e
   {
     for (const auto& word : expr.words)
     {
-      state->font_state->render_text(engine, word.first.c_str(), offset + left, top - text_height, sz * get_font_ratio(), sz, word.second.color);
+      state->font_state->prepare_text(engine, word.first.c_str(), offset + left, top - text_height, sz * get_font_ratio(), sz, word.second.color);
       float tw, th;
       state->font_state->get_render_size(tw, th, word.first.c_str(), sz * get_font_ratio(), sz);
       left += tw;
@@ -319,26 +319,28 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
   descr.h = state->height;
   descr.frame_buffer_handle = framebuffer_id;
   descr.frame_buffer_channel = 10;
-  return;
   if (std::holds_alternative<Title>(expr))
   {
+    _draw_title(state, engine, std::get<Title>(expr), left, right, top, bottom);
     engine->renderpass_begin(descr);
     state->font_state->bind(engine);
-    _draw_title(state, engine, std::get<Title>(expr), left, right, top, bottom);
+    state->font_state->draw_text(engine);
     engine->renderpass_end();
   }
   if (std::holds_alternative<Text>(expr))
     {
+    _draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
     engine->renderpass_begin(descr);
     state->font_state->bind(engine);
-    _draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
+    state->font_state->draw_text(engine);
     engine->renderpass_end();
     }
   if (std::holds_alternative<Line>(expr))
     {
+    _draw_line(state, engine, std::get<Line>(expr), left, right, top, bottom);
     engine->renderpass_begin(descr);
     state->font_state->bind(engine);
-    _draw_line(state, engine, std::get<Line>(expr), left, right, top, bottom);
+    state->font_state->draw_text(engine);
     engine->renderpass_end();
     }
   if (std::holds_alternative<Image>(expr))

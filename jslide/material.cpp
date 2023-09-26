@@ -159,7 +159,6 @@ font_material::font_material()
   shader_program_handle = -1;
   width_handle = -1;
   height_handle = -1;
-  geometry_id = -1;
   atlas_texture_id = -1;
 }
 
@@ -270,6 +269,7 @@ void font_material::_init_font(RenderDoos::render_engine* engine)
   }
   
   atlas_texture_id = engine->add_texture(w, h, RenderDoos::texture_format_r8ui, (const uint8_t*)raw_bitmap, TEX_USAGE_READ | TEX_USAGE_RENDER_TARGET);
+  engine->bind_texture_to_channel(atlas_texture_id, 9, TEX_FILTER_NEAREST | TEX_WRAP_REPEAT);
   delete[] raw_bitmap;
 }
 
@@ -302,7 +302,7 @@ void font_material::bind(RenderDoos::render_engine* engine)
   engine->set_uniform(width_handle, (void*)&atlas_width);
   engine->set_uniform(height_handle, (void*)&atlas_height);
   
-  engine->bind_texture_to_channel(atlas_texture_id, 1, TEX_FILTER_NEAREST | TEX_WRAP_REPEAT);
+  engine->bind_texture_to_channel(atlas_texture_id, 9, TEX_FILTER_NEAREST | TEX_WRAP_REPEAT);
   
   engine->bind_uniform(shader_program_handle, width_handle);
   engine->bind_uniform(shader_program_handle, height_handle);
@@ -315,7 +315,8 @@ void font_material::destroy(RenderDoos::render_engine* engine)
   engine->remove_program(shader_program_handle);
   engine->remove_uniform(width_handle);
   engine->remove_uniform(height_handle);
-  engine->remove_geometry(geometry_id);
+  for (auto id : geometry_ids)
+    engine->remove_geometry(id);
 }
 
 namespace
@@ -334,10 +335,19 @@ text_vert_t make_text_vert(float x, float y, float s, float t, float r, float g,
 }
 }
 
-void font_material::render_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, uint32_t clr)
+void font_material::draw_text(RenderDoos::render_engine* engine)
+  {
+  for (auto id : geometry_ids)
+    {
+    engine->geometry_draw(id);
+    }
+  }
+  
+void font_material::prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, uint32_t clr)
 {
-  if (geometry_id >= 0)
-    engine->remove_geometry(geometry_id);
+  for (auto id : geometry_ids)
+    engine->remove_geometry(id);
+  geometry_ids.clear();
   
   const float x_orig = x;
   
@@ -381,12 +391,13 @@ void font_material::render_text(RenderDoos::render_engine* engine, const char* t
     verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2 - h, c[*p].tx + c[*p].bw / atlas_width, c[*p].ty + c[*p].bh / atlas_height, red, green, blue);
   }
   
-  geometry_id = engine->add_geometry(VERTEX_2_2_3);
+  uint32_t id = engine->add_geometry(VERTEX_2_2_3);
+  geometry_ids.push_back(id);
   
   text_vert_t* vp;
   uint32_t* ip;
   
-  engine->geometry_begin(geometry_id, verts.size(), verts.size()*6, (float**)&vp, (void**)&ip);
+  engine->geometry_begin(id, (int32_t)verts.size(), (int32_t)verts.size()*6, (float**)&vp, (void**)&ip);
   memcpy(vp, verts.data(), sizeof(float)*7*verts.size());
   for (uint32_t i = 0; i < verts.size(); ++i)
   {
@@ -397,20 +408,21 @@ void font_material::render_text(RenderDoos::render_engine* engine, const char* t
     *ip++ = i * 6 + 4;
     *ip++ = i * 6 + 5;
   }
-  engine->geometry_end(geometry_id);
-  engine->geometry_draw(geometry_id);
+  engine->geometry_end(id);
+  //engine->geometry_draw(geometry_id);
 }
 
-void font_material::render_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const jtk::vec3<float>& clr)
+void font_material::prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const jtk::vec3<float>& clr)
   {
   uint32_t c = 0xff000000 | ((uint32_t)(clr.z*255.f) << 16) | ((uint32_t)(clr.y*255.f) << 8) | ((uint32_t)(clr.x*255.f));
-  render_text(engine, text, x, y, sx, sy, c);
+  prepare_text(engine, text, x, y, sx, sy, c);
   }
   
-void font_material::render_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& colors)
+void font_material::prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& colors)
   {
-  if (geometry_id >= 0)
-    engine->remove_geometry(geometry_id);
+  for (auto id : geometry_ids)
+    engine->remove_geometry(id);
+  geometry_ids.clear();
   
   const float x_orig = x;
   
@@ -456,12 +468,12 @@ void font_material::render_text(RenderDoos::render_engine* engine, const char* t
     verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2 - h, c[*p].tx + c[*p].bw / atlas_width, c[*p].ty + c[*p].bh / atlas_height, red, green, blue);
   }
   
-  geometry_id = engine->add_geometry(VERTEX_2_2_3);
-  
+  uint32_t id = engine->add_geometry(VERTEX_2_2_3);
+  geometry_ids.push_back(id);
   text_vert_t* vp;
   uint32_t* ip;
   
-  engine->geometry_begin(geometry_id, verts.size(), verts.size()*6, (float**)&vp, (void**)&ip);
+  engine->geometry_begin(id, (int32_t)verts.size(), (int32_t)verts.size()*6, (float**)&vp, (void**)&ip);
   memcpy(vp, verts.data(), sizeof(float)*7*verts.size());
   for (uint32_t i = 0; i < verts.size(); ++i)
   {
@@ -472,8 +484,8 @@ void font_material::render_text(RenderDoos::render_engine* engine, const char* t
     *ip++ = i * 6 + 4;
     *ip++ = i * 6 + 5;
   }
-  engine->geometry_end(geometry_id);
-  engine->geometry_draw(geometry_id);
+  engine->geometry_end(id);
+  //engine->geometry_draw(geometry_id);
   }
 
 void font_material::get_render_size(float& width, float& height, const char* text, float sx, float sy)
@@ -585,6 +597,7 @@ void shadertoy_material::destroy(RenderDoos::render_engine* engine)
   global_time_handle = -1;
   time_delta_handle = -1;
   frame_handle = -1;
+  geometry_id = -1;
 }
 
 bool shadertoy_material::is_compiled()
@@ -609,10 +622,6 @@ void shadertoy_material::draw(uint32_t res_w, uint32_t res_h, uint32_t framebuff
 
 void shadertoy_material::compile(RenderDoos::render_engine* engine)
 {
-  std::string fragment_shader;
-  fragment_shader.append(get_shadertoy_material_fragment_shader_header());
-  fragment_shader.append(_script);
-  fragment_shader.append(get_shadertoy_material_fragment_shader_footer());
   if (engine->get_renderer_type() == RenderDoos::renderer_type::METAL)
   {
     std::string header = std::string(R"(
@@ -644,6 +653,10 @@ fragment float4 jslide_shadertoy_material_fragment_shader(const VertexOut vertex
   }
   else if (engine->get_renderer_type() == RenderDoos::renderer_type::OPENGL)
   {
+    std::string fragment_shader;
+    fragment_shader.append(get_shadertoy_material_fragment_shader_header());
+    fragment_shader.append(_script);
+    fragment_shader.append(get_shadertoy_material_fragment_shader_footer());
     vs_handle = engine->add_shader(get_shadertoy_material_vertex_shader().c_str(), SHADER_VERTEX, nullptr);
     fs_handle = engine->add_shader(fragment_shader.c_str(), SHADER_FRAGMENT, nullptr);
   }

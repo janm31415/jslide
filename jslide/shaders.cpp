@@ -30,7 +30,7 @@ out vec4 outColor;
 uniform int width;
 uniform int height;
 
-layout(r8ui, binding = 1) readonly uniform uimage2D font_texture;
+layout(r8ui, binding = 9) readonly uniform uimage2D font_texture;
 
 void main() {
     int x = int(frag_tex_coord.x * float(width));
