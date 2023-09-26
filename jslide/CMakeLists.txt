@@ -69,6 +69,7 @@ set(HDRS
 colors.h
 debug.h
 defines.h
+image.h
 image_helper.h
 jpg2pdf.h
 keyboard.h
@@ -81,6 +82,7 @@ pref_file.h
 settings.h
 shaders.h
 sizing.h
+slide.h
 syntax_highlight.h
 tokenizer.h
 video_reader.h
@@ -93,6 +95,7 @@ debug.cpp
 image_helper.cpp
 jpg2pdf.cpp
 logging.cpp
+image.cpp
 main.cpp
 material.cpp
 nester.cpp
@@ -100,6 +103,7 @@ parser.cpp
 pref_file.cpp
 settings.cpp
 shaders.cpp
+slide.cpp
 sizing.cpp
 syntax_highlight.cpp
 tokenizer.cpp

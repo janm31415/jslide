@@ -401,6 +401,81 @@ void font_material::render_text(RenderDoos::render_engine* engine, const char* t
   engine->geometry_draw(geometry_id);
 }
 
+void font_material::render_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const jtk::vec3<float>& clr)
+  {
+  uint32_t c = 0xff000000 | ((uint32_t)(clr.z*255.f) << 16) | ((uint32_t)(clr.y*255.f) << 8) | ((uint32_t)(clr.x*255.f));
+  render_text(engine, text, x, y, sx, sy, c);
+  }
+  
+void font_material::render_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& colors)
+  {
+  if (geometry_id >= 0)
+    engine->remove_geometry(geometry_id);
+  
+  const float x_orig = x;
+  
+  std::vector<text_vert_t> verts(6 * strlen(text));
+  int n = 0;
+  
+  char_info_t* c = char_info;
+  
+  auto color_it = colors.begin();
+  
+  const char* p;
+  for (p = text; *p; ++p, ++color_it)
+  {
+    if (*p == 10)
+    {
+      y -= c['@'].bh * sy;
+      x = x_orig;
+      continue;
+    }
+    
+    float x2 = x + c[*p].bl * sx;
+    float y2 = -y - c[*p].bt * sy;
+    float w = c[*p].bw * sx;
+    float h = c[*p].bh * sy;
+    
+    // Advance cursor to start of next char
+    x += c[*p].ax * sx;
+    y += c[*p].ay * sy;
+    
+    // Skip 0 pixel glyphs
+    if (!w || !h)
+      continue;
+    
+    const auto& color = *color_it;
+    const float red = color[0];
+    const float green = color[1];
+    const float blue = color[2];
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2, c[*p].tx, c[*p].ty, red, green, blue);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / atlas_width, c[*p].ty, red, green, blue);
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / atlas_height, red, green, blue);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2, c[*p].tx + c[*p].bw / atlas_width, c[*p].ty, red, green, blue);
+    verts[n++] = (text_vert_t)make_text_vert(x2, -y2 - h, c[*p].tx, c[*p].ty + c[*p].bh / atlas_height, red, green, blue);
+    verts[n++] = (text_vert_t)make_text_vert(x2 + w, -y2 - h, c[*p].tx + c[*p].bw / atlas_width, c[*p].ty + c[*p].bh / atlas_height, red, green, blue);
+  }
+  
+  geometry_id = engine->add_geometry(VERTEX_2_2_3);
+  
+  text_vert_t* vp;
+  uint32_t* ip;
+  
+  engine->geometry_begin(geometry_id, verts.size(), verts.size()*6, (float**)&vp, (void**)&ip);
+  memcpy(vp, verts.data(), sizeof(float)*7*verts.size());
+  for (uint32_t i = 0; i < verts.size(); ++i)
+  {
+    *ip++ = i * 6;
+    *ip++ = i * 6 + 1;
+    *ip++ = i * 6 + 2;
+    *ip++ = i * 6 + 3;
+    *ip++ = i * 6 + 4;
+    *ip++ = i * 6 + 5;
+  }
+  engine->geometry_end(geometry_id);
+  engine->geometry_draw(geometry_id);
+  }
+
 void font_material::get_render_size(float& width, float& height, const char* text, float sx, float sy)
 {
   char_info_t* c = char_info;
