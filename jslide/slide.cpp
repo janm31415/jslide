@@ -314,6 +314,7 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
 {
   RenderDoos::renderpass_descriptor descr;
   descr.clear_color = 0xff808080;
+
   descr.clear_flags = CLEAR_DEPTH;
   descr.w = state->width;
   descr.h = state->height;
@@ -322,19 +323,25 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
   state->font_state->clear_text(engine);
   if (std::holds_alternative<Title>(expr))
   {
+  if (!std::get<Title>(expr).text.words.empty())
+    {
     _draw_title(state, engine, std::get<Title>(expr), left, right, top, bottom);
     engine->renderpass_begin(descr);
     state->font_state->bind(engine);
     state->font_state->draw_text(engine);
     engine->renderpass_end();
+    }
   }
   if (std::holds_alternative<Text>(expr))
     {
-    _draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
-    engine->renderpass_begin(descr);
-    state->font_state->bind(engine);
-    state->font_state->draw_text(engine);
-    engine->renderpass_end();
+    if (!std::get<Text>(expr).words.empty())
+      {
+      _draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
+      engine->renderpass_begin(descr);
+      state->font_state->bind(engine);
+      state->font_state->draw_text(engine);
+      engine->renderpass_end();
+      }
     }
   if (std::holds_alternative<Line>(expr))
     {

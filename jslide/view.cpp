@@ -569,7 +569,7 @@ void view::_imgui_ui()
   if (strlen(savePDFChosenPath) > 0)
     {
     std::string filename(savePDFChosenPath);
-    _write_to_pdf(filename);    
+    _write_to_pdf_filename = filename;
     }
 
   if (_settings.log_window)
@@ -828,7 +828,6 @@ namespace
 
 void view::_write_to_pdf(const std::string& filename)
   {
-  /*
   if (_presentation.slides.empty())
     return;
   char* title = "jslide (https://github.com/janm31415/jslide)", * author = "Jan Maes", * keywords = "jslide (https://github.com/janm31415/jslide)", * subject = "jslide (https://github.com/janm31415/jslide)", * creator = "Jan Maes";
@@ -838,25 +837,36 @@ void view::_write_to_pdf(const std::string& filename)
   ScaleMethod scale = ScaleFit;
   PJPEG2PDF pdfId = Jpeg2PDF_BeginDocument(pageWidth, pageHeight, pageMargins); // Letter is 8.5x11 inch
   uint32_t _slide_id_save = _slide_id;
-  std::vector<uint8_t> image_buffer(_slide_gl_state->width * _slide_gl_state->height * 4);
+  std::vector<uint8_t> image_buffer(_slide_state->width * _slide_state->height * 4);
   my_context ctxt;
   ctxt.buffer.reserve(image_buffer.size());
   stbi_flip_vertically_on_write(true); 
   for (_slide_id = 0; _slide_id < _presentation.slides.size(); ++_slide_id)
     {
     _prepare_current_slide();
-    glViewport(0, 0, _w, _h);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //RenderDoos::renderpass_descriptor descr;
+    //descr.clear_color = 0xff808080;
+    //descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
+    //descr.clear_depth = 0;
+    //descr.w = _w;
+    //descr.h = _h;
+    //_engine.renderpass_begin(descr);
+    
+    RenderDoos::render_drawables drawables;
+#if defined(RENDERDOOS_METAL)
+    void* layer = SDL_Metal_GetLayer(_metalView);
+    auto drawable = next_drawable(layer);
+    drawables.metal_drawable = (void*)drawable.drawable;
+    drawables.metal_screen_texture = (void*)drawable.texture;
+#endif
 
-    draw_slide_data(_slide_gl_state, _presentation.slides[_slide_id], _sp);
-    _slide_gl_state->fbo.get_texture()->bind_to_channel(0);  
-    jtk::gl_check_error("_slide_gl_state->fbo.get_texture()->bind_to_channel(0);");
-    _slide_gl_state->fbo.get_texture()->fill_pixels((GLubyte*)image_buffer.data(), 4);
-    _slide_gl_state->fbo.get_texture()->release();
+    _engine.frame_begin(drawables);
+    draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
+    _engine.frame_end(true);
+    _engine.get_data_from_texture(_slide_state->framebuffer_id, image_buffer.data(), _slide_state->width*_slide_state->height*4);
     ctxt.buffer.clear();
-    stbi_write_jpg_to_func(&my_stbi_write_func, (void*)&ctxt, _slide_gl_state->width, _slide_gl_state->height, 4, image_buffer.data(), 100);
-    Jpeg2PDF_AddJpeg(pdfId, _slide_gl_state->width, _slide_gl_state->height, ctxt.buffer.size(), ctxt.buffer.data(), true, pageOrientation, 300.0, 300.0, scale, cropHeight, cropWidth);
+    stbi_write_jpg_to_func(&my_stbi_write_func, (void*)&ctxt, _slide_state->width, _slide_state->height, 4, image_buffer.data(), 100);
+    Jpeg2PDF_AddJpeg(pdfId, _slide_state->width, _slide_state->height, (uint32_t)ctxt.buffer.size(), ctxt.buffer.data(), true, pageOrientation, 300.0, 300.0, scale, cropHeight, cropWidth);
     }
   char timestamp[40] = { 0 };
   uint32_t pdfSize = Jpeg2PDF_EndDocument(pdfId, timestamp, title, author, keywords, subject, creator);
@@ -868,7 +878,6 @@ void view::_write_to_pdf(const std::string& filename)
   Logging::Info() << "Exported slides to " << filename << "\n";
   _slide_id = _slide_id_save;
   _prepare_current_slide();
-  */
   }
 
 void view::_do_mouse()
@@ -943,6 +952,7 @@ void view::loop()
     RenderDoos::renderpass_descriptor descr;
     descr.clear_color = 0xff808080;
     descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
+    descr.clear_depth = 0;
     descr.w = _w;
     descr.h = _h;
     _engine.renderpass_begin(descr);
@@ -986,13 +996,19 @@ void view::loop()
       _imgui_ui();
 #endif
       }
-    _engine.frame_end();
+    _engine.frame_end(true);
 
     std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(1.0));
 #if defined(RENDERDOOS_OPENGL)
     SDL_GL_SwapWindow(_window);
 #endif
-
+    
+    if (!_write_to_pdf_filename.empty())
+      {
+      _write_to_pdf(_write_to_pdf_filename);
+      _write_to_pdf_filename.clear();
+      }
+    
     ++_sp.frame;
     _sp.time += _sp.time_delta;
     }

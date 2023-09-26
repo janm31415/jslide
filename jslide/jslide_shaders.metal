@@ -126,5 +126,6 @@ vertex VertexOut jslide_shadertoy_material_vertex_shader(const device VertexIn *
   float4 pos(vertices[vertexId].position, 1);
   VertexOut out;
   out.position = pos;
+  out.texcoord = vertices[vertexId].textureCoordinates;
   return out;
 }

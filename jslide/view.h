@@ -87,4 +87,6 @@ class view
     uint32_t _framebuffer_id;
     
     slide_t* _slide_state;
+    
+    std::string _write_to_pdf_filename;
   };
