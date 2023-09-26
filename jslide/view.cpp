@@ -158,7 +158,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   _slide_state->blit_state = &_blit_material;
   _slide_state->shader_state = &_shadertoy_material;
   _slide_state->font_state = &_font_material;
-  init_slide_data(_slide_state, &_engine, _max_w, _max_h);
+  init_slide_data(_slide_state, &_engine, _w, _h);
   
   _make_dummy_image();
 
@@ -861,9 +861,10 @@ void view::_write_to_pdf(const std::string& filename)
 #endif
 
     _engine.frame_begin(drawables);
-    draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
+    draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);        
     _engine.frame_end(true);
-    _engine.get_data_from_texture(_slide_state->framebuffer_id, image_buffer.data(), _slide_state->width*_slide_state->height*4);
+    _engine.get_data_from_texture(_engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle, image_buffer.data(), _slide_state->width * _slide_state->height * 4);
+
     ctxt.buffer.clear();
     stbi_write_jpg_to_func(&my_stbi_write_func, (void*)&ctxt, _slide_state->width, _slide_state->height, 4, image_buffer.data(), 100);
     Jpeg2PDF_AddJpeg(pdfId, _slide_state->width, _slide_state->height, (uint32_t)ctxt.buffer.size(), ctxt.buffer.data(), true, pageOrientation, 300.0, 300.0, scale, cropHeight, cropWidth);
