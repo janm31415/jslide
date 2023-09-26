@@ -30,5 +30,26 @@ vertex VertexOut blit_vertex_shader(const device VertexIn *vertices [[buffer(0)]
 }
 
 fragment float4 blit_fragment_shader(const VertexOut vertexIn [[stage_in]], texture2d<float> texture [[texture(0)]], sampler sampler2d [[sampler(0)]], constant BlitMaterialUniforms& input [[buffer(10)]]) {
-  return texture.sample(sampler2d, vertexIn.texcoord);
+  float2 pos = (vertexIn.texcoord.xy - input.iBlitOffset)/input.iBlitResolution;
+  if (input.iRotation == 90)
+    {
+    float tmp = pos.x;
+    pos.x = 1-pos.y;
+    pos.y = tmp;
+    }
+  else if (input.iRotation == 180)
+    {
+    pos.x = 1 - pos.x;
+    pos.y = 1 - pos.y;
+    }
+  else if (input.iRotation == 270)
+    {
+    float tmp = pos.x;
+    pos.x = pos.y;
+    pos.y = 1-tmp;
+    }
+  if (input.iFlip > 0)
+    pos.y = 1 - pos.y;
+  
+  return texture.sample(sampler2d, pos);
 }
