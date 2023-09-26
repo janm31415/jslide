@@ -73,13 +73,15 @@ class view
     keyboard_handler _keyb;
     Presentation _presentation;
     uint32_t _slide_id, _previous_slide_id;
-    //shader_parameters _sp;    
+    shadertoy_material::properties _sp;
     transfer_slides_data _transfer_slides;
 
     RenderDoos::render_engine _engine;
 
     font_material _font_material;
     blit_material _blit_material;
+    shadertoy_material _shadertoy_material;
     
     int32_t _dummy_image_handle;
+    uint32_t _framebuffer_id;
   };

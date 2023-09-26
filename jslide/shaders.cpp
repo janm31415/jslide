@@ -125,7 +125,7 @@ std::string get_blit_fragment_shader()
   )");
   }
 
-std::string get_shader_vertex_shader()
+std::string get_shadertoy_material_vertex_shader()
   {
   return std::string(R"(#version 330 core
 precision mediump float;
@@ -138,33 +138,22 @@ void main()
 )");
   }
 
-std::string get_shader_fragment_header()
+std::string get_shadertoy_material_fragment_shader_header()
   {
   return std::string(R"(#version 330 core
 precision mediump float;
 precision mediump int;
-//uniform sampler2D iChannel0;
-//uniform sampler2D iChannel1;
-//uniform sampler2D iChannel2;
-//uniform sampler2D iChannel3;
 uniform vec3 iResolution;
 uniform float iTime;
 uniform float iGlobalTime;
-//uniform float iChannelTime[4];
-//uniform vec4 iMouse;
-//uniform vec4 iDate;
-//uniform float iSampleRate;
-//uniform vec3 iChannelResolution[4];
 uniform int iFrame;
 uniform float iTimeDelta;
-//struct Channel {  vec3 resolution;  float time;};
-//uniform Channel iChannel[4];
 
 out vec4 FragColor;
 )");
   }
 
-std::string get_shader_fragment_footer()
+std::string get_shadertoy_material_fragment_shader_footer()
   {
   return std::string(R"(
 void main() 

@@ -113,3 +113,18 @@ fragment float4 font_material_fragment_shader(const FontVertexOut vertexIn [[sta
   float a = texture.read(uint2(x,y)).r/255.0;
   return float4(1, 1, 1, a)*float4(vertexIn.color, 1);
 }
+
+struct ShadertoyMaterialUniforms {
+  float3 iResolution;
+  float iTime;
+  float iGlobalTime;
+  float iTimeDelta;
+  int iFrame;
+};
+
+vertex VertexOut jslide_shadertoy_material_vertex_shader(const device VertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant ShadertoyMaterialUniforms& input [[buffer(10)]]) {
+  float4 pos(vertices[vertexId].position, 1);
+  VertexOut out;
+  out.position = pos;
+  return out;
+}

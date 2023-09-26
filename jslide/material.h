@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <string>
 #include "jtk/vec.h"
 #include "ft2build.h"
 #include FT_FREETYPE_H
@@ -73,9 +74,9 @@ class font_material
     font_material();
     virtual ~font_material();
 
-    virtual void compile(RenderDoos::render_engine* engine);
-    virtual void bind(RenderDoos::render_engine* engine);
-    virtual void destroy(RenderDoos::render_engine* engine);
+    void compile(RenderDoos::render_engine* engine);
+    void bind(RenderDoos::render_engine* engine);
+    void destroy(RenderDoos::render_engine* engine);
 
     void render_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, uint32_t clr);
 
@@ -100,3 +101,35 @@ class font_material
     FT_Library _ft;
     FT_Face _face;
   };
+
+
+class shadertoy_material
+    {
+    public:
+      struct properties
+        {
+        float time;
+        float global_time;
+        float time_delta;
+        int frame;
+        };
+
+      shadertoy_material();
+      virtual ~shadertoy_material();
+
+      void set_script(const std::string& script);
+      void set_shadertoy_properties(const properties& props);
+
+      void compile(RenderDoos::render_engine* engine);
+      void bind(uint32_t res_w, uint32_t res_h, RenderDoos::render_engine* engine);
+      void destroy(RenderDoos::render_engine* engine);
+      void draw(uint32_t framebuffer_id, uint32_t res_w, uint32_t res_h, RenderDoos::render_engine* engine);
+      
+    private:
+      int32_t vs_handle, fs_handle;
+      int32_t shader_program_handle;
+      std::string _script;
+      properties _props;
+      int32_t res_handle, time_handle, global_time_handle, time_delta_handle, frame_handle;
+      uint32_t geometry_id;
+    };

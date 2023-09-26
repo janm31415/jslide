@@ -150,6 +150,8 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 
 
   _blit_material.compile(&_engine);
+  _shadertoy_material.compile(&_engine);
+  _framebuffer_id = _engine.add_frame_buffer(_viewport_w, _viewport_h, false);
 
   _make_dummy_image();
 
@@ -187,6 +189,7 @@ view::~view()
   ImGui::DestroyContext();
   _engine.remove_texture(_dummy_image_handle);
   _blit_material.destroy(&_engine);
+  _shadertoy_material.destroy(&_engine);
   _engine.destroy();
 
   SDL_DestroyWindow(_window);
@@ -773,8 +776,8 @@ void view::_prepare_current_slide()
     try
       {
       //init_slide_shader(_slide_gl_state, _presentation.slides[_slide_id].shader);
-      //_sp.frame = 0;
-      //_sp.time = 0.f;
+      _sp.frame = 0;
+      _sp.time = 0.f;
       }
     catch (std::runtime_error& e)
       {
@@ -857,13 +860,13 @@ void view::_do_mouse()
 
 void view::loop()
   {
-  //_sp.frame = 0;
-  //_sp.time = 0.f;
+  _sp.frame = 0;
+  _sp.time = 0.f;
   auto last_tic = std::chrono::high_resolution_clock::now();
   while (!_quit)
     {
     auto tic = std::chrono::high_resolution_clock::now();
-    //_sp.time_delta = (float)(std::chrono::duration_cast<std::chrono::microseconds>(tic - last_tic).count()) / 1000000.f;
+    _sp.time_delta = (float)(std::chrono::duration_cast<std::chrono::microseconds>(tic - last_tic).count()) / 1000000.f;
     last_tic = tic;
 
     _poll_for_events();
@@ -910,6 +913,8 @@ void view::loop()
 #endif
 
     _engine.frame_begin(drawables);
+    _shadertoy_material.set_shadertoy_properties(_sp);
+    _shadertoy_material.draw(_viewport_w, _viewport_h, _framebuffer_id, &_engine);
 
     RenderDoos::renderpass_descriptor descr;
     descr.clear_color = 0xff808080;
@@ -922,7 +927,7 @@ void view::loop()
     jtk::vec2<float> blitResolution(_viewport_w, _viewport_h);
     jtk::vec2<float> blitOffset(_viewport_pos_x,_viewport_pos_y);
     _blit_material.bind(&_engine,
-    _dummy_image_handle,
+    _engine.get_frame_buffer(_framebuffer_id)->texture_handle,
     viewResolution,
     blitResolution,
     blitOffset,
@@ -959,7 +964,7 @@ void view::loop()
     SDL_GL_SwapWindow(_window);
 #endif
 
-    //++_sp.frame;
-    //_sp.time += _sp.time_delta;
+    ++_sp.frame;
+    _sp.time += _sp.time_delta;
     }
   }
