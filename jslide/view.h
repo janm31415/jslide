@@ -15,6 +15,7 @@
 
 #include "settings.h"
 #include "mouse_data.h"
+#include "slide.h"
 
 #include "parser.h"
 
@@ -78,10 +79,11 @@ class view
 
     RenderDoos::render_engine _engine;
 
-    font_material _font_material;
     blit_material _blit_material;
     shadertoy_material _shadertoy_material;
     
     int32_t _dummy_image_handle;
     uint32_t _framebuffer_id;
+    
+    slide_t* _slide_state;
   };

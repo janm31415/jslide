@@ -176,7 +176,7 @@ void font_material::_init_font(RenderDoos::render_engine* engine)
     exit(EXIT_FAILURE);
   }
   
-  if (FT_New_Face(_ft, "data/Karla-Regular.ttf", 0, &_face)) {
+  if (FT_New_Face(_ft, "data/LessPerfectDOSVGA.ttf", 0, &_face)) {
     printf("Error loading font face\n");
     exit(EXIT_FAILURE);
   }

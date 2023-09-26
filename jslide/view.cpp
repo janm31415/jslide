@@ -54,7 +54,7 @@
 
 view::view(int argc, char** argv) : _w(1600), _h(900), _quit(false),
 _viewport_w(V_W), _viewport_h(V_H),
-_viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0), _previous_slide_id(0), _dummy_image_handle(-1)
+_viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0), _previous_slide_id(0), _dummy_image_handle(-1), _slide_state(nullptr)
   {
   SDL_DisplayMode dm;
   _windowed_w = _w;
@@ -153,6 +153,9 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   _shadertoy_material.compile(&_engine);
   _framebuffer_id = _engine.add_frame_buffer(_viewport_w, _viewport_h, false);
 
+  _slide_state = new slide_t();
+  init_slide_data(_slide_state, &_engine, _max_w, _max_h);
+  
   _make_dummy_image();
 
   _settings = read_settings("jslide.cfg");
@@ -187,6 +190,7 @@ view::~view()
   #endif
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
+  destroy_slide_data(_slide_state, &_engine);
   _engine.remove_texture(_dummy_image_handle);
   _blit_material.destroy(&_engine);
   _shadertoy_material.destroy(&_engine);
@@ -624,7 +628,7 @@ void view::_build()
     //  }
     destroy_presentation(_presentation);
     _presentation = make_presentation(tokes);
-    nest_blocks(_presentation, &_font_material);
+    nest_blocks(_presentation, &_slide_state->font_state);
     }
   catch (std::runtime_error& e)
     {
@@ -698,6 +702,7 @@ namespace
 
 void view::_next_slide(bool with_cool_transfer)
   {
+  with_cool_transfer = false;
   if (_presentation.slides.empty())
     return;
   if (_transfer_slides.active) // still in a previous active transfer
@@ -761,7 +766,7 @@ void view::_prepare_current_slide()
     return;
   if (_slide_id >= _presentation.slides.size())
     _slide_id = 0;
-  //clear_images(_slide_gl_state);
+  clear_images(_slide_state, &_engine);
   bool should_compute_shader = _presentation.slides[_slide_id].reset_shaders;
   if (!should_compute_shader)
     {
@@ -775,7 +780,7 @@ void view::_prepare_current_slide()
     {
     try
       {
-      //init_slide_shader(_slide_gl_state, _presentation.slides[_slide_id].shader);
+      init_slide_shader(_slide_state, &_engine, _presentation.slides[_slide_id].shader);
       _sp.frame = 0;
       _sp.time = 0.f;
       }
@@ -788,7 +793,7 @@ void view::_prepare_current_slide()
     {
     if (std::holds_alternative<Image>(b.expr))
       {
-      //add_image(_slide_gl_state, b);
+      add_image(_slide_state, &_engine, b);
       }
     }
   }
@@ -913,8 +918,15 @@ void view::loop()
 #endif
 
     _engine.frame_begin(drawables);
-    _shadertoy_material.set_shadertoy_properties(_sp);
-    _shadertoy_material.draw(_viewport_w, _viewport_h, _framebuffer_id, &_engine);
+    
+    
+    if (!_presentation.slides.empty())
+      {
+       draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
+      }
+        
+    //_shadertoy_material.set_shadertoy_properties(_sp);
+    //_shadertoy_material.draw(_viewport_w, _viewport_h, _framebuffer_id, &_engine);
 
     RenderDoos::renderpass_descriptor descr;
     descr.clear_color = 0xff808080;
@@ -927,11 +939,11 @@ void view::loop()
     jtk::vec2<float> blitResolution(_viewport_w, _viewport_h);
     jtk::vec2<float> blitOffset(_viewport_pos_x,_viewport_pos_y);
     _blit_material.bind(&_engine,
-    _engine.get_frame_buffer(_framebuffer_id)->texture_handle,
+    _engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle,
     viewResolution,
     blitResolution,
     blitOffset,
-    1,0,0);
+    _settings.crt_effect ? 1 : 0,1,0);
     _blit_material.draw(&_engine);
     _engine.renderpass_end();
 
