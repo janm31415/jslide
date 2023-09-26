@@ -56,7 +56,8 @@ class view
     void _set_fullscreen(bool on);
     void _do_mouse();
     void _write_to_pdf(const std::string& filename);
-
+    void _make_dummy_image();
+    
   private:
     SDL_Window* _window;
     #if defined(RENDERDOOS_METAL)
@@ -78,4 +79,7 @@ class view
     RenderDoos::render_engine _engine;
 
     font_material _font_material;
+    blit_material _blit_material;
+    
+    int32_t _dummy_image_handle;
   };

@@ -38,9 +38,12 @@
 #include "tokenizer.h"
 #include "parser.h"
 #include "nester.h"
+#include "image_helper.h"
 
 #include "stb/stb_image_write.h"
 #include "jpg2pdf.h"
+
+#include "RenderDoos/types.h"
 
 #include <thread>
 
@@ -51,7 +54,7 @@
 
 view::view(int argc, char** argv) : _w(1600), _h(900), _quit(false),
 _viewport_w(V_W), _viewport_h(V_H),
-_viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0), _previous_slide_id(0)
+_viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0), _previous_slide_id(0), _dummy_image_handle(-1)
   {
   SDL_DisplayMode dm;
   _windowed_w = _w;
@@ -146,7 +149,9 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive];
 
 
+  _blit_material.compile(&_engine);
 
+  _make_dummy_image();
 
   _settings = read_settings("jslide.cfg");
 
@@ -180,11 +185,17 @@ view::~view()
   #endif
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
-
+  _engine.remove_texture(_dummy_image_handle);
+  _blit_material.destroy(&_engine);
   _engine.destroy();
 
   SDL_DestroyWindow(_window);
   }
+
+void view::_make_dummy_image() {
+  image im = dummy_image();
+  _dummy_image_handle = _engine.add_texture(im.w, im.h, RenderDoos::texture_format_rgba8, im.im);
+}
 
 bool view::_ctrl_pressed()
   {
@@ -906,6 +917,15 @@ void view::loop()
     descr.w = _w;
     descr.h = _h;
     _engine.renderpass_begin(descr);
+    
+    jtk::vec2<float> blitResolution(_w, _h);
+    jtk::vec2<float> blitOffset(0,0);
+    _blit_material.bind(&_engine,
+    _dummy_image_handle,
+    blitResolution,
+    blitOffset,
+    0,0,0);
+    _blit_material.draw(&_engine);
     _engine.renderpass_end();
 
 

@@ -14,4 +14,6 @@ struct image
   void swap(image& other);
   };
 
+image dummy_image();
+
 bool read_image(image& im, const std::string& filename);
