@@ -408,10 +408,10 @@ void font_material::prepare_text(RenderDoos::render_engine* engine, const char* 
     vertsdata[i*7+6] = verts[i].b;
     }
   */
-  engine->geometry_begin(id, (int32_t)verts.size(), (int32_t)verts.size()*6, (float**)&vp, (void**)&ip);
+  engine->geometry_begin(id, (int32_t)verts.size(), (int32_t)verts.size(), (float**)&vp, (void**)&ip);
   memcpy(vp, verts.data(), sizeof(float)*7*verts.size());
   //memcpy(vp, vertsdata.data(), sizeof(float)*vertsdata.size());
-  for (uint32_t i = 0; i < verts.size(); ++i)
+  for (uint32_t i = 0; i < verts.size()/6; ++i)
   {
     *ip++ = i * 6;
     *ip++ = i * 6 + 1;
@@ -488,9 +488,9 @@ void font_material::prepare_text(RenderDoos::render_engine* engine, const char* 
   text_vert_t* vp;
   uint32_t* ip;
   
-  engine->geometry_begin(id, (int32_t)verts.size(), (int32_t)verts.size()*6, (float**)&vp, (void**)&ip);
+  engine->geometry_begin(id, (int32_t)verts.size(), (int32_t)verts.size(), (float**)&vp, (void**)&ip);
   memcpy(vp, verts.data(), sizeof(float)*7*verts.size());
-  for (uint32_t i = 0; i < verts.size(); ++i)
+  for (uint32_t i = 0; i < verts.size()/6; ++i)
   {
     *ip++ = i * 6;
     *ip++ = i * 6 + 1;
