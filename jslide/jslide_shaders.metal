@@ -132,3 +132,24 @@ vertex BlitVertexOut jslide_shadertoy_material_vertex_shader(const device BlitVe
   out.texcoord = vertices[vertexId].textureCoordinates;
   return out;
 }
+
+
+struct TransferMaterialUniforms {
+  float2 iTransferResolution;
+  float iTransferChannel0;
+  float iTransferTime;
+  float iTransferMaxTime;
+  int iTransferMethod;
+};
+
+vertex BlitVertexOut transfer_material_vertex_shader(const device BlitVertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant TransferMaterialUniforms& input [[buffer(10)]]) {
+  float4 pos(vertices[vertexId].position, 1);
+  BlitVertexOut out;
+  out.position = pos;
+  out.texcoord = vertices[vertexId].textureCoordinates;
+  return out;
+}
+
+fragment float4 transfer_material_fragment_shader(const BlitVertexOut vertexIn [[stage_in]], texture2d<float> texture [[texture(0)]], sampler sampler2d [[sampler(0)]], constant TransferMaterialUniforms& input [[buffer(10)]]) {
+  return float4(1,0,1,1);
+}
