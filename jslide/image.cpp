@@ -101,7 +101,7 @@ void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
 #if defined(RENDERDOOS_METAL)
     int flip = 1;
 #else
-    int flip = 0;
+    int flip = 1;
 #endif
     
     state->blit_state->bind(engine,
