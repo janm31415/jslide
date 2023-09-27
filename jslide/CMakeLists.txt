@@ -216,11 +216,18 @@ add_custom_command(TARGET jslide POST_BUILD
 
 if (WIN32)
 add_custom_command(TARGET jslide POST_BUILD 
-   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders/gl" "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+else (WIN32)
+  if (APPLE)
+    add_custom_command(TARGET jslide POST_BUILD 
+   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders/mac" "$<TARGET_FILE_DIR:jslide>/shaders")  
+  else (APPLE)
+    add_custom_command(TARGET jslide POST_BUILD 
+   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders/gl" "$<TARGET_FILE_DIR:jslide>/shaders")  
+   endif(APPLE)
 endif (WIN32)
 
-add_custom_command(TARGET jslide POST_BUILD 
-   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "$<TARGET_FILE_DIR:jslide>/shaders")
+
 
 add_custom_command(TARGET jslide POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/jslide_syntax.json" "$<TARGET_FILE_DIR:jslide>/jslide_syntax.json")
