@@ -1,6 +1,6 @@
 #pragma once
 
-#include "font_gl.h"
+#include "material.h"
 #include "parser.h"
 
 inline float get_font_ratio()
@@ -29,4 +29,4 @@ inline float get_size(int size)
   return 0.002f;
   }
 
-void get_text_sizes(float& text_width, float& text_height, font_t* state, const Text& expr, float sz);
+void get_text_sizes(float& text_width, float& text_height, font_material* state, const Text& expr, float sz);

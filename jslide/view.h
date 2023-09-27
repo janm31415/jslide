@@ -1,19 +1,21 @@
 #pragma once
-#include <glew/GL/glew.h>
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include "SDL.h"
 #include <string>
 #include <chrono>
 #include <array>
 #include <memory>
 
+#if defined(RENDERDOOS_METAL)
+#include "SDL_metal.h"
+#endif
+#include "RenderDoos/render_engine.h"
+#include "material.h"
+
 #include "keyboard.h"
 
 #include "settings.h"
 #include "mouse_data.h"
-#include "blit_gl.h"
-#include "slide_gl.h"
-#include "transfer_gl.h"
+#include "slide.h"
 
 #include "parser.h"
 
@@ -39,13 +41,9 @@ class view
 
   private:
     void _poll_for_events();
-    void _imgui_ui();
-    void _setup_blit_gl_objects(bool fullscreen);
-    void _setup_gl_objects();
+    void _imgui_ui();   
     void _log_window();
     void _script_window();
-    void _destroy_gl_objects();
-    void _destroy_blit_gl_objects();
     void _save();
     void _load(const std::string& filename);
     bool _ctrl_pressed();
@@ -59,15 +57,17 @@ class view
     void _set_fullscreen(bool on);
     void _do_mouse();
     void _write_to_pdf(const std::string& filename);
-
+    void _make_dummy_image();
+    void _resize();
+    
   private:
-    SDL_Window* _window;    
+    SDL_Window* _window;
+    #if defined(RENDERDOOS_METAL)
+    SDL_MetalView _metalView;
+    #endif
     uint32_t _w, _h, _viewport_w, _viewport_h, _viewport_pos_x, _viewport_pos_y, _max_w, _max_h, _windowed_w, _windowed_h;
     bool _quit;
-    settings _settings;    
-    blit_t* _blit_gl_state;
-    slide_t* _slide_gl_state;
-    transfer_t* _transfer_gl_state;
+    settings _settings;        
     mouse_data _md;    
     std::string _script;    
     int _line_nr, _col_nr;
@@ -75,6 +75,21 @@ class view
     keyboard_handler _keyb;
     Presentation _presentation;
     uint32_t _slide_id, _previous_slide_id;
-    shader_parameters _sp;    
+    shadertoy_material::properties _sp;
     transfer_slides_data _transfer_slides;
+
+    RenderDoos::render_engine _engine;
+
+    blit_material _blit_material;
+    shadertoy_material _shadertoy_material;
+    font_material _font_material;
+    transfer_material _transfer_material;
+    
+    int32_t _dummy_image_handle;
+    
+    slide_t* _slide_state;
+    
+    std::string _write_to_pdf_filename;
+
+    uint32_t _transfer_framebuffer_id;
   };

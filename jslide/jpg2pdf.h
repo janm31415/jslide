@@ -55,5 +55,5 @@ typedef enum { FitWidth, FitHeight, FitNone } Fit; // how we should actually fit
 
 PJPEG2PDF Jpeg2PDF_BeginDocument(double pdfW, double pdfH, double margin); /* pdfW, pdfH: Page Size in Inch ( 1 inch=25.4 mm ) */
 int Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, uint32_t imgW, uint32_t imgH, uint32_t fileSize, uint8_t* pJpeg, uint8_t isColor, PageOrientation pageOrientation, double dpiX, double dpiY, ScaleMethod scale, bool cropHeight, bool cropWidth);
-uint32_t Jpeg2PDF_EndDocument(PJPEG2PDF pPDF, char* timestamp, char* title, char* author, char* keywords, char* subject, char* creator);
+uint32_t Jpeg2PDF_EndDocument(PJPEG2PDF pPDF, const char* timestamp, const char* title, const char* author, const char* keywords, const char* subject, const char* creator);
 int Jpeg2PDF_GetFinalDocumentAndCleanup(PJPEG2PDF pPDF, uint8_t* outPDF, uint32_t* outPDFSize);

@@ -1,34 +1,42 @@
 #include "shaders.h"
 
-std::string get_font_vertex_shader()
+std::string get_font_material_vertex_shader()
   {
   return std::string(R"(#version 330 core
-in vec4 coord;
-in vec3 color;
+layout (location = 0) in vec2 pos;
+layout (location = 1) in vec2 uv;
+layout (location = 2) in vec3 color;
 
 out vec2 frag_tex_coord;
 out vec3 text_color;
 
 void main() {
-    frag_tex_coord = coord.zw;
+    frag_tex_coord = uv;
+    //frag_tex_coord.y = 1-frag_tex_coord.y;
     text_color = color;
-    gl_Position = vec4(coord.xy, 0, 1);
+    gl_Position = vec4(pos, 0, 1);
 }
 )");
   }
 
-std::string get_font_fragment_shader()
+std::string get_font_material_fragment_shader()
   {
-  return std::string(R"(#version 330 core
+  return std::string(R"(#version 430 core
 in vec2 frag_tex_coord;
 in vec3 text_color;
 
 out vec4 outColor;
 
-uniform sampler2D tex;
+uniform int font_atlas_width;
+uniform int font_atlas_height;
+
+layout(r8ui, binding = 7) readonly uniform uimage2D font_texture;
 
 void main() {
-    outColor = vec4(1, 1, 1, texture(tex, frag_tex_coord).r)*vec4(text_color, 1);
+    int x = int(frag_tex_coord.x * float(font_atlas_width));
+    int y = int(frag_tex_coord.y * float(font_atlas_height));
+    uint a = imageLoad(font_texture, ivec2(x, y)).r;
+    outColor = vec4(1, 1, 1, float(a)/255.0)*vec4(text_color, 1);
 }
 )");
   }
@@ -98,6 +106,8 @@ std::string get_blit_fragment_shader()
     pos.x = pos.y;
     pos.y = 1-tmp;
     }
+  if (pos.x < 0 || pos.y < 0 || pos.x > 1 || pos.y > 1)
+    discard;
   if (iFlip > 0)
     pos.y = 1 - pos.y;
   if (iCrt > 0)
@@ -115,7 +125,7 @@ std::string get_blit_fragment_shader()
   )");
   }
 
-std::string get_shader_vertex_shader()
+std::string get_shadertoy_material_vertex_shader()
   {
   return std::string(R"(#version 330 core
 precision mediump float;
@@ -128,33 +138,22 @@ void main()
 )");
   }
 
-std::string get_shader_fragment_header()
+std::string get_shadertoy_material_fragment_shader_header()
   {
   return std::string(R"(#version 330 core
 precision mediump float;
 precision mediump int;
-//uniform sampler2D iChannel0;
-//uniform sampler2D iChannel1;
-//uniform sampler2D iChannel2;
-//uniform sampler2D iChannel3;
 uniform vec3 iResolution;
 uniform float iTime;
 uniform float iGlobalTime;
-//uniform float iChannelTime[4];
-//uniform vec4 iMouse;
-//uniform vec4 iDate;
-//uniform float iSampleRate;
-//uniform vec3 iChannelResolution[4];
 uniform int iFrame;
 uniform float iTimeDelta;
-//struct Channel {  vec3 resolution;  float time;};
-//uniform Channel iChannel[4];
 
 out vec4 FragColor;
 )");
   }
 
-std::string get_shader_fragment_footer()
+std::string get_shadertoy_material_fragment_shader_footer()
   {
   return std::string(R"(
 void main() 
@@ -164,7 +163,7 @@ void main()
 )");
   }
 
-std::string get_transfer_vertex_shader()
+std::string get_transfer_material_vertex_shader()
   {
   return std::string(R"(#version 330 core
   precision mediump float;
@@ -179,64 +178,64 @@ std::string get_transfer_vertex_shader()
   )");
   }
 
-std::string get_transfer_fragment_shader()
+std::string get_transfer_material_fragment_shader()
   {
   return std::string(R"(#version 330 core
   precision mediump float;
   precision mediump int;
-  uniform vec2      iResolution;
-  uniform sampler2D iChannel0;
-  uniform float     iTime;
-  uniform float     iMaxTime;
-  uniform int       iMethod;
+  uniform vec2      iTransferResolution;
+  uniform sampler2D iTransferChannel0;
+  uniform float     iTransferTime;
+  uniform float     iTransferMaxTime;
+  uniform int       iTransferMethod;
   out vec4 FragColor;
   
 
   void main()
   {
-  if (iMethod == 3) // zoom
+  if (iTransferMethod == 3) // zoom
     {
-    float x = clamp(iTime / iMaxTime, 0, 1);    
+    float x = clamp(iTransferTime / iTransferMaxTime, 0, 1);
     float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
-    vec2 pos = gl_FragCoord.xy/iResolution;
-    FragColor = texture(iChannel0, (2.0*pos-1.0)*frac*0.5+0.5);
+    vec2 pos = gl_FragCoord.xy/iTransferResolution;
+    FragColor = texture(iTransferChannel0, (2.0*pos-1.0)*frac*0.5+0.5);
     }
-  else if (iMethod == 2) // split
+  else if (iTransferMethod == 2) // split
     {
-    float x = clamp(iTime / iMaxTime, 0, 1);
+    float x = clamp(iTransferTime / iTransferMaxTime, 0, 1);
     float frac = (abs(x-0.5f))/(0.5);
-    vec2 pos = gl_FragCoord.xy/iResolution;
+    vec2 pos = gl_FragCoord.xy/iTransferResolution;
     if (pos.x < 0.5)
       {
       if (pos.x < frac*0.5)
-        FragColor = texture(iChannel0, pos+vec2((1-frac)*0.5,0));  
+        FragColor = texture(iTransferChannel0, pos+vec2((1-frac)*0.5,0));
       else
         FragColor = vec4(0,0,0,1);
       }
     else
       {
       if (pos.x > 1.0-frac*0.5)
-        FragColor = texture(iChannel0, pos- vec2((1-frac)*0.5,0));  
+        FragColor = texture(iTransferChannel0, pos- vec2((1-frac)*0.5,0));
       else
         FragColor = vec4(0,0,0,1);
       }    
     }
-  else if (iMethod == 1) // dia
+  else if (iTransferMethod == 1) // dia
     {
-    float x = clamp(iTime / iMaxTime, 0, 1);    
+    float x = clamp(iTransferTime / iTransferMaxTime, 0, 1);
     float frac = 1.0-(abs(x-0.5f))/(0.5);
-    vec2 pos = gl_FragCoord.xy/iResolution + vec2(frac,0);
+    vec2 pos = gl_FragCoord.xy/iTransferResolution + vec2(frac,0);
     if (pos.x > 1)
       FragColor = vec4(0,0,0,1);
     else
-      FragColor = texture(iChannel0, pos);
+      FragColor = texture(iTransferChannel0, pos);
     }
   else // fade
     {
-    float x = clamp(iTime / iMaxTime, 0, 1);    
+    float x = clamp(iTransferTime / iTransferMaxTime, 0, 1);
     float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
-    vec2 pos = gl_FragCoord.xy/iResolution;
-    FragColor = texture(iChannel0, pos)*frac;
+    vec2 pos = gl_FragCoord.xy/iTransferResolution;
+    FragColor = texture(iTransferChannel0, pos)*frac;
     }
   }
   )");
