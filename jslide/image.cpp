@@ -47,7 +47,7 @@ void draw_image_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
   }
   RenderDoos::renderpass_descriptor descr;
   descr.clear_color = 0xff808080;
-  descr.clear_flags = 0;//CLEAR_COLOR | CLEAR_DEPTH;
+  descr.clear_flags = CLEAR_DEPTH;
   descr.w = state->view_w;
   descr.h = state->view_h;
   descr.frame_buffer_handle = framebuffer_id;
@@ -85,7 +85,7 @@ void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
     
     RenderDoos::renderpass_descriptor descr;
     descr.clear_color = 0xff808080;
-    descr.clear_flags = 0;//CLEAR_COLOR | CLEAR_DEPTH;
+    descr.clear_flags = CLEAR_DEPTH;
     descr.w = state->view_w;
     descr.h = state->view_h;
     descr.frame_buffer_handle = framebuffer_id;

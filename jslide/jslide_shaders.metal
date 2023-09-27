@@ -1,13 +1,13 @@
  #include <metal_stdlib>
 using namespace metal;
 
-struct VertexIn {
+struct BlitVertexIn {
   packed_float3 position;
   packed_float3 normal;
   packed_float2 textureCoordinates;
 };
 
-struct VertexOut {
+struct BlitVertexOut {
   float4 position [[position]];
   float2 texcoord;
 };
@@ -22,9 +22,9 @@ struct BlitMaterialUniforms {
   int iRotation;
 };
 
-vertex VertexOut blit_vertex_shader(const device VertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant BlitMaterialUniforms& input [[buffer(10)]]) {
+vertex BlitVertexOut blit_vertex_shader(const device BlitVertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant BlitMaterialUniforms& input [[buffer(10)]]) {
   float4 pos(vertices[vertexId].position, 1);
-  VertexOut out;
+  BlitVertexOut out;
   out.position = pos;
   out.texcoord = vertices[vertexId].textureCoordinates;
   return out;
@@ -46,7 +46,7 @@ float3 DrawVignette( float3 color, float2 uv )
   return color * vignette;
   }
 
-fragment float4 blit_fragment_shader(const VertexOut vertexIn [[stage_in]], texture2d<float> texture [[texture(0)]], sampler sampler2d [[sampler(0)]], constant BlitMaterialUniforms& input [[buffer(10)]]) {
+fragment float4 blit_fragment_shader(const BlitVertexOut vertexIn [[stage_in]], texture2d<float> texture [[texture(0)]], sampler sampler2d [[sampler(0)]], constant BlitMaterialUniforms& input [[buffer(10)]]) {
   float2 pos = (vertexIn.texcoord.xy*input.iViewResolution - input.iBlitOffset)/input.iBlitResolution;
   if (input.iRotation == 90)
     {
@@ -122,9 +122,9 @@ struct ShadertoyMaterialUniforms {
   int iFrame;
 };
 
-vertex VertexOut jslide_shadertoy_material_vertex_shader(const device VertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant ShadertoyMaterialUniforms& input [[buffer(10)]]) {
+vertex BlitVertexOut jslide_shadertoy_material_vertex_shader(const device BlitVertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant ShadertoyMaterialUniforms& input [[buffer(10)]]) {
   float4 pos(vertices[vertexId].position, 1);
-  VertexOut out;
+  BlitVertexOut out;
   out.position = pos;
   out.texcoord = vertices[vertexId].textureCoordinates;
   return out;

@@ -158,7 +158,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   _slide_state->blit_state = &_blit_material;
   _slide_state->shader_state = &_shadertoy_material;
   _slide_state->font_state = &_font_material;
-  init_slide_data(_slide_state, &_engine, _w, _h);
+  init_slide_data(_slide_state, &_engine, _max_w, _max_h);
   
   _make_dummy_image();
 
@@ -953,7 +953,6 @@ void view::loop()
     RenderDoos::renderpass_descriptor descr;
     descr.clear_color = 0xff808080;
     descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
-    descr.clear_depth = 0;
     descr.w = _w;
     descr.h = _h;
     _engine.renderpass_begin(descr);

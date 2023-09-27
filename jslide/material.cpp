@@ -107,6 +107,7 @@ void blit_material::bind(RenderDoos::render_engine* engine,
                          int flip,
                          int rotation
                          ) {
+  engine->set_blending_enabled(false);
   engine->bind_program(shader_program_handle);
   engine->set_uniform(iViewResolution, (void*)(&viewResolution.x));
   engine->bind_uniform(shader_program_handle, iViewResolution);
@@ -317,6 +318,7 @@ void font_material::destroy(RenderDoos::render_engine* engine)
   engine->remove_uniform(height_handle);
   for (auto id : geometry_ids)
     engine->remove_geometry(id);
+  geometry_ids.clear();
 }
 
 namespace
@@ -628,7 +630,7 @@ void shadertoy_material::compile(RenderDoos::render_engine* engine)
 #include <metal_stdlib>
 using namespace metal;
 
-struct VertexOut {
+struct ShaderToyVertexOut {
   float4 position [[position]];
   float2 texcoord;
 };
@@ -642,7 +644,7 @@ struct ShadertoyMaterialUniforms {
 };)");
     
     std::string footer = std::string(R"(
-fragment float4 jslide_shadertoy_material_fragment_shader(const VertexOut vertexIn [[stage_in]], constant ShadertoyMaterialUniforms& input [[buffer(10)]]) {
+fragment float4 jslide_shadertoy_material_fragment_shader(const ShaderToyVertexOut vertexIn [[stage_in]], constant ShadertoyMaterialUniforms& input [[buffer(10)]]) {
   float4 fragColor;
   mainImage(fragColor, vertexIn.position.xy, input.iTime, input.iResolution);
   return float4(fragColor[0], fragColor[1], fragColor[2], 1);
@@ -721,6 +723,7 @@ fragment float4 jslide_shadertoy_material_fragment_shader(const VertexOut vertex
 
 void shadertoy_material::bind(uint32_t res_w, uint32_t res_h, RenderDoos::render_engine* engine)
 {
+  engine->set_blending_enabled(false);
   engine->bind_program(shader_program_handle);
   float res[3] = { (float)res_w, (float)res_h, 1.f };
   engine->set_uniform(res_handle, (void*)res);
