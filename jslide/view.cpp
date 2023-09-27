@@ -271,8 +271,11 @@ void view::_poll_for_events()
         {
         _w = event.window.data1;
         _h = event.window.data2;
-        _windowed_w = _w;
-        _windowed_h = _h;
+        if (_w != _max_w && _h != _max_h)
+          {
+          _windowed_w = _w;
+          _windowed_h = _h;
+          }
         _resize();
         }
       break;
@@ -617,9 +620,22 @@ void view::_set_fullscreen(bool on)
   _settings.fullscreen = on;
   //SDL_SetWindowFullscreen(_window, _settings.fullscreen);
   if (_settings.fullscreen)
-    SDL_SetWindowSize(_window, _max_w, _max_h);
+    {
+    #ifdef _WIN32
+        SDL_SetWindowSize(_window, _max_w, _max_h);
+    #else
+        SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    #endif
+    }
   else
+    {
+    #ifdef _WIN32
     SDL_SetWindowSize(_window, _windowed_w, _windowed_h);
+    #else
+    SDL_SetWindowFullscreen(_window, 0);
+    SDL_SetWindowSize(_window, _windowed_w, _windowed_h);
+    #endif
+    }
   SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
   _resize();
   }
