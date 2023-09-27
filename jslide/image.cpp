@@ -95,12 +95,19 @@ void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
     jtk::vec2<float> viewResolution(state->view_w, state->view_h);
     jtk::vec2<float> blitResolution(state->blit_w, state->blit_h);
     jtk::vec2<float> blitOffset(state->blit_x,state->blit_y);
+    
+#if defined(RENDERDOOS_METAL)
+    int flip = 1;
+#else
+    int flip = 0;
+#endif
+    
     state->blit_state->bind(engine,
                            state->tex_handle,
                            viewResolution,
                            blitResolution,
                            blitOffset,
-                           0,0,rotation);
+                           0,flip,rotation);
     state->blit_state->draw(engine);
     engine->renderpass_end();
     

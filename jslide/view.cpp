@@ -866,7 +866,11 @@ void view::_write_to_pdf(const std::string& filename)
   {
   if (_presentation.slides.empty())
     return;
-  char* title = "jslide (https://github.com/janm31415/jslide)", * author = "Jan Maes", * keywords = "jslide (https://github.com/janm31415/jslide)", * subject = "jslide (https://github.com/janm31415/jslide)", * creator = "Jan Maes";
+  std::string title("jslide (https://github.com/janm31415/jslide)");
+  std::string author("Jan Maes");
+  std::string keywords("jslide (https://github.com/janm31415/jslide)");
+  std::string subject("jslide (https://github.com/janm31415/jslide)");
+  std::string creator("Jan Maes");
   double pageWidth = 8.27, pageHeight = 11.69, pageMargins = 0;
   bool cropWidth = false, cropHeight = false;
   PageOrientation pageOrientation = Landscape;
@@ -920,7 +924,7 @@ void view::_write_to_pdf(const std::string& filename)
     Jpeg2PDF_AddJpeg(pdfId, _slide_state->width, _slide_state->height, (uint32_t)ctxt.buffer.size(), ctxt.buffer.data(), true, pageOrientation, 300.0, 300.0, scale, cropHeight, cropWidth);
     }
   char timestamp[40] = { 0 };
-  uint32_t pdfSize = Jpeg2PDF_EndDocument(pdfId, timestamp, title, author, keywords, subject, creator);
+  uint32_t pdfSize = Jpeg2PDF_EndDocument(pdfId, timestamp, title.c_str(), author.c_str(), keywords.c_str(), subject.c_str(), creator.c_str());
   std::vector<uint8_t> pdfBuf(pdfSize);
   Jpeg2PDF_GetFinalDocumentAndCleanup(pdfId, pdfBuf.data(), &pdfSize);
   FILE* fp = fopen(filename.c_str(), "wb");

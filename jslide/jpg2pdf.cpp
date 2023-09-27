@@ -197,9 +197,9 @@ int Jpeg2PDF_AddJpeg(PJPEG2PDF pPDF, uint32_t imgW, uint32_t imgH, uint32_t file
   return result;
   }
 
-uint32_t Jpeg2PDF_EndDocument(PJPEG2PDF pPDF, char* timestamp, char* title, char* author, char* keywords, char* subject, char* creator) {
+uint32_t Jpeg2PDF_EndDocument(PJPEG2PDF pPDF, const char* timestamp, const char* title, const char* author, const char* keywords, const char* subject, const char* creator) {
   uint32_t headerSize, tailerSize, pdfSize = 0;
-  char* producer = "Jpeg2PDF Engine By: arbin";
+  const char* producer = "Jpeg2PDF Engine By: arbin";
   char* XMPmetadata;
 
   if (pPDF) {
@@ -244,30 +244,34 @@ uint32_t Jpeg2PDF_EndDocument(PJPEG2PDF pPDF, char* timestamp, char* title, char
     pPDF->pdfObj++;
 
     /* convert ISO9601 to PDF Info format %Y-%m-%dT%H:%M:%S%z -> %Y%m%d%H%M%S%z' */
-    timestamp[4] = timestamp[5];
-    timestamp[5] = timestamp[6];
-    timestamp[6] = timestamp[8];
-    timestamp[7] = timestamp[9];
-    timestamp[8] = timestamp[11];
-    timestamp[9] = timestamp[12];
-    timestamp[10] = timestamp[14];
-    timestamp[11] = timestamp[15];
-    timestamp[12] = timestamp[17];
-    timestamp[13] = timestamp[18];
-    timestamp[14] = timestamp[19];
-    timestamp[15] = timestamp[20];
-    timestamp[16] = timestamp[21];
-    timestamp[17] = '\'';
-    timestamp[18] = timestamp[23];
-    timestamp[19] = timestamp[24];
-    timestamp[20] = '\'';
-    timestamp[21] = '\0';
+    char ts[22];
+    for (int i = 0; i < 22; ++i)
+      ts[i] = timestamp[i];
+    
+    ts[4] = timestamp[5];
+    ts[5] = timestamp[6];
+    ts[6] = timestamp[8];
+    ts[7] = timestamp[9];
+    ts[8] = timestamp[11];
+    ts[9] = timestamp[12];
+    ts[10] = timestamp[14];
+    ts[11] = timestamp[15];
+    ts[12] = timestamp[17];
+    ts[13] = timestamp[18];
+    ts[14] = timestamp[19];
+    ts[15] = timestamp[20];
+    ts[16] = timestamp[21];
+    ts[17] = '\'';
+    ts[18] = timestamp[23];
+    ts[19] = timestamp[24];
+    ts[20] = '\'';
+    ts[21] = '\0';
 
     /* Info Object */
     infoObj = pPDF->pdfObj;
     Jpeg2PDF_SetXREF(pPDF, INDEX_USE_PPDF, pPDF->currentOffSet, 'n');
     nChars = sprintf(pTail, "%d 0 obj\n<<\n/Title (%s)\n/Author (%s)\n/Keywords (%s)\n/Subject (%s)\n/Producer (%s)\n/Creator (%s)\n/CreationDate (D:%s)\n/ModDate (D:%s)\n>>\nendobj\n", \
-      pPDF->pdfObj, title, author, keywords, subject, producer, creator, timestamp, timestamp);
+      pPDF->pdfObj, title, author, keywords, subject, producer, creator, ts, ts);
     pPDF->currentOffSet += nChars;	pTail += nChars;
     pPDF->pdfObj++;
 

@@ -461,25 +461,6 @@ void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Sl
   state->font_state->bind(engine);
   state->font_state->draw_text(engine);
   engine->renderpass_end();
-  /*
-   bool background_shader = _draw_shader(state, params);
-   state->fbo.bind(10);
-   glViewport(0, 0, state->width, state->height);
-   glClearColor(0.f, 0.f, 0.f, 1.f);
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   
-   if (background_shader)
-   {
-   draw_blit_data(&state->blit_gl_state, state->shader_fbo.get_texture(), state->width, state->height);
-   }
-   
-   for (const auto& b : s.blocks)
-   {
-   _draw_block(state, b, params);
-   }
-   
-   state->fbo.release();
-   */
 }
 
 void init_slide_shader(slide_t* state, RenderDoos::render_engine* engine, const std::string& script)
