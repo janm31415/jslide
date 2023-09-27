@@ -621,20 +621,12 @@ void view::_set_fullscreen(bool on)
   //SDL_SetWindowFullscreen(_window, _settings.fullscreen);
   if (_settings.fullscreen)
     {
-    #ifdef _WIN32
-        SDL_SetWindowSize(_window, _max_w, _max_h);
-    #else
-        SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    #endif
+    SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     }
   else
     {
-    #ifdef _WIN32
-    SDL_SetWindowSize(_window, _windowed_w, _windowed_h);
-    #else
     SDL_SetWindowFullscreen(_window, 0);
     SDL_SetWindowSize(_window, _windowed_w, _windowed_h);
-    #endif
     }
   SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
   _resize();
