@@ -880,13 +880,6 @@ void view::_write_to_pdf(const std::string& filename)
   for (_slide_id = 0; _slide_id < _presentation.slides.size(); ++_slide_id)
     {
     _prepare_current_slide();
-    //RenderDoos::renderpass_descriptor descr;
-    //descr.clear_color = 0xff808080;
-    //descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
-    //descr.clear_depth = 0;
-    //descr.w = _w;
-    //descr.h = _h;
-    //_engine.renderpass_begin(descr);
 
     RenderDoos::render_drawables drawables;
 #if defined(RENDERDOOS_METAL)
@@ -896,10 +889,31 @@ void view::_write_to_pdf(const std::string& filename)
     drawables.metal_screen_texture = (void*)drawable.texture;
 #endif
 
+    prepare_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
     _engine.frame_begin(drawables);
     draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
     _engine.frame_end(true);
     _engine.get_data_from_texture(_engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle, image_buffer.data(), _slide_state->width * _slide_state->height * 4);
+#if defined(RENDERDOOS_METAL)
+    {
+    // flip image and also flip red and blue bytes
+    std::vector<uint8_t> image_buffer_copy(image_buffer);
+    for (uint32_t y = 0; y < _slide_state->height; ++y)
+      {
+      uint32_t* p_write_row = ((uint32_t*)image_buffer.data()) + y*_slide_state->width;
+      const uint32_t* p_read_row = ((uint32_t*)image_buffer_copy.data()) + (_slide_state->height - y - 1)*_slide_state->width;
+      for (uint32_t x = 0; x < _slide_state->width; ++x)
+        {
+        uint32_t clr = *p_read_row++;
+        uint32_t blue = (clr >> 16) & 0xff;
+        uint32_t red = clr & 0xff;
+        clr = (clr & 0xff00ffff) | (red << 16);
+        clr = (clr & 0xffffff00) | (blue);
+        *p_write_row++ = clr;
+        }
+      }
+    }
+#endif
 
     ctxt.buffer.clear();
     stbi_write_jpg_to_func(&my_stbi_write_func, (void*)&ctxt, _slide_state->width, _slide_state->height, 4, image_buffer.data(), 100);
