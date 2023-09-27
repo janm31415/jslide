@@ -85,9 +85,10 @@ class view
     transfer_material _transfer_material;
     
     int32_t _dummy_image_handle;
-    uint32_t _framebuffer_id;
     
     slide_t* _slide_state;
     
     std::string _write_to_pdf_filename;
+
+    uint32_t _transfer_framebuffer_id;
   };

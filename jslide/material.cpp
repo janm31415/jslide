@@ -816,7 +816,7 @@ void transfer_material::destroy(RenderDoos::render_engine* engine)
 void transfer_material::draw(uint32_t res_w, uint32_t res_h, int32_t texture_handle, int32_t framebuffer_id, RenderDoos::render_engine* engine)
   {
   RenderDoos::renderpass_descriptor descr;
-  descr.clear_color = 0xff00ff00;
+  descr.clear_color = 0xff00ffff;
   descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
   descr.frame_buffer_handle = framebuffer_id;
   descr.frame_buffer_channel = 10;
@@ -841,7 +841,7 @@ void transfer_material::compile(RenderDoos::render_engine* engine)
     fs_handle = engine->add_shader(get_transfer_material_fragment_shader().c_str(), SHADER_FRAGMENT, nullptr);
   }
   shader_program_handle = engine->add_program(vs_handle, fs_handle);
-  res_handle = engine->add_uniform("iTransferResolution", RenderDoos::uniform_type::vec3, 1);
+  res_handle = engine->add_uniform("iTransferResolution", RenderDoos::uniform_type::vec2, 1);
   time_handle = engine->add_uniform("iTransferTime", RenderDoos::uniform_type::real, 1);
   channel0_handle = engine->add_uniform("iTransferChannel0", RenderDoos::uniform_type::sampler, 1);
   max_time_handle = engine->add_uniform("iTransferMaxTime", RenderDoos::uniform_type::real, 1);
@@ -903,7 +903,7 @@ void transfer_material::bind(uint32_t res_w, uint32_t res_h, int32_t texture_han
 {
   engine->set_blending_enabled(false);
   engine->bind_program(shader_program_handle);
-  float res[3] = { (float)res_w, (float)res_h, 1.f };
+  float res[2] = { (float)res_w, (float)res_h};
   engine->set_uniform(res_handle, (void*)res);
   engine->set_uniform(time_handle, &_props.time);
   engine->set_uniform(max_time_handle, &_props.max_time);

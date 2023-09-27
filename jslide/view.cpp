@@ -135,32 +135,33 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
   (void)io;
-  
+
   // Setup Platform/Renderer bindings
   ImGui_ImplSDL2_InitForOpenGL(_window, gl_context);
   const char* glsl_version = "#version 130";
   ImGui_ImplOpenGL3_Init(glsl_version);
-  
-  
+
+
   // Setup Style
   ImGui::StyleColorsDark();
-  #endif
-  
+#endif
+
   ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive];
 
 
   _blit_material.compile(&_engine);
   _shadertoy_material.compile(&_engine);
   _font_material.compile(&_engine);
-  _transfer_material.compile(&_engine);
-  _framebuffer_id = _engine.add_frame_buffer(_viewport_w, _viewport_h, false);
+  _transfer_material.compile(&_engine);  
 
   _slide_state = new slide_t();
   _slide_state->blit_state = &_blit_material;
   _slide_state->shader_state = &_shadertoy_material;
   _slide_state->font_state = &_font_material;
   init_slide_data(_slide_state, &_engine, _max_w, _max_h);
-  
+
+  _transfer_framebuffer_id = _engine.add_frame_buffer(_viewport_w, _viewport_h, false);
+
   _make_dummy_image();
 
   _settings = read_settings("jslide.cfg");
@@ -188,11 +189,11 @@ view::~view()
   {
   write_settings(_settings, "jslide.cfg");
   destroy_presentation(_presentation);
-  #if defined(RENDERDOOS_METAL)
+#if defined(RENDERDOOS_METAL)
   ImGui_ImplMetal_Shutdown();
-  #else
+#else
   ImGui_ImplOpenGL3_Shutdown();
-  #endif
+#endif
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
   destroy_slide_data(_slide_state, &_engine);
@@ -201,6 +202,7 @@ view::~view()
   _shadertoy_material.destroy(&_engine);
   _font_material.destroy(&_engine);
   _transfer_material.destroy(&_engine);
+  _engine.remove_frame_buffer(_transfer_framebuffer_id);
   _engine.destroy();
 
   SDL_DestroyWindow(_window);
@@ -209,7 +211,7 @@ view::~view()
 void view::_make_dummy_image() {
   image im = dummy_image();
   _dummy_image_handle = _engine.add_texture(im.w, im.h, RenderDoos::texture_format_rgba8, im.im);
-}
+  }
 
 bool view::_ctrl_pressed()
   {
@@ -242,7 +244,7 @@ void view::_poll_for_events()
       case SDL_WINDOWEVENT:
       {
       if (event.window.event == SDL_WINDOWEVENT_RESIZED)
-        {        
+        {
         _w = event.window.data1;
         _h = event.window.data2;
         _windowed_w = _w;
@@ -361,7 +363,7 @@ void view::_poll_for_events()
         if (_ctrl_pressed())
           _save();
         break;
-        }        
+        }
         }
       break;
       }
@@ -525,7 +527,7 @@ void view::_imgui_ui()
         }
       if (ImGui::BeginMenu("Window"))
         {
-        ImGui::MenuItem("CRT display", "F4", &_settings.crt_effect);                              
+        ImGui::MenuItem("CRT display", "F4", &_settings.crt_effect);
         ImGui::MenuItem("Log window", NULL, &_settings.log_window);
         ImGui::MenuItem("Script window", NULL, &_settings.script_window);
         ImGui::EndMenu();
@@ -586,7 +588,7 @@ void view::_imgui_ui()
   }
 
 void view::_set_fullscreen(bool on)
-  {  
+  {
   ImGui::SetWindowFocus(nullptr); // hack: if not for this line, the script text would disappear if the script window had the focus
   _settings.fullscreen = on;
   //SDL_SetWindowFullscreen(_window, _settings.fullscreen);
@@ -595,7 +597,7 @@ void view::_set_fullscreen(bool on)
   else
     SDL_SetWindowSize(_window, _windowed_w, _windowed_h);
   SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-  
+
   }
 
 namespace
@@ -709,8 +711,6 @@ namespace
 
 void view::_next_slide(bool with_cool_transfer)
   {
-  /*
-  with_cool_transfer = false;
   if (_presentation.slides.empty())
     return;
   if (_transfer_slides.active) // still in a previous active transfer
@@ -735,12 +735,14 @@ void view::_next_slide(bool with_cool_transfer)
     }
   else
     _prepare_current_slide();
-  */
+
+  /*
   if (_presentation.slides.empty())
     return;
   if ((_slide_id + 1) < _presentation.slides.size())
     ++_slide_id;
   _prepare_current_slide();
+  */
   }
 
 void view::_previous_slide()
@@ -759,7 +761,7 @@ void view::_first_slide()
   if (_presentation.slides.empty())
     return;
   _transfer_slides.active = false;
-  _previous_slide_id = _slide_id;  
+  _previous_slide_id = _slide_id;
   _slide_id = 0;
   _prepare_current_slide();
   }
@@ -770,7 +772,7 @@ void view::_last_slide()
     return;
   _transfer_slides.active = false;
   _previous_slide_id = _slide_id;
-  _slide_id = _presentation.slides.empty() ? 0 : _presentation.slides.size()-1;
+  _slide_id = _presentation.slides.empty() ? 0 : _presentation.slides.size() - 1;
   _prepare_current_slide();
   }
 
@@ -784,7 +786,7 @@ void view::_prepare_current_slide()
   bool should_compute_shader = _presentation.slides[_slide_id].reset_shaders;
   if (!should_compute_shader)
     {
-    if (_previous_slide_id != (_slide_id-1) && _previous_slide_id < _presentation.slides.size())
+    if (_previous_slide_id != (_slide_id - 1) && _previous_slide_id < _presentation.slides.size())
       {
       if (_presentation.slides[_previous_slide_id].reset_shaders)
         should_compute_shader = true;
@@ -842,7 +844,7 @@ void view::_write_to_pdf(const std::string& filename)
   std::vector<uint8_t> image_buffer(_slide_state->width * _slide_state->height * 4);
   my_context ctxt;
   ctxt.buffer.reserve(image_buffer.size());
-  stbi_flip_vertically_on_write(true); 
+  stbi_flip_vertically_on_write(true);
   for (_slide_id = 0; _slide_id < _presentation.slides.size(); ++_slide_id)
     {
     _prepare_current_slide();
@@ -853,7 +855,7 @@ void view::_write_to_pdf(const std::string& filename)
     //descr.w = _w;
     //descr.h = _h;
     //_engine.renderpass_begin(descr);
-    
+
     RenderDoos::render_drawables drawables;
 #if defined(RENDERDOOS_METAL)
     void* layer = SDL_Metal_GetLayer(_metalView);
@@ -863,7 +865,7 @@ void view::_write_to_pdf(const std::string& filename)
 #endif
 
     _engine.frame_begin(drawables);
-    draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);        
+    draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
     _engine.frame_end(true);
     _engine.get_data_from_texture(_engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle, image_buffer.data(), _slide_state->width * _slide_state->height * 4);
 
@@ -916,7 +918,7 @@ void view::loop()
           {
           _prepare_current_slide();
           }
-        _transfer_slides.time += _sp.time_delta;   
+        _transfer_slides.time += _sp.time_delta;
         if (_transfer_slides.time < half_time)
           draw_slide_data(_slide_gl_state, _presentation.slides[_transfer_slides.slide_id_1], _sp);
         else
@@ -933,11 +935,6 @@ void view::loop()
     draw_blit_data(_blit_gl_state, blit_texture, _w, _h, _settings.crt_effect);
     */
 
-    if (!_presentation.slides.empty())
-      {
-      prepare_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
-      }
-      
     RenderDoos::render_drawables drawables;
 #if defined(RENDERDOOS_METAL)
     void* layer = SDL_Metal_GetLayer(_metalView);
@@ -948,13 +945,54 @@ void view::loop()
 
 
     _engine.frame_begin(drawables);
-    
-    
+
+    uint32_t target_framebuffer_id = _slide_state->framebuffer_id;
     if (!_presentation.slides.empty())
       {
-      draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
-      }   
-        
+      if (_transfer_slides.active)
+        {
+        float half_time = _transfer_slides.total_transfer_time * 0.5f;
+        if ((_transfer_slides.time < half_time && _transfer_slides.time + _sp.time_delta >= half_time) || half_time == 0.f)
+          {
+          _prepare_current_slide();
+          }
+        _transfer_slides.time += _sp.time_delta;
+        if (_transfer_slides.time < half_time)
+          {
+          prepare_slide_data(_slide_state, &_engine, _presentation.slides[_transfer_slides.slide_id_1], _sp);
+          draw_slide_data(_slide_state, &_engine, _presentation.slides[_transfer_slides.slide_id_1], _sp);
+          }
+        else
+          {
+          prepare_slide_data(_slide_state, &_engine, _presentation.slides[_transfer_slides.slide_id_2], _sp);
+          draw_slide_data(_slide_state, &_engine, _presentation.slides[_transfer_slides.slide_id_2], _sp);
+          }
+        transfer_material::properties props;
+        props.time = _transfer_slides.time;
+        props.max_time = _transfer_slides.total_transfer_time;
+        props.method = (int)_transfer_slides.e_transfer_animation;
+        _transfer_material.set_transfer_properties(props);
+        _transfer_material.draw(_viewport_w, _viewport_h, _engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle, _transfer_framebuffer_id, &_engine);
+        //draw_transfer_data(_transfer_gl_state, _slide_gl_state->fbo.get_texture(), _transfer_slides.time, _transfer_slides.total_transfer_time, _transfer_slides.e_transfer_animation);
+        //blit_texture = _transfer_gl_state->fbo.get_texture();
+        target_framebuffer_id = _transfer_framebuffer_id;
+        if (_transfer_slides.time >= _transfer_slides.total_transfer_time)
+          _transfer_slides.active = false;
+        }
+      else
+        {
+        prepare_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
+        draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
+        }
+
+        }
+
+    //if (!_presentation.slides.empty())
+    //  {
+    //  prepare_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
+    //  draw_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
+    //  }   
+
     //_shadertoy_material.set_shadertoy_properties(_sp);
     //_shadertoy_material.draw(_viewport_w, _viewport_h, _framebuffer_id, &_engine);
 
@@ -967,18 +1005,18 @@ void view::loop()
 
     jtk::vec2<float> viewResolution(_w, _h);
     jtk::vec2<float> blitResolution(_viewport_w, _viewport_h);
-    jtk::vec2<float> blitOffset(_viewport_pos_x,_viewport_pos_y);
+    jtk::vec2<float> blitOffset(_viewport_pos_x, _viewport_pos_y);
 #if defined(RENDERDOOS_METAL)
     int flip = 1;
 #else
     int flip = 0;
 #endif
     _blit_material.bind(&_engine,
-    _engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle,
-    viewResolution,
-    blitResolution,
-    blitOffset,
-    _settings.crt_effect ? 1 : 0,flip,0);
+      _engine.get_frame_buffer(target_framebuffer_id)->texture_handle,
+      viewResolution,
+      blitResolution,
+      blitOffset,
+      _settings.crt_effect ? 1 : 0, flip, 0);
     _blit_material.draw(&_engine);
     _engine.renderpass_end();
 
@@ -1010,14 +1048,14 @@ void view::loop()
 #if defined(RENDERDOOS_OPENGL)
     SDL_GL_SwapWindow(_window);
 #endif
-    
+
     if (!_write_to_pdf_filename.empty())
       {
       _write_to_pdf(_write_to_pdf_filename);
       _write_to_pdf_filename.clear();
       }
-    
+
     ++_sp.frame;
     _sp.time += _sp.time_delta;
+      }
     }
-  }

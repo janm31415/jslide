@@ -155,7 +155,6 @@ public:
   transfer_material();
   ~transfer_material();
   
-  void set_script(const std::string& script);
   void set_transfer_properties(const properties& props);
   
   void compile(RenderDoos::render_engine* engine);
@@ -166,7 +165,6 @@ public:
 private:
   int32_t vs_handle, fs_handle;
   int32_t shader_program_handle;
-  std::string _script;
   properties _props;
   int32_t res_handle, channel0_handle, time_handle, max_time_handle, method_handle;
   uint32_t geometry_id;
