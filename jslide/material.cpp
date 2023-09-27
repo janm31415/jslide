@@ -7,7 +7,7 @@
 
 #include <cassert>
 
-#define MAX_WIDTH 1024 // Maximum texture width on pi
+#define MAX_WIDTH 2048 // Maximum texture width on pi
 
 blit_material::blit_material() {
   vs_handle = -1;
@@ -207,10 +207,9 @@ void font_material::_init_font(RenderDoos::render_engine* engine)
       w = std::max(w, row_w);
       h += row_h;
       row_w = 0;
-      row_h = 0;
     }
     row_w += g->bitmap.width + 1;
-    row_h = std::max<unsigned int>(row_h, g->bitmap.rows);
+    row_h = std::max<unsigned int>(row_h, g->bitmap.rows+1);
   }
   
   // final texture dimensions
@@ -842,8 +841,8 @@ void transfer_material::compile(RenderDoos::render_engine* engine)
   }
   shader_program_handle = engine->add_program(vs_handle, fs_handle);
   res_handle = engine->add_uniform("iTransferResolution", RenderDoos::uniform_type::vec2, 1);
-  time_handle = engine->add_uniform("iTransferTime", RenderDoos::uniform_type::real, 1);
   channel0_handle = engine->add_uniform("iTransferChannel0", RenderDoos::uniform_type::sampler, 1);
+  time_handle = engine->add_uniform("iTransferTime", RenderDoos::uniform_type::real, 1);  
   max_time_handle = engine->add_uniform("iTransferMaxTime", RenderDoos::uniform_type::real, 1);
   method_handle = engine->add_uniform("iTransferMethod", RenderDoos::uniform_type::integer, 1);
   geometry_id = engine->add_geometry(VERTEX_STANDARD);
@@ -901,21 +900,21 @@ void transfer_material::compile(RenderDoos::render_engine* engine)
 
 void transfer_material::bind(uint32_t res_w, uint32_t res_h, int32_t texture_handle, RenderDoos::render_engine* engine)
 {
+  int channel = 0;
   engine->set_blending_enabled(false);
   engine->bind_program(shader_program_handle);
   float res[2] = { (float)res_w, (float)res_h};
   engine->set_uniform(res_handle, (void*)res);
+  engine->set_uniform(channel0_handle, (void*)(&channel));
   engine->set_uniform(time_handle, &_props.time);
   engine->set_uniform(max_time_handle, &_props.max_time);
   engine->set_uniform(method_handle, &_props.method);
-  int channel = 0;
-  engine->set_uniform(channel0_handle, (void*)(&channel));
   
   engine->bind_uniform(shader_program_handle, res_handle);
+  engine->bind_uniform(shader_program_handle, channel0_handle);
   engine->bind_uniform(shader_program_handle, time_handle);
   engine->bind_uniform(shader_program_handle, max_time_handle);
   engine->bind_uniform(shader_program_handle, method_handle);
-  engine->bind_uniform(shader_program_handle, channel0_handle);
   
   
   const RenderDoos::texture* tex = engine->get_texture(texture_handle);

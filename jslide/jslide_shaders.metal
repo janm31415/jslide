@@ -151,11 +151,12 @@ vertex BlitVertexOut transfer_material_vertex_shader(const device BlitVertexIn *
 }
 
 fragment float4 transfer_material_fragment_shader(const BlitVertexOut vertexIn [[stage_in]], texture2d<float> texture [[texture(0)]], sampler sampler2d [[sampler(0)]], constant TransferMaterialUniforms& input [[buffer(10)]]) {
+  
   if (input.iTransferMethod == 3) // zoom
   {
     float x = clamp(input.iTransferTime / input.iTransferMaxTime, 0.0, 1.0);
-    float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
-    float2 pos = vertexIn.position.xy;
+    float frac = sqrt(abs(x-0.5))/sqrt(0.5);
+    float2 pos = vertexIn.position.xy/input.iTransferResolution;
     
     return texture.sample(sampler2d, (2.0*pos-1.0)*frac*0.5+0.5);
   }
@@ -163,7 +164,7 @@ fragment float4 transfer_material_fragment_shader(const BlitVertexOut vertexIn [
   {
     float x = clamp(input.iTransferTime / input.iTransferMaxTime, 0.0, 1.0);
     float frac = (abs(x-0.5f))/(0.5);
-    float2 pos = vertexIn.position.xy;
+    float2 pos = vertexIn.position.xy/input.iTransferResolution;
     if (pos.x < 0.5)
     {
       if (pos.x < frac*0.5)
@@ -183,7 +184,7 @@ fragment float4 transfer_material_fragment_shader(const BlitVertexOut vertexIn [
   {
     float x = clamp(input.iTransferTime / input.iTransferMaxTime, 0.0, 1.0);
     float frac = 1.0-(abs(x-0.5f))/(0.5);
-    float2 pos = vertexIn.position.xy + float2(frac,0);
+    float2 pos = vertexIn.position.xy/input.iTransferResolution + float2(frac,0);
     if (pos.x > 1)
       return float4(0,0,0,1);
     else
@@ -193,7 +194,7 @@ fragment float4 transfer_material_fragment_shader(const BlitVertexOut vertexIn [
   {
     float x = clamp(input.iTransferTime / input.iTransferMaxTime, 0.0, 1.0);
     float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
-    float2 pos = vertexIn.position.xy;
+    float2 pos = vertexIn.position.xy/input.iTransferResolution;
     return texture.sample(sampler2d, pos)*frac;
   }
 }

@@ -436,17 +436,12 @@ void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Sl
     jtk::vec2<float> viewResolution(state->width, state->height);
     jtk::vec2<float> blitResolution(state->width, state->height);
     jtk::vec2<float> blitOffset(0, 0);
-#if defined(RENDERDOOS_METAL)
-    int flip = 1;
-#else
-    int flip = 0;
-#endif
     state->blit_state->bind(engine,
       engine->get_frame_buffer(state->shader_framebuffer_id)->texture_handle,
       viewResolution,
       blitResolution,
       blitOffset,
-      0, flip, 0);
+      0, 0, 0);
     state->blit_state->draw(engine);
     }
   
