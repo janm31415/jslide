@@ -160,7 +160,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   _slide_state->font_state = &_font_material;
   init_slide_data(_slide_state, &_engine, _max_w, _max_h);
 
-  _transfer_framebuffer_id = _engine.add_frame_buffer(_viewport_w, _viewport_h, false);
+  _transfer_framebuffer_id = _engine.add_frame_buffer(_max_w, _max_h, false);
 
   _make_dummy_image();
 
@@ -208,6 +208,30 @@ view::~view()
   SDL_DestroyWindow(_window);
   }
 
+void view::_resize() {
+  _viewport_w = V_W;
+  _viewport_h = V_H;
+  _viewport_pos_x = V_X;
+  _viewport_pos_y = V_Y;
+
+  int pos_x = _viewport_pos_x;
+  int pos_y = _viewport_pos_y;
+  _w = _windowed_w;
+  _h = _windowed_h;
+
+  if (_settings.fullscreen)
+    {
+    pos_x = 0;
+    pos_y = 0;
+    _viewport_w = _max_w;
+    _viewport_h = _max_h;
+    _viewport_pos_x = 0;
+    _viewport_pos_y = 0;
+    _w = _max_w;
+    _h = _max_h;
+    }
+}
+
 void view::_make_dummy_image() {
   image im = dummy_image();
   _dummy_image_handle = _engine.add_texture(im.w, im.h, RenderDoos::texture_format_rgba8, im.im);
@@ -249,7 +273,7 @@ void view::_poll_for_events()
         _h = event.window.data2;
         _windowed_w = _w;
         _windowed_h = _h;
-        assert(0); //todo
+        _resize();
         }
       break;
       }
@@ -597,7 +621,7 @@ void view::_set_fullscreen(bool on)
   else
     SDL_SetWindowSize(_window, _windowed_w, _windowed_h);
   SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-
+  _resize();
   }
 
 namespace
@@ -972,7 +996,7 @@ void view::loop()
         props.max_time = _transfer_slides.total_transfer_time;
         props.method = (int)_transfer_slides.e_transfer_animation;
         _transfer_material.set_transfer_properties(props);
-        _transfer_material.draw(_viewport_w, _viewport_h, _engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle, _transfer_framebuffer_id, &_engine);
+        _transfer_material.draw(_max_w, _max_h, _engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle, _transfer_framebuffer_id, &_engine);
         //draw_transfer_data(_transfer_gl_state, _slide_gl_state->fbo.get_texture(), _transfer_slides.time, _transfer_slides.total_transfer_time, _transfer_slides.e_transfer_animation);
         //blit_texture = _transfer_gl_state->fbo.get_texture();
         target_framebuffer_id = _transfer_framebuffer_id;
@@ -997,7 +1021,7 @@ void view::loop()
     //_shadertoy_material.draw(_viewport_w, _viewport_h, _framebuffer_id, &_engine);
 
     RenderDoos::renderpass_descriptor descr;
-    descr.clear_color = 0xff808080;
+    descr.clear_color = 0xff202020;
     descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
     descr.w = _w;
     descr.h = _h;
