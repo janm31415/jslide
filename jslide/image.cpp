@@ -4,6 +4,7 @@
 #include "RenderDoos/render_context.h"
 #include "RenderDoos/render_engine.h"
 #include "RenderDoos/types.h"
+#include "video_reader.h"
 
 void init_image_data(image_t* state, RenderDoos::render_engine* engine, const image& im, int32_t blit_x, int32_t blit_y, int32_t blit_w, int32_t blit_h, int32_t view_w, int32_t view_h)
 {
@@ -16,8 +17,9 @@ void init_image_data(image_t* state, RenderDoos::render_engine* engine, const im
   state->view_h = view_h;
 }
 
-void init_video_data(image_t* state, RenderDoos::render_engine* engine, const VideoReaderState& vstate, int32_t blit_x, int32_t blit_y, int32_t blit_w, int32_t blit_h, int32_t view_w, int32_t view_h)
+void init_video_data(image_t* state, RenderDoos::render_engine* engine, VideoReaderState& vstate, int32_t blit_x, int32_t blit_y, int32_t blit_w, int32_t blit_h, int32_t view_w, int32_t view_h)
 {
+  video_reader_seek_frame(&vstate, 0);
   state->video_state = vstate;
   state->video_frame_data = new uint8_t[vstate.width * vstate.height * 4];
   state->tex_handle = engine->add_texture(vstate.width, vstate.height, RenderDoos::texture_format_rgba8, (const uint8_t*)nullptr);

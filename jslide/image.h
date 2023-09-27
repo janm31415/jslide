@@ -19,7 +19,7 @@ typedef struct image_t {
   } image_t;
 
 void init_image_data(image_t* state, RenderDoos::render_engine* engine, const image& im, int32_t blit_x, int32_t blit_y, int32_t blit_w, int32_t blit_h, int32_t view_w, int32_t view_h);
-void init_video_data(image_t* state, RenderDoos::render_engine* engine, const VideoReaderState& vstate, int32_t blit_x, int32_t blit_y, int32_t blit_w, int32_t blit_h, int32_t view_w, int32_t view_h);
+void init_video_data(image_t* state, RenderDoos::render_engine* engine, VideoReaderState& vstate, int32_t blit_x, int32_t blit_y, int32_t blit_w, int32_t blit_h, int32_t view_w, int32_t view_h);
 
 void destroy_image_data(image_t* state, RenderDoos::render_engine* engine);
 
