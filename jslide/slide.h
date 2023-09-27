@@ -29,6 +29,8 @@ typedef struct slide_t {
 void init_slide_data(slide_t* state, RenderDoos::render_engine* engine, uint32_t width, uint32_t height);
 void init_slide_shader(slide_t* state, RenderDoos::render_engine* engine, const std::string& script);
 void destroy_slide_data(slide_t* state, RenderDoos::render_engine* engine);
+
+void prepare_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Slide& s, const shadertoy_material::properties& params);
 void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Slide& s, const shadertoy_material::properties& params);
 
 void clear_images(slide_t* state, RenderDoos::render_engine* engine);

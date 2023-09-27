@@ -931,6 +931,11 @@ void view::loop()
     draw_blit_data(_blit_gl_state, blit_texture, _w, _h, _settings.crt_effect);
     */
 
+    if (!_presentation.slides.empty())
+      {
+      prepare_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
+      }
+      
     RenderDoos::render_drawables drawables;
 #if defined(RENDERDOOS_METAL)
     void* layer = SDL_Metal_GetLayer(_metalView);
@@ -938,6 +943,7 @@ void view::loop()
     drawables.metal_drawable = (void*)drawable.drawable;
     drawables.metal_screen_texture = (void*)drawable.texture;
 #endif
+
 
     _engine.frame_begin(drawables);
     

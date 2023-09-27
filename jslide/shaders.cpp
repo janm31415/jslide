@@ -27,14 +27,14 @@ in vec3 text_color;
 
 out vec4 outColor;
 
-uniform int width;
-uniform int height;
+uniform int font_atlas_width;
+uniform int font_atlas_height;
 
 layout(r8ui, binding = 7) readonly uniform uimage2D font_texture;
 
 void main() {
-    int x = int(frag_tex_coord.x * float(width));
-    int y = int(frag_tex_coord.y * float(height));
+    int x = int(frag_tex_coord.x * float(font_atlas_width));
+    int y = int(frag_tex_coord.y * float(font_atlas_height));
     uint a = imageLoad(font_texture, ivec2(x, y)).r;
     outColor = vec4(1, 1, 1, float(a)/255.0)*vec4(text_color, 1);
 }

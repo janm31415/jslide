@@ -312,24 +312,21 @@ void _draw_image(slide_t* state, RenderDoos::render_engine* engine, uint32_t fra
 
 void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_t framebuffer_id, const Expression& expr, float left, float right, float top, float bottom, const shadertoy_material::properties& params)
 {
-  RenderDoos::renderpass_descriptor descr;
-  descr.clear_color = 0xff808080;
-
-  descr.clear_flags = CLEAR_DEPTH;
-  descr.w = state->width;
-  descr.h = state->height;
-  descr.frame_buffer_handle = framebuffer_id;
-  descr.frame_buffer_channel = 10;
-  state->font_state->clear_text(engine);
+  //RenderDoos::renderpass_descriptor descr;
+  //descr.clear_color = 0xff808080;
+//
+  //descr.clear_flags = CLEAR_DEPTH;
+  //descr.w = state->width;
+  //descr.h = state->height;
+  //descr.frame_buffer_handle = framebuffer_id;
+  //descr.frame_buffer_channel = 10;
+  //state->font_state->clear_text(engine);
+  /*
   if (std::holds_alternative<Title>(expr))
   {
   if (!std::get<Title>(expr).text.words.empty())
     {
     _draw_title(state, engine, std::get<Title>(expr), left, right, top, bottom);
-    engine->renderpass_begin(descr);
-    state->font_state->bind(engine);
-    state->font_state->draw_text(engine);
-    engine->renderpass_end();
     }
   }
   if (std::holds_alternative<Text>(expr))
@@ -337,27 +334,47 @@ void _draw_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_
     if (!std::get<Text>(expr).words.empty())
       {
       _draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
-      engine->renderpass_begin(descr);
-      state->font_state->bind(engine);
-      state->font_state->draw_text(engine);
-      engine->renderpass_end();
       }
     }
   if (std::holds_alternative<Line>(expr))
     {
     _draw_line(state, engine, std::get<Line>(expr), left, right, top, bottom);
-    engine->renderpass_begin(descr);
-    state->font_state->bind(engine);
-    state->font_state->draw_text(engine);
-    engine->renderpass_end();
     }
+  */
   if (std::holds_alternative<Image>(expr))
     _draw_image(state, engine, framebuffer_id, std::get<Image>(expr), params);
+}
+
+void _prepare_expression(slide_t* state, RenderDoos::render_engine* engine, uint32_t framebuffer_id, const Expression& expr, float left, float right, float top, float bottom, const shadertoy_material::properties& params)
+{
+  if (std::holds_alternative<Title>(expr))
+  {
+  if (!std::get<Title>(expr).text.words.empty())
+    {
+    _draw_title(state, engine, std::get<Title>(expr), left, right, top, bottom);
+    }
+  }
+  if (std::holds_alternative<Text>(expr))
+    {
+    if (!std::get<Text>(expr).words.empty())
+      {
+      _draw_text(state, engine, std::get<Text>(expr), left, right, top, bottom);
+      }
+    }
+  if (std::holds_alternative<Line>(expr))
+    {
+    _draw_line(state, engine, std::get<Line>(expr), left, right, top, bottom);
+    }
 }
 
 void _draw_block(slide_t* state, RenderDoos::render_engine* engine, uint32_t framebuffer_id, const Block& b, const shadertoy_material::properties& params)
 {
   _draw_expression(state, engine, framebuffer_id, b.expr, b.left, b.right, b.top, b.bottom, params);
+}
+
+void _prepare_block(slide_t* state, RenderDoos::render_engine* engine, uint32_t framebuffer_id, const Block& b, const shadertoy_material::properties& params)
+{
+  _prepare_expression(state, engine, framebuffer_id, b.expr, b.left, b.right, b.top, b.bottom, params);
 }
 
 bool _draw_shader(slide_t* state, RenderDoos::render_engine* engine, uint32_t framebuffer_id, const shadertoy_material::properties& params)
@@ -389,8 +406,21 @@ void destroy_slide_data(slide_t* state, RenderDoos::render_engine* engine)
   engine->remove_frame_buffer(state->shader_framebuffer_id);
 }
 
+void prepare_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Slide& s, const shadertoy_material::properties& params)
+{
+  state->font_state->clear_text(engine);
+
+  for (const auto& b : s.blocks)
+  {
+    _prepare_block(state, engine, state->framebuffer_id, b, params);
+  }
+  
+  
+}
+
 void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Slide& s, const shadertoy_material::properties& params)
-{  
+{
+  //state->font_state->clear_text(engine);
   bool background_shader = _draw_shader(state, engine, state->shader_framebuffer_id, params);
   RenderDoos::renderpass_descriptor descr;
   descr.clear_color = 0xff000000;
@@ -427,7 +457,15 @@ void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Sl
     _draw_block(state, engine, state->framebuffer_id, b, params);
   }
   
-  
+  descr.clear_flags = CLEAR_DEPTH;
+  descr.w = state->width;
+  descr.h = state->height;
+  descr.frame_buffer_handle = state->framebuffer_id;
+  descr.frame_buffer_channel = 10;
+  engine->renderpass_begin(descr);
+  state->font_state->bind(engine);
+  state->font_state->draw_text(engine);
+  engine->renderpass_end();
   /*
    bool background_shader = _draw_shader(state, params);
    state->fbo.bind(10);

@@ -88,8 +88,8 @@ struct FontVertexIn {
 };
 
 struct FontMaterialUniforms {
-  int width;
-  int height;
+  int font_atlas_width;
+  int font_atlas_height;
 };
 
 struct FontVertexOut {
@@ -107,11 +107,14 @@ vertex FontVertexOut font_material_vertex_shader(const device FontVertexIn *vert
   return out;
 }
 
-fragment float4 font_material_fragment_shader(const FontVertexOut vertexIn [[stage_in]], texture2d<uint> texture [[texture(7)]], constant FontMaterialUniforms& input [[buffer(10)]]) {
-  int x = int(vertexIn.texcoord.x * float(input.width));
-  int y = int(vertexIn.texcoord.y * float(input.height));
+fragment float4 font_material_fragment_shader(const FontVertexOut vertexIn [[stage_in]], texture2d<uint, access::read> texture [[texture(7)]], constant FontMaterialUniforms& input [[buffer(10)]]) {
+  //if (vertexIn.texcoord.x < 0 || vertexIn.texcoord.y < 0 || vertexIn.texcoord.x > 1 || vertexIn.texcoord.y > 1)
+  //  return float4(0,0,0,0);
+  int x = int(vertexIn.texcoord.x * float(input.font_atlas_width));
+  int y = int(vertexIn.texcoord.y * float(input.font_atlas_height));
   float a = texture.read(uint2(x,y)).r/255.0;
   return float4(1, 1, 1, a)*float4(vertexIn.color, 1);
+  //return float4(1,0,1,1);
 }
 
 struct ShadertoyMaterialUniforms {

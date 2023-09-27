@@ -7,7 +7,7 @@
 
 #include <cassert>
 
-#define MAX_WIDTH 2048 // Maximum texture width on pi
+#define MAX_WIDTH 1024 // Maximum texture width on pi
 
 blit_material::blit_material() {
   vs_handle = -1;
@@ -287,8 +287,8 @@ void font_material::compile(RenderDoos::render_engine* engine)
     fs_handle = engine->add_shader(get_font_material_fragment_shader().c_str(), SHADER_FRAGMENT, nullptr);
   }
   shader_program_handle = engine->add_program(vs_handle, fs_handle);
-  width_handle = engine->add_uniform("width", RenderDoos::uniform_type::integer, 1);
-  height_handle = engine->add_uniform("height", RenderDoos::uniform_type::integer, 1);
+  width_handle = engine->add_uniform("font_atlas_width", RenderDoos::uniform_type::integer, 1);
+  height_handle = engine->add_uniform("font_atlas_height", RenderDoos::uniform_type::integer, 1);
   _init_font(engine);
 }
 
@@ -395,9 +395,22 @@ void font_material::prepare_text(RenderDoos::render_engine* engine, const char* 
   
   text_vert_t* vp;
   uint32_t* ip;
-  
+  /*
+  std::vector<float> vertsdata(verts.size()*7);
+  for (uint32_t i = 0; i < verts.size(); ++i)
+    {
+    vertsdata[i*7+0] = verts[i].x;
+    vertsdata[i*7+1] = verts[i].y;
+    vertsdata[i*7+2] = verts[i].s;
+    vertsdata[i*7+3] = verts[i].t;
+    vertsdata[i*7+4] = verts[i].r;
+    vertsdata[i*7+5] = verts[i].g;
+    vertsdata[i*7+6] = verts[i].b;
+    }
+  */
   engine->geometry_begin(id, (int32_t)verts.size(), (int32_t)verts.size()*6, (float**)&vp, (void**)&ip);
   memcpy(vp, verts.data(), sizeof(float)*7*verts.size());
+  //memcpy(vp, vertsdata.data(), sizeof(float)*vertsdata.size());
   for (uint32_t i = 0; i < verts.size(); ++i)
   {
     *ip++ = i * 6;
