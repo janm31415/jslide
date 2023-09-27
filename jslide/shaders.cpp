@@ -163,7 +163,7 @@ void main()
 )");
   }
 
-std::string get_transfer_vertex_shader()
+std::string get_transfer_material_vertex_shader()
   {
   return std::string(R"(#version 330 core
   precision mediump float;
@@ -178,64 +178,64 @@ std::string get_transfer_vertex_shader()
   )");
   }
 
-std::string get_transfer_fragment_shader()
+std::string get_transfer_material_fragment_shader()
   {
   return std::string(R"(#version 330 core
   precision mediump float;
   precision mediump int;
-  uniform vec2      iResolution;
-  uniform sampler2D iChannel0;
-  uniform float     iTime;
-  uniform float     iMaxTime;
-  uniform int       iMethod;
+  uniform vec2      iTransferResolution;
+  uniform sampler2D iTransferChannel0;
+  uniform float     iTransferTime;
+  uniform float     iTransferMaxTime;
+  uniform int       iTransferMethod;
   out vec4 FragColor;
   
 
   void main()
   {
-  if (iMethod == 3) // zoom
+  if (iTransferMethod == 3) // zoom
     {
-    float x = clamp(iTime / iMaxTime, 0, 1);    
+    float x = clamp(iTransferTime / iTransferMaxTime, 0, 1);
     float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
-    vec2 pos = gl_FragCoord.xy/iResolution;
-    FragColor = texture(iChannel0, (2.0*pos-1.0)*frac*0.5+0.5);
+    vec2 pos = gl_FragCoord.xy/iTransferResolution;
+    FragColor = texture(iTransferChannel0, (2.0*pos-1.0)*frac*0.5+0.5);
     }
-  else if (iMethod == 2) // split
+  else if (iTransferMethod == 2) // split
     {
-    float x = clamp(iTime / iMaxTime, 0, 1);
+    float x = clamp(iTransferTime / iTransferMaxTime, 0, 1);
     float frac = (abs(x-0.5f))/(0.5);
-    vec2 pos = gl_FragCoord.xy/iResolution;
+    vec2 pos = gl_FragCoord.xy/iTransferResolution;
     if (pos.x < 0.5)
       {
       if (pos.x < frac*0.5)
-        FragColor = texture(iChannel0, pos+vec2((1-frac)*0.5,0));  
+        FragColor = texture(iTransferChannel0, pos+vec2((1-frac)*0.5,0));
       else
         FragColor = vec4(0,0,0,1);
       }
     else
       {
       if (pos.x > 1.0-frac*0.5)
-        FragColor = texture(iChannel0, pos- vec2((1-frac)*0.5,0));  
+        FragColor = texture(iTransferChannel0, pos- vec2((1-frac)*0.5,0));
       else
         FragColor = vec4(0,0,0,1);
       }    
     }
-  else if (iMethod == 1) // dia
+  else if (iTransferMethod == 1) // dia
     {
-    float x = clamp(iTime / iMaxTime, 0, 1);    
+    float x = clamp(iTransferTime / iTransferMaxTime, 0, 1);
     float frac = 1.0-(abs(x-0.5f))/(0.5);
-    vec2 pos = gl_FragCoord.xy/iResolution + vec2(frac,0);
+    vec2 pos = gl_FragCoord.xy/iTransferResolution + vec2(frac,0);
     if (pos.x > 1)
       FragColor = vec4(0,0,0,1);
     else
-      FragColor = texture(iChannel0, pos);
+      FragColor = texture(iTransferChannel0, pos);
     }
   else // fade
     {
-    float x = clamp(iTime / iMaxTime, 0, 1);    
+    float x = clamp(iTransferTime / iTransferMaxTime, 0, 1);
     float frac = sqrt(abs(x-0.5f))/sqrt(0.5);
-    vec2 pos = gl_FragCoord.xy/iResolution;
-    FragColor = texture(iChannel0, pos)*frac;
+    vec2 pos = gl_FragCoord.xy/iTransferResolution;
+    FragColor = texture(iTransferChannel0, pos)*frac;
     }
   }
   )");

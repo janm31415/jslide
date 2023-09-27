@@ -152,6 +152,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   _blit_material.compile(&_engine);
   _shadertoy_material.compile(&_engine);
   _font_material.compile(&_engine);
+  _transfer_material.compile(&_engine);
   _framebuffer_id = _engine.add_frame_buffer(_viewport_w, _viewport_h, false);
 
   _slide_state = new slide_t();
@@ -199,6 +200,7 @@ view::~view()
   _blit_material.destroy(&_engine);
   _shadertoy_material.destroy(&_engine);
   _font_material.destroy(&_engine);
+  _transfer_material.destroy(&_engine);
   _engine.destroy();
 
   SDL_DestroyWindow(_window);

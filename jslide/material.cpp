@@ -751,3 +751,175 @@ void shadertoy_material::bind(uint32_t res_w, uint32_t res_h, RenderDoos::render
   engine->bind_uniform(shader_program_handle, time_delta_handle);
   engine->bind_uniform(shader_program_handle, frame_handle);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+transfer_material::transfer_material()
+{
+  vs_handle = -1;
+  fs_handle = -1;
+  shader_program_handle = -1;
+  res_handle = -1;
+  time_handle = -1;
+  channel0_handle = -1;
+  max_time_handle = -1;
+  method_handle = -1;
+  _props.time = 0;
+  _props.max_time = 0;
+  _props.method = 0;
+}
+
+transfer_material::~transfer_material()
+{
+}
+
+
+void transfer_material::set_transfer_properties(const properties& props)
+{
+  _props = props;
+}
+
+void transfer_material::destroy(RenderDoos::render_engine* engine)
+{
+  engine->remove_shader(vs_handle);
+  engine->remove_shader(fs_handle);
+  engine->remove_program(shader_program_handle);
+  engine->remove_uniform(res_handle);
+  engine->remove_uniform(time_handle);
+  engine->remove_uniform(channel0_handle);
+  engine->remove_uniform(max_time_handle);
+  engine->remove_uniform(method_handle);
+  engine->remove_geometry(geometry_id);
+  vs_handle = -1;
+  fs_handle = -1;
+  shader_program_handle = -1;
+  res_handle = -1;
+  time_handle = -1;
+  channel0_handle = -1;
+  max_time_handle = -1;
+  method_handle = -1;
+  geometry_id = -1;
+}
+
+void transfer_material::draw(uint32_t res_w, uint32_t res_h, int32_t texture_handle, int32_t framebuffer_id, RenderDoos::render_engine* engine)
+  {
+  RenderDoos::renderpass_descriptor descr;
+  descr.clear_color = 0xff00ff00;
+  descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
+  descr.frame_buffer_handle = framebuffer_id;
+  descr.frame_buffer_channel = 10;
+  descr.w = res_w;
+  descr.h = res_h;
+  engine->renderpass_begin(descr);
+  bind(res_w, res_h, texture_handle, engine);
+  engine->geometry_draw(geometry_id);
+  engine->renderpass_end();
+  }
+
+void transfer_material::compile(RenderDoos::render_engine* engine)
+{
+  if (engine->get_renderer_type() == RenderDoos::renderer_type::METAL)
+  {
+    vs_handle = engine->add_shader(nullptr, SHADER_VERTEX, "transfer_material_vertex_shader");
+    fs_handle = engine->add_shader(nullptr, SHADER_FRAGMENT, "transfer_material_fragment_shader");
+  }
+  else if (engine->get_renderer_type() == RenderDoos::renderer_type::OPENGL)
+  {
+    vs_handle = engine->add_shader(get_transfer_material_vertex_shader().c_str(), SHADER_VERTEX, nullptr);
+    fs_handle = engine->add_shader(get_transfer_material_fragment_shader().c_str(), SHADER_FRAGMENT, nullptr);
+  }
+  shader_program_handle = engine->add_program(vs_handle, fs_handle);
+  res_handle = engine->add_uniform("iTransferResolution", RenderDoos::uniform_type::vec3, 1);
+  time_handle = engine->add_uniform("iTransferTime", RenderDoos::uniform_type::real, 1);
+  channel0_handle = engine->add_uniform("iTransferChannel0", RenderDoos::uniform_type::sampler, 1);
+  max_time_handle = engine->add_uniform("iTransferMaxTime", RenderDoos::uniform_type::real, 1);
+  method_handle = engine->add_uniform("iTransferMethod", RenderDoos::uniform_type::integer, 1);
+  geometry_id = engine->add_geometry(VERTEX_STANDARD);
+  RenderDoos::vertex_standard* vp;
+  uint32_t* ip;
+  
+  engine->geometry_begin(geometry_id, 4, 6, (float**)&vp, (void**)&ip);
+  // make a quad for drawing the texture
+  
+  vp->x = -1.f;
+  vp->y = -1.f;
+  vp->z = 0.f;
+  vp->nx = 0.f;
+  vp->ny = 0.f;
+  vp->nz = 1.f;
+  vp->u = 0.f;
+  vp->v = 0.f;
+  ++vp;
+  vp->x = 1.f;
+  vp->y = -1.f;
+  vp->z = 0.f;
+  vp->nx = 0.f;
+  vp->ny = 0.f;
+  vp->nz = 1.f;
+  vp->u = 1.f;
+  vp->v = 0.f;
+  ++vp;
+  vp->x = 1.f;
+  vp->y = 1.f;
+  vp->z = 0.f;
+  vp->nx = 0.f;
+  vp->ny = 0.f;
+  vp->nz = 1.f;
+  vp->u = 1.f;
+  vp->v = 1.f;
+  ++vp;
+  vp->x = -1.f;
+  vp->y = 1.f;
+  vp->z = 0.f;
+  vp->nx = 0.f;
+  vp->ny = 0.f;
+  vp->nz = 1.f;
+  vp->u = 0.f;
+  vp->v = 1.f;
+  
+  ip[0] = 0;
+  ip[1] = 1;
+  ip[2] = 2;
+  ip[3] = 0;
+  ip[4] = 2;
+  ip[5] = 3;
+  
+  engine->geometry_end(geometry_id);
+}
+
+void transfer_material::bind(uint32_t res_w, uint32_t res_h, int32_t texture_handle, RenderDoos::render_engine* engine)
+{
+  engine->set_blending_enabled(false);
+  engine->bind_program(shader_program_handle);
+  float res[3] = { (float)res_w, (float)res_h, 1.f };
+  engine->set_uniform(res_handle, (void*)res);
+  engine->set_uniform(time_handle, &_props.time);
+  engine->set_uniform(max_time_handle, &_props.max_time);
+  engine->set_uniform(method_handle, &_props.method);
+  int channel = 0;
+  engine->set_uniform(channel0_handle, (void*)(&channel));
+  
+  engine->bind_uniform(shader_program_handle, res_handle);
+  engine->bind_uniform(shader_program_handle, time_handle);
+  engine->bind_uniform(shader_program_handle, max_time_handle);
+  engine->bind_uniform(shader_program_handle, method_handle);
+  engine->bind_uniform(shader_program_handle, channel0_handle);
+  
+  
+  const RenderDoos::texture* tex = engine->get_texture(texture_handle);
+  assert(tex != nullptr);
+  int32_t texture_flags = TEX_WRAP_CLAMP_TO_EDGE | TEX_FILTER_NEAREST;
+  engine->bind_texture_to_channel(texture_handle, channel, texture_flags);
+}

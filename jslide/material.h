@@ -73,7 +73,7 @@ class font_material
 {
 public:
   font_material();
-  virtual ~font_material();
+  ~font_material();
   
   void compile(RenderDoos::render_engine* engine);
   void bind(RenderDoos::render_engine* engine);
@@ -120,7 +120,7 @@ public:
   };
   
   shadertoy_material();
-  virtual ~shadertoy_material();
+  ~shadertoy_material();
   
   void set_script(const std::string& script);
   void set_shadertoy_properties(const properties& props);
@@ -138,5 +138,36 @@ private:
   std::string _script;
   properties _props;
   int32_t res_handle, time_handle, global_time_handle, time_delta_handle, frame_handle;
+  uint32_t geometry_id;
+};
+
+
+class transfer_material
+{
+public:
+  struct properties
+  {
+    float time;
+    float max_time;
+    int method;
+  };
+  
+  transfer_material();
+  ~transfer_material();
+  
+  void set_script(const std::string& script);
+  void set_transfer_properties(const properties& props);
+  
+  void compile(RenderDoos::render_engine* engine);
+  void bind(uint32_t res_w, uint32_t res_h, int32_t texture_handle, RenderDoos::render_engine* engine);
+  void destroy(RenderDoos::render_engine* engine);
+  void draw(uint32_t res_w, uint32_t res_h, int32_t texture_handle, int32_t framebuffer_id, RenderDoos::render_engine* engine);
+
+private:
+  int32_t vs_handle, fs_handle;
+  int32_t shader_program_handle;
+  std::string _script;
+  properties _props;
+  int32_t res_handle, channel0_handle, time_handle, max_time_handle, method_handle;
   uint32_t geometry_id;
 };
