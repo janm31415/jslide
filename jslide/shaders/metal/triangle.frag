@@ -1,0 +1,77 @@
+// The MIT License
+// Copyright ﾩ 2014 Inigo Quilez
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// Signed distance to a triangle. Negative in the inside, positive in the outside.
+// Note there's only one square root involved. The clamp(x,a,b) is really just
+// max(a,min(b,x)). The sign(x) function is |x|/x. 
+
+
+// List of other 2D distances: https://www.shadertoy.com/playlist/MXdSRf
+//
+// and iquilezles.org/articles/distfunctions2d
+
+
+// Other triangle functions:
+//
+// Distance:   https://www.shadertoy.com/view/XsXSz4
+// Gradient:   https://www.shadertoy.com/view/tlVyWh
+// Boundaries: https://www.shadertoy.com/view/tlKcDz
+
+
+// signed distance to a 2D triangle
+float sdTriangle( float2 p, float2 p0, float2 p1, float2 p2 )
+{
+	float2 e0 = p1 - p0;
+	float2 e1 = p2 - p1;
+	float2 e2 = p0 - p2;
+
+	float2 v0 = p - p0;
+	float2 v1 = p - p1;
+	float2 v2 = p - p2;
+
+	float2 pq0 = v0 - e0*clamp( dot(v0,e0)/dot(e0,e0), 0.0, 1.0 );
+	float2 pq1 = v1 - e1*clamp( dot(v1,e1)/dot(e1,e1), 0.0, 1.0 );
+	float2 pq2 = v2 - e2*clamp( dot(v2,e2)/dot(e2,e2), 0.0, 1.0 );
+    
+    float s = e0.x*e2.y - e0.y*e2.x;
+    float2 d = min( min( float2( dot( pq0, pq0 ), s*(v0.x*e0.y-v0.y*e0.x) ),
+                       float2( dot( pq1, pq1 ), s*(v1.x*e1.y-v1.y*e1.x) )),
+                       float2( dot( pq2, pq2 ), s*(v2.x*e2.y-v2.y*e2.x) ));
+
+	return -sqrt(d.x)*sign(d.y);
+}
+
+//---- everything below this line is NOT the triangle formula, and it's there just to produce the picture ---
+
+void mainImage(thread float4& fragColor, float2 fragCoord, float iTime, float3 iResolution) 
+{
+	float2 p = (2.0*fragCoord.xy-iResolution.xy)/iResolution.y;
+    float2 m = (float2(0.0)-iResolution.xy)/iResolution.y;
+	p *= 1.5;
+    m *= 1.5;
+    
+    // animate
+	float2 v1 = float2(1.4,1.0)*cos( iTime + float2(0.0,2.00) + 0.0 );
+	float2 v2 = float2(1.4,1.0)*cos( iTime + float2(0.0,1.50) + 1.5 );
+	float2 v3 = float2(1.4,1.0)*cos( iTime + float2(0.0,3.00) + 4.0 );
+
+    // distance
+	float d = sdTriangle( p, v1, v2, v3 );
+    
+    // color
+#if 1
+    float3 col = float3(1.0) - sign(d)*float3(0.1,0.4,0.7);
+	col *= 1.0 - exp(-2.0*abs(d));
+	col *= 0.8 + 0.2*cos(120.0*d);
+	col = mix( col, float3(1.0), 1.0-smoothstep(0.0,0.02,abs(d)) );
+#else
+    float3 col = (d<0.0) ? float3(0.2,0.8,0.8) : float3(0.8,0.2,0.8);
+	col *= exp2(-2.0*abs(d));
+    col = mix(col,float3(1.20),exp2(-22.0*abs(d)));
+	col = mix( col, float3(0.0), 1.0-smoothstep(0.01,0.02,abs(d)) );
+    col *= 1.0 + 0.5*smoothstep(-0.4,0.4,cos(100.0*d));
+#endif
+
+	fragColor = float4(col,1.0);
+}
