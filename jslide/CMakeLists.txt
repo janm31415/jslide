@@ -220,7 +220,7 @@ add_custom_command(TARGET jslide POST_BUILD
 else (WIN32)
   if (APPLE)
     add_custom_command(TARGET jslide POST_BUILD 
-   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders/mac" "$<TARGET_FILE_DIR:jslide>/shaders")  
+   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders/metal" "$<TARGET_FILE_DIR:jslide>/shaders")  
   else (APPLE)
     add_custom_command(TARGET jslide POST_BUILD 
    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders/gl" "$<TARGET_FILE_DIR:jslide>/shaders")  
