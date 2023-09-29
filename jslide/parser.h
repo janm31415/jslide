@@ -41,7 +41,9 @@ enum class language
   T_RUST,
   T_SCHEME,
   T_SWIFT,
-  T_XML
+  T_XML,
+  T_NOLANG,
+  T_MATH
   };
 
 enum class textsize
@@ -77,6 +79,14 @@ enum class image_orientation
   T_ORIENTATION_180DEG,
   T_ORIENTATION_270DEG
   };
+  
+enum class shader_visibility
+  {
+  T_SHADER_VISIBILITY_FULL,
+  T_SHADER_VISIBILITY_HALF,
+  T_SHADER_VISIBILITY_QUARTER,
+  T_SHADER_VISIBILITY_EIGHTH
+  };
 
 std::string language_to_extension(language l);
 
@@ -92,6 +102,7 @@ struct ActiveAttributes
   transfer_animation e_transfer_animation = transfer_animation::T_FADE;
   movie_speed e_movie_speed = movie_speed::T_SPEED_NORMAL;
   image_orientation e_image_orientation = image_orientation::T_ORIENTATION_NORMAL;
+  shader_visibility e_shader_visibility = shader_visibility::T_SHADER_VISIBILITY_FULL;
   };
 
 int get_textsize(const ActiveAttributes& attrib);

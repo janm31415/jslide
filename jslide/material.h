@@ -117,6 +117,7 @@ public:
     float global_time;
     float time_delta;
     int frame;
+    float fade = 1.f;
   };
   
   shadertoy_material();
@@ -137,7 +138,7 @@ private:
   int32_t shader_program_handle;
   std::string _script;
   properties _props;
-  int32_t res_handle, time_handle, global_time_handle, time_delta_handle, frame_handle;
+  int32_t res_handle, time_handle, global_time_handle, time_delta_handle, frame_handle, fade_handle;
   uint32_t geometry_id;
 };
 

@@ -123,6 +123,7 @@ struct ShadertoyMaterialUniforms {
   float iGlobalTime;
   float iTimeDelta;
   int iFrame;
+  float iFade;
 };
 
 vertex BlitVertexOut jslide_shadertoy_material_vertex_shader(const device BlitVertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant ShadertoyMaterialUniforms& input [[buffer(10)]]) {

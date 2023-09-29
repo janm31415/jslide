@@ -549,6 +549,7 @@ shadertoy_material::shadertoy_material()
   shader_program_handle = -1;
   res_handle = -1;
   time_handle = -1;
+  fade_handle = -1;
   global_time_handle = -1;
   time_delta_handle = -1;
   frame_handle = -1;
@@ -611,6 +612,7 @@ void shadertoy_material::destroy(RenderDoos::render_engine* engine)
   global_time_handle = -1;
   time_delta_handle = -1;
   frame_handle = -1;
+  fade_handle = -1;
   geometry_id = -1;
 }
 
@@ -653,12 +655,14 @@ struct ShadertoyMaterialUniforms {
   float iGlobalTime;
   float iTimeDelta;
   int iFrame;
+  float iFade;
 };)");
     
     std::string footer = std::string(R"(
 fragment float4 jslide_shadertoy_material_fragment_shader(const ShaderToyVertexOut vertexIn [[stage_in]], constant ShadertoyMaterialUniforms& input [[buffer(10)]]) {
   float4 fragColor;
   mainImage(fragColor, vertexIn.position.xy, input.iTime, input.iResolution);
+  fragColor *= input.iFade;
   return float4(fragColor[0], fragColor[1], fragColor[2], 1);
 })");
     std::string total_fragment_shader = header.append(_script).append(footer);
@@ -680,6 +684,7 @@ fragment float4 jslide_shadertoy_material_fragment_shader(const ShaderToyVertexO
   global_time_handle = engine->add_uniform("iGlobalTime", RenderDoos::uniform_type::real, 1);
   time_delta_handle = engine->add_uniform("iTimeDelta", RenderDoos::uniform_type::real, 1);
   frame_handle = engine->add_uniform("iFrame", RenderDoos::uniform_type::integer, 1);
+  fade_handle = engine->add_uniform("iFade", RenderDoos::uniform_type::real, 1);
   geometry_id = engine->add_geometry(VERTEX_STANDARD);
   RenderDoos::vertex_standard* vp;
   uint32_t* ip;
@@ -743,12 +748,14 @@ void shadertoy_material::bind(uint32_t res_w, uint32_t res_h, RenderDoos::render
   engine->set_uniform(global_time_handle, &_props.global_time);
   engine->set_uniform(time_delta_handle, &_props.time_delta);
   engine->set_uniform(frame_handle, &_props.frame);
+  engine->set_uniform(fade_handle, &_props.fade);
   
   engine->bind_uniform(shader_program_handle, res_handle);
   engine->bind_uniform(shader_program_handle, time_handle);
   engine->bind_uniform(shader_program_handle, global_time_handle);
   engine->bind_uniform(shader_program_handle, time_delta_handle);
   engine->bind_uniform(shader_program_handle, frame_handle);
+  engine->bind_uniform(shader_program_handle, fade_handle);
 }
 
 

@@ -55,6 +55,8 @@ std::string language_to_extension(language l)
     case language::T_SCHEME : return "scm";
     case language::T_SWIFT : return "swift";
     case language::T_XML: return "xml";
+    case language::T_NOLANG: return "";
+    case language::T_MATH: return "math";
     }
   return "";
   }
@@ -76,6 +78,16 @@ namespace
     m[".dia"] = transfer_animation::T_DIA;
     m[".split"] = transfer_animation::T_SPLIT;
     m[".zoom"] = transfer_animation::T_ZOOM;
+    return m;
+    }
+    
+  std::map<std::string, shader_visibility> get_shader_visibility_map()
+    {
+    std::map<std::string, shader_visibility> m;
+    m[".nofog"] = shader_visibility::T_SHADER_VISIBILITY_FULL;
+    m[".foghalf"] = shader_visibility::T_SHADER_VISIBILITY_HALF;
+    m[".fogquarter"] = shader_visibility::T_SHADER_VISIBILITY_QUARTER;
+    m[".fogeighth"] = shader_visibility::T_SHADER_VISIBILITY_EIGHTH;
     return m;
     }
 
@@ -136,6 +148,8 @@ namespace
     m[".scheme"] = language::T_SCHEME;
     m[".swift"] = language::T_SWIFT;
     m[".xml"] = language::T_XML;
+    m[".nolang"] = language::T_NOLANG;
+    m[".math"] = language::T_MATH;
     return m;
     }
 
@@ -187,6 +201,7 @@ namespace
     static auto transfer_animation_map = get_transfer_animation_map();
     static auto movie_speed_map = get_movie_speed_map();
     static auto image_orientation_map = get_image_orientation_map();
+    static auto shader_visibility_map = get_shader_visibility_map();
     bool attributes_lines = popped_token.type == token::T_NEWLINE || popped_token.type == token::T_NEWSLIDE || popped_token.type == token::T_ADDTOSLIDE;
     require(tokes, "{:");
     while (current_type(tokes) != token::T_ATTRIBUTE_END)
@@ -234,6 +249,12 @@ namespace
       if (it7 != image_orientation_map.end())
         {
         current_attributes.e_image_orientation = it7->second;
+        continue;
+        }
+      auto it8 = shader_visibility_map.find(t.value);
+      if (it8 != shader_visibility_map.end())
+        {
+        current_attributes.e_shader_visibility = it8->second;
         continue;
         }
       if (t.value == std::string(".left"))

@@ -148,6 +148,7 @@ uniform float iTime;
 uniform float iGlobalTime;
 uniform int iFrame;
 uniform float iTimeDelta;
+uniform float iFade;
 
 out vec4 FragColor;
 )");
@@ -159,6 +160,7 @@ std::string get_shadertoy_material_fragment_shader_footer()
 void main() 
   {
   mainImage(FragColor, gl_FragCoord.xy);
+  FragColor *= iFade;
   }
 )");
   }

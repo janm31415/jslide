@@ -31,6 +31,20 @@ namespace
     return out;
     }
 
+  keyword_data make_keyword_data_for_math()
+    {
+    keyword_data kd;
+
+    std::string in = "+ - * / sin cos atan sqr sqrt ! % ^ pow acos asin tan exp atan2 mod log ln abs";
+    kd.keywords_1 = break_string(in);
+    std::sort(kd.keywords_1.begin(), kd.keywords_1.end());
+
+    in = "0 1 2 3 4 5 9 7 8 9 . , a b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z";
+    kd.keywords_2 = break_string(in);
+    std::sort(kd.keywords_2.begin(), kd.keywords_2.end());
+    return kd;
+    }
+    
   keyword_data make_keyword_data_for_cpp()
     {
     keyword_data kd;
@@ -198,6 +212,18 @@ namespace
     return cd;
     }
 
+  comment_data make_comment_data_for_math()
+    {
+    comment_data cd;
+    cd.multiline_begin = "/*";
+    cd.multiline_end = "*/";
+    cd.multistring_begin = "R\"(";
+    cd.multistring_end = ")\"";
+    cd.single_line = "//";
+    cd.uses_quotes_for_chars = true;
+    return cd;
+    }
+    
   std::map<std::string, comment_data> build_comment_data_hardcoded()
     {
     std::map<std::string, comment_data> m;
@@ -228,12 +254,16 @@ namespace
     m["m"] = make_comment_data_for_objective_c();
     m["mm"] = make_comment_data_for_objective_c();
     */
+    m[""] = comment_data();
+    m["math"] = make_comment_data_for_math();
     return m;
     }
 
   std::map<std::string, keyword_data> build_keyword_data_hardcoded()
     {
     std::map<std::string, keyword_data> m;
+    m[""] = keyword_data();
+    m["math"] = make_keyword_data_for_math();
     /*
     m["cc"] = make_keyword_data_for_cpp();
     m["cpp"] = make_keyword_data_for_cpp();

@@ -421,7 +421,23 @@ void prepare_slide_data(slide_t* state, RenderDoos::render_engine* engine, const
 void draw_slide_data(slide_t* state, RenderDoos::render_engine* engine, const Slide& s, const shadertoy_material::properties& params)
 {
   //state->font_state->clear_text(engine);
-  bool background_shader = _draw_shader(state, engine, state->shader_framebuffer_id, params);
+  shadertoy_material::properties st_props(params);
+  switch (s.attrib.e_shader_visibility)
+    {
+      case shader_visibility::T_SHADER_VISIBILITY_FULL:
+        st_props.fade = 1.f;
+        break;
+      case shader_visibility::T_SHADER_VISIBILITY_HALF:
+        st_props.fade = 0.5f;
+        break;
+      case shader_visibility::T_SHADER_VISIBILITY_QUARTER:
+        st_props.fade = 0.25f;
+        break;
+      case shader_visibility::T_SHADER_VISIBILITY_EIGHTH:
+        st_props.fade = 0.125f;
+        break;
+    }
+  bool background_shader = _draw_shader(state, engine, state->shader_framebuffer_id, st_props);
   RenderDoos::renderpass_descriptor descr;
   descr.clear_color = 0xff000000;
   descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
