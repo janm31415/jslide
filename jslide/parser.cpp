@@ -55,7 +55,6 @@ std::string language_to_extension(language l)
     case language::T_SCHEME : return "scm";
     case language::T_SWIFT : return "swift";
     case language::T_XML: return "xml";
-    case language::T_NOLANG: return "";
     case language::T_MATH: return "math";
     }
   return "";
@@ -148,7 +147,6 @@ namespace
     m[".scheme"] = language::T_SCHEME;
     m[".swift"] = language::T_SWIFT;
     m[".xml"] = language::T_XML;
-    m[".nolang"] = language::T_NOLANG;
     m[".math"] = language::T_MATH;
     return m;
     }

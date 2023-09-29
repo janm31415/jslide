@@ -20,6 +20,7 @@ std::map<std::string, jtk::vec3<float>> get_color_map()
   m[".bluepurple"] = jtk::vec3<float>(0.215686, 0, 0.701961);
   m[".teal"] = jtk::vec3<float>(0.0117647, 0.854902, 0.772549);
   m[".darkred"] = jtk::vec3<float>(0.690196, 0, 0.12549);
+  m[".darkgreen"] = jtk::vec3<float>(0, 0.7, 0);    
   return m;
   }
 

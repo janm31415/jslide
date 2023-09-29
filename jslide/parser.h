@@ -42,7 +42,6 @@ enum class language
   T_SCHEME,
   T_SWIFT,
   T_XML,
-  T_NOLANG,
   T_MATH
   };
 

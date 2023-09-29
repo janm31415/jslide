@@ -35,7 +35,7 @@ namespace
     {
     keyword_data kd;
 
-    std::string in = "+ - * / sin cos atan sqr sqrt ! % ^ pow acos asin tan exp atan2 mod log ln abs";
+    std::string in = "+ - * / sin cos atan sqr sqrt ! % ^ pow acos asin tan exp atan2 mod log ln abs \\";
     kd.keywords_1 = break_string(in);
     std::sort(kd.keywords_1.begin(), kd.keywords_1.end());
 
@@ -224,6 +224,18 @@ namespace
     return cd;
     }
     
+  comment_data make_comment_data_for_nolang()
+    {
+    comment_data cd;
+    cd.multiline_begin = "asdfqepoijcxvl;kjrtoijscvlkndsfdf";
+    cd.multiline_end = "dbsdfgjqelscvlknsafv;lakwdjjgg;lwjf";
+    cd.multistring_begin = "asdf;lqkwejfl;c;lfkgjdw;lkfjsd";
+    cd.multistring_end = "qewjkljjncsvl;kjwdl;fkjsadflgkjsdaffj";
+    cd.single_line = "qdfkjksljwer;jd;lkejf;lkdjfdf";
+    cd.uses_quotes_for_chars = false;
+    return cd;
+    }
+    
   std::map<std::string, comment_data> build_comment_data_hardcoded()
     {
     std::map<std::string, comment_data> m;
@@ -254,7 +266,7 @@ namespace
     m["m"] = make_comment_data_for_objective_c();
     m["mm"] = make_comment_data_for_objective_c();
     */
-    m[""] = comment_data();
+    m[""] = make_comment_data_for_nolang();
     m["math"] = make_comment_data_for_math();
     return m;
     }
