@@ -60,7 +60,8 @@ enum class transfer_animation
   T_FADE,
   T_DIA,
   T_SPLIT,
-  T_ZOOM
+  T_ZOOM,
+  T_ITERATE
   };
 
 enum class movie_speed

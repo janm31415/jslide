@@ -77,6 +77,7 @@ namespace
     m[".dia"] = transfer_animation::T_DIA;
     m[".split"] = transfer_animation::T_SPLIT;
     m[".zoom"] = transfer_animation::T_ZOOM;
+    m[".iterate"] = transfer_animation::T_ITERATE;
     return m;
     }
     

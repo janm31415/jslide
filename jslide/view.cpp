@@ -727,15 +727,24 @@ void view::_log_window()
 
 namespace
   {
-  float get_total_time(transfer_animation anim)
+  int _get_random_transfer_method(int slide_id)
     {
-    switch (anim)
+    return ((int)slide_id % ((int)transfer_animation::T_ITERATE-1));
+    }
+  
+  float get_total_time(transfer_animation anim, int slide_id)
+    {
+    transfer_animation anim2 = anim;
+    if (anim == transfer_animation::T_ITERATE)
+      anim2 = (transfer_animation)(_get_random_transfer_method(slide_id)+1);
+    switch (anim2)
       {
       case transfer_animation::T_NONE: return 0.f;
       case transfer_animation::T_SPLIT: return 1.f;
       case transfer_animation::T_FADE: return 0.5f;
       case transfer_animation::T_DIA: return 0.5f;
       case transfer_animation::T_ZOOM: return 0.5f;
+      case transfer_animation::T_ITERATE: return 0.5f;
       }
     return 0.5f;
     }
@@ -756,7 +765,7 @@ void view::_next_slide(bool with_cool_transfer)
     ++_slide_id;
   if (with_cool_transfer && _presentation.slides[_slide_id].reset_shaders)
     {
-    _transfer_slides.total_transfer_time = get_total_time(_presentation.slides[_previous_slide_id].attrib.e_transfer_animation);
+    _transfer_slides.total_transfer_time = get_total_time(_presentation.slides[_previous_slide_id].attrib.e_transfer_animation, _slide_id);
     _transfer_slides.active = true;
     _transfer_slides.time = 0.f;
     _transfer_slides.slide_id_1 = _previous_slide_id;
@@ -804,7 +813,7 @@ void view::_last_slide()
     return;
   _transfer_slides.active = false;
   _previous_slide_id = _slide_id;
-  _slide_id = _presentation.slides.empty() ? 0 : _presentation.slides.size() - 1;
+  _slide_id = _presentation.slides.empty() ? 0 : (uint32_t)_presentation.slides.size() - 1;
   _prepare_current_slide();
   }
 
@@ -1020,7 +1029,14 @@ void view::loop()
         transfer_material::properties props;
         props.time = _transfer_slides.time;
         props.max_time = _transfer_slides.total_transfer_time;
-        props.method = (int)_transfer_slides.e_transfer_animation;
+        if (_transfer_slides.e_transfer_animation == transfer_animation::T_ITERATE)
+          {
+          props.method = _get_random_transfer_method(_slide_id);
+          }
+        else
+          {
+          props.method = (int)_transfer_slides.e_transfer_animation;
+          }
         _transfer_material.set_transfer_properties(props);
         _transfer_material.draw(_max_w, _max_h, _engine.get_frame_buffer(_slide_state->framebuffer_id)->texture_handle, _transfer_framebuffer_id, &_engine);
         //draw_transfer_data(_transfer_gl_state, _slide_gl_state->fbo.get_texture(), _transfer_slides.time, _transfer_slides.total_transfer_time, _transfer_slides.e_transfer_animation);

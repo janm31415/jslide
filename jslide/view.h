@@ -59,7 +59,7 @@ class view
     void _write_to_pdf(const std::string& filename);
     void _make_dummy_image();
     void _resize();
-    
+  
   private:
     SDL_Window* _window;
     #if defined(RENDERDOOS_METAL)
