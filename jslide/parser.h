@@ -71,6 +71,13 @@ enum class movie_speed
   T_SPEED_TIMES_FOUR,
   T_SPEED_TIMES_EIGHT
   };
+  
+  
+enum class movie_loop
+  {
+  T_NOREPEAT,
+  T_REPEAT
+  };
 
 enum class image_orientation
   {
@@ -101,6 +108,7 @@ struct ActiveAttributes
   textsize e_textsize = textsize::T_NORMAL;
   transfer_animation e_transfer_animation = transfer_animation::T_FADE;
   movie_speed e_movie_speed = movie_speed::T_SPEED_NORMAL;
+  movie_loop e_movie_loop = movie_loop::T_NOREPEAT;
   image_orientation e_image_orientation = image_orientation::T_ORIENTATION_NORMAL;
   shader_visibility e_shader_visibility = shader_visibility::T_SHADER_VISIBILITY_FULL;
   };

@@ -100,6 +100,14 @@ namespace
     m[".speedx8"] = movie_speed::T_SPEED_TIMES_EIGHT;
     return m;
     }
+    
+  std::map<std::string, movie_loop> get_movie_loop_map()
+    {
+    std::map<std::string, movie_loop> m;
+    m[".norepeat"] = movie_loop::T_NOREPEAT;
+    m[".repeat"] = movie_loop::T_REPEAT;
+    return m;
+    }
 
   std::map<std::string, image_orientation> get_image_orientation_map()
     {
@@ -201,6 +209,7 @@ namespace
     static auto movie_speed_map = get_movie_speed_map();
     static auto image_orientation_map = get_image_orientation_map();
     static auto shader_visibility_map = get_shader_visibility_map();
+    static auto movie_loop_map = get_movie_loop_map();
     bool attributes_lines = popped_token.type == token::T_NEWLINE || popped_token.type == token::T_NEWSLIDE || popped_token.type == token::T_ADDTOSLIDE;
     require(tokes, "{:");
     while (current_type(tokes) != token::T_ATTRIBUTE_END)
@@ -254,6 +263,12 @@ namespace
       if (it8 != shader_visibility_map.end())
         {
         current_attributes.e_shader_visibility = it8->second;
+        continue;
+        }
+      auto it9 = movie_loop_map.find(t.value);
+      if (it9 != movie_loop_map.end())
+        {
+        current_attributes.e_movie_loop = it9->second;
         continue;
         }
       if (t.value == std::string(".left"))

@@ -24,4 +24,4 @@ void init_video_data(image_t* state, RenderDoos::render_engine* engine, VideoRea
 void destroy_image_data(image_t* state, RenderDoos::render_engine* engine);
 
 void draw_image_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render_engine* engine, image_orientation orientation);
-void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render_engine* engine, const shadertoy_material::properties& params, movie_speed speed, image_orientation orientation);
+void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render_engine* engine, const shadertoy_material::properties& params, movie_speed speed, movie_loop loop, image_orientation orientation);

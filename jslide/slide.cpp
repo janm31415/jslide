@@ -305,7 +305,7 @@ void _draw_image(slide_t* state, RenderDoos::render_engine* engine, uint32_t fra
   if (im.link_to_image >= state->image_states.size())
     return;
   if (im.video.width > 0 && im.video.height > 0)
-    draw_video_data(state->image_states[im.link_to_image], framebuffer_id, engine, params, im.attrib.e_movie_speed, im.attrib.e_image_orientation);
+    draw_video_data(state->image_states[im.link_to_image], framebuffer_id, engine, params, im.attrib.e_movie_speed, im.attrib.e_movie_loop, im.attrib.e_image_orientation);
   else
     draw_image_data(state->image_states[im.link_to_image], framebuffer_id, engine, im.attrib.e_image_orientation);
 }

@@ -24,6 +24,8 @@ struct VideoReaderState {
   AVFrame* av_frame = nullptr;
   AVPacket* av_packet = nullptr;
   SwsContext* sws_scaler_ctx = nullptr;
+  
+  bool endOfStream = false;
 };
 
 #else

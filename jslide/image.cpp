@@ -69,7 +69,7 @@ void draw_image_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
   engine->renderpass_end();
 }
 
-void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render_engine* engine, const shadertoy_material::properties& params, movie_speed speed, image_orientation orientation)
+void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render_engine* engine, const shadertoy_material::properties& params, movie_speed speed, movie_loop loop, image_orientation orientation)
 {
   int64_t pts;
   if (video_reader_read_frame(&state->video_state, state->video_frame_data, &pts))
@@ -129,5 +129,12 @@ void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
         std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(wait_time * 1000.0));
       }
     }
+    if (state->video_state.endOfStream)
+      {
+      if (loop == movie_loop::T_REPEAT)
+        {
+        video_reader_seek_frame(&state->video_state, 0);
+        }
+      }
   }
 }

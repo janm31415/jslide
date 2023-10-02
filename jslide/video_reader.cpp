@@ -138,8 +138,10 @@ bool video_reader_read_frame(VideoReaderState* state, uint8_t* frame_buffer, int
 
   // Decode one frame
   int response;
+  state->endOfStream = true;
   while (av_read_frame(av_format_ctx, av_packet) >= 0)
     {
+    state->endOfStream = false;
     if (av_packet->stream_index != video_stream_index)
       {
       av_packet_unref(av_packet);
