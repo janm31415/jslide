@@ -120,6 +120,8 @@ void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
       case movie_speed::T_SPEED_TIMES_TWO: time_for_one_frame *= 0.5; break;
       case movie_speed::T_SPEED_TIMES_FOUR: time_for_one_frame *= 0.25; break;
       case movie_speed::T_SPEED_TIMES_EIGHT: time_for_one_frame *= 0.125; break;
+      case movie_speed::T_SPEED_TIMES_HALF: time_for_one_frame *= 2.0; break;
+      case movie_speed::T_SPEED_THIRTY: time_for_one_frame = 1.0/30.0; break;
     }
     if (time_for_one_frame > params.time_delta)
     {

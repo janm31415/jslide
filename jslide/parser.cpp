@@ -94,10 +94,12 @@ namespace
   std::map<std::string, movie_speed> get_movie_speed_map()
     {
     std::map<std::string, movie_speed> m;
+    m[".speedx0.5"] = movie_speed::T_SPEED_TIMES_HALF;
     m[".speedx1"] = movie_speed::T_SPEED_NORMAL;
     m[".speedx2"] = movie_speed::T_SPEED_TIMES_TWO;
     m[".speedx4"] = movie_speed::T_SPEED_TIMES_FOUR;
     m[".speedx8"] = movie_speed::T_SPEED_TIMES_EIGHT;
+    m[".speed30"] = movie_speed::T_SPEED_THIRTY;
     return m;
     }
     
@@ -452,12 +454,12 @@ namespace
     return b;
     }
 
-  Slide make_slide(tokens& tokes, const Slide& prev_slide)
+  Slide make_slide(tokens& tokes, const Slide& prev_slide, bool add_to_slide)
     {
     inside_code_block = false;
     first_line_in_code_block = false;
     Slide s = prev_slide;
-    if (!s.blocks.empty())
+    if (add_to_slide)
       s.reset_shaders = false;
     if (tokes.empty())
       {
@@ -527,9 +529,9 @@ Presentation make_presentation(tokens& tokes)
   while (!tokes.empty())
     {
     if (popped_token.type == token::T_ADDTOSLIDE)
-      pres.slides.push_back(make_slide(tokes, pres.slides.back()));
+      pres.slides.push_back(make_slide(tokes, pres.slides.back(), true));
     else
-      pres.slides.push_back(make_slide(tokes, Slide()));
+      pres.slides.push_back(make_slide(tokes, Slide(), false));
     }
   pres.slides.push_back(make_ending_slide());
   return pres;
