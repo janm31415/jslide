@@ -936,7 +936,9 @@ mouse_material::mouse_material()
   fs_handle = -1;
   shader_program_handle = -1;
   mouse_handle = -1;
+  res_handle = -1;
   mouse_pixelsize_handle = -1;
+  mouse_type_handle = -1;
   geometry_id = -1;
 }
 
@@ -958,7 +960,9 @@ void mouse_material::compile(RenderDoos::render_engine* engine)
   }
   shader_program_handle = engine->add_program(vs_handle, fs_handle);
   mouse_handle = engine->add_uniform("iMouse", RenderDoos::uniform_type::vec2, 1);
+  res_handle = engine->add_uniform("iMouseResolution", RenderDoos::uniform_type::vec2, 1);
   mouse_pixelsize_handle = engine->add_uniform("iMousePixelsize", RenderDoos::uniform_type::integer, 1);
+  mouse_type_handle = engine->add_uniform("iMouseType", RenderDoos::uniform_type::integer, 1);
   geometry_id = engine->add_geometry(VERTEX_STANDARD);
   RenderDoos::vertex_standard* vp;
   uint32_t* ip;
@@ -1012,15 +1016,20 @@ void mouse_material::compile(RenderDoos::render_engine* engine)
   engine->geometry_end(geometry_id);
 }
 
-void mouse_material::bind(float mouse_x, float mouse_y, int32_t mouse_pixelsize, RenderDoos::render_engine* engine)
+void mouse_material::bind(float mouse_x, float mouse_y, uint32_t res_w, uint32_t res_h, int32_t mouse_pixelsize, int32_t mouse_type, RenderDoos::render_engine* engine)
 {
   float mouse[2] = { (float)mouse_x, (float)mouse_y};
+  float res[2] = { (float)res_w, (float)res_h};
   engine->set_blending_enabled(false);
   engine->bind_program(shader_program_handle);
   engine->set_uniform(mouse_handle, (void*)mouse);
+  engine->set_uniform(res_handle, (void*)res);
   engine->set_uniform(mouse_pixelsize_handle, (void*)&mouse_pixelsize);
+  engine->set_uniform(mouse_type_handle, (void*)&mouse_type);
   engine->bind_uniform(shader_program_handle, mouse_handle);
+  engine->bind_uniform(shader_program_handle, res_handle);
   engine->bind_uniform(shader_program_handle, mouse_pixelsize_handle);
+  engine->bind_uniform(shader_program_handle, mouse_type_handle);
 }
 
 void mouse_material::destroy(RenderDoos::render_engine* engine)
@@ -1029,7 +1038,9 @@ void mouse_material::destroy(RenderDoos::render_engine* engine)
   engine->remove_shader(fs_handle);
   engine->remove_program(shader_program_handle);
   engine->remove_uniform(mouse_handle);
+  engine->remove_uniform(res_handle);
   engine->remove_uniform(mouse_pixelsize_handle);
+  engine->remove_uniform(mouse_type_handle);  
 }
 
 void mouse_material::draw(RenderDoos::render_engine* engine)

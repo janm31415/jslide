@@ -10,6 +10,7 @@ struct settings
   bool fullscreen; 
   bool crt_effect;
   bool show_mouse;
+  int mouse_type;
   };
 
 settings read_settings(const char* filename);

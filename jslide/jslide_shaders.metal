@@ -203,7 +203,9 @@ fragment float4 transfer_material_fragment_shader(const BlitVertexOut vertexIn [
 
 struct MouseMaterialUniforms {
   float2 iMouse;
+  float2 iMouseResolution;
   int iMousePixelsize;
+  int iMouseType;
 };
 
 vertex BlitVertexOut mouse_material_vertex_shader(const device BlitVertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant MouseMaterialUniforms& input [[buffer(10)]]) {
@@ -364,10 +366,68 @@ float4 mouseSprite(int lx, int ly, float4 bg, float4 c0, float4 c1) {
   return bg;
 }
 
+float2x2 mouse_rotate2d(float angle)
+{
+  return float2x2(cos(angle),-sin(angle), sin(angle), cos(angle));
+}
+
+float mouse_rect (float2 uv, float2 pos, float blurVal, float2 size)
+{
+  float value = smoothstep(pos.x - size.x/2., (pos.x - size.x/2.) + blurVal, uv.x)
+  - smoothstep(pos.x + size.x/2., (pos.x + size.x/2.) + blurVal,uv.x);
+  
+  return value *= smoothstep(pos.y, pos.y + blurVal, uv.y)
+  - smoothstep(pos.y + size.y, (pos.y+size.y) + blurVal, uv.y);
+}
+
+float mouse_circle(float2 uv,float radius, float2 pos)
+{
+  
+  float d = distance(pos,uv);
+  float value = step(radius,d);
+  
+  return value;
+}
+
 fragment float4 mouse_material_fragment_shader(const BlitVertexOut vertexIn [[stage_in]], constant MouseMaterialUniforms& input [[buffer(10)]]) {
-  float pixelsize = 8;
-	int localmousex = (int)round((vertexIn.position.x-input.iMouse.x)/input.iMousePixelsize);
-	int localmousey = (int)round((vertexIn.position.y-input.iMouse.y)/input.iMousePixelsize);
+  if (input.iMouseType == 1)
+  {
+    float2 uv = (vertexIn.position.xy-input.iMouse)/input.iMouseResolution;
+    float ratio = input.iMouseResolution.x/input.iMouseResolution.y;
+    float xoffset = 0.2;
+    float2 bladePos = float2((0.495-xoffset)*ratio,.48);
+    float2 handlePos = float2((0.499-xoffset)*ratio,.34);
+    float2 shinePos = float2((0.494-xoffset)*ratio,.48);
+    float2 circlePos = float2((0.499-xoffset)*ratio,.44);
+    float2 hiltPos = float2((0.5-xoffset)*ratio,.48);
+    float2 bottomPos = float2((0.5-xoffset)*ratio,.34);
+    
+    uv.x *= ratio;
+    
+    uv-=bladePos;
+    uv*= mouse_rotate2d(4);
+    uv+=bladePos;
+    
+    float3 blade = float3(mouse_rect(uv, bladePos, 0.02, float2(.029, 0.7)));
+    float3 handle = float3(mouse_rect(uv, handlePos, 0.0, float2(.029, 0.15)));
+    float3 shine = float3(mouse_rect(uv, shinePos, 0.02, float2(.01, 0.7)));
+    float button = mouse_circle(uv, 0.01, circlePos);
+    float3 hilt = float3(mouse_rect(uv, hiltPos, 0.0, float2(.05, .015)));
+    float3 bottom = float3(mouse_rect(uv, bottomPos, 0.0, float2(.05, .015)));
+    
+    float3 col = mix(float3(.0), float3(0., 0., 1.), blade);
+    col = mix(col, float3(1., 1., 1.), shine);
+    col += mix(col, float3(.3), handle);
+    col += mix(col, float3(.0), button);
+    col = mix(col, float3(.2), hilt);
+    col = mix(col, float3(.2), bottom);
+    if (col.x == 0)
+      discard_fragment();
+    // Output to screen
+    return float4(col,1.0);
+  }
+  int localmousex = (int)round((vertexIn.position.x-input.iMouse.x)/input.iMousePixelsize);
+  int localmousey = (int)round((vertexIn.position.y-input.iMouse.y)/input.iMousePixelsize);
   float4 bg = float4(0,0,0,0);
   float4 c0 = float4(1,1,1,1);
   float4 c1 = float4(0,0,0,1);
@@ -375,4 +435,5 @@ fragment float4 mouse_material_fragment_shader(const BlitVertexOut vertexIn [[st
   if (clr.w == 0)
     discard_fragment();
   return clr;
+  
 }

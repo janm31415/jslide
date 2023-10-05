@@ -11,12 +11,14 @@ settings read_settings(const char* filename)
   s.script_window = true; 
   s.crt_effect = true;
   s.show_mouse = true;
+  s.mouse_type = 0;
   pref_file f(filename, pref_file::READ);
   f["file_open_folder"] >> s.file_open_folder;
   f["log_window"] >> s.log_window;
   f["script_window"] >> s.script_window;
   f["crt_effect"] >> s.crt_effect;
   f["show_mouse"] >> s.show_mouse;
+  f["mouse_type"] >> s.mouse_type;
   return s;
   }
 
@@ -27,5 +29,6 @@ void write_settings(const settings& s, const char* filename)
   f << "script_window" << s.script_window;
   f << "crt_effect" << s.crt_effect;
   f << "show_mouse" << s.show_mouse;
+  f << "mouse_type" << s.mouse_type;
   f.release();
   }

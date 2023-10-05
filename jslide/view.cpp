@@ -293,7 +293,7 @@ void view::_poll_for_events()
         {
           float width_ratio = (float)_viewport_w / (float)_w;
           float height_ratio = (float)_viewport_h / (float)_h;
-          
+        
           _md.mouse_x *= width_ratio;
           _md.mouse_y *= height_ratio;
         }
@@ -427,6 +427,16 @@ void view::_poll_for_events()
             _settings.show_mouse = !_settings.show_mouse;
             break;
           }
+          case SDLK_0:
+          {
+            _settings.mouse_type = 0;
+            break;
+          }
+          case SDLK_1:
+          {
+            _settings.mouse_type = 1;
+            break;
+          }           
         }
         break;
       }
@@ -1075,7 +1085,7 @@ void view::loop()
       descr_mouse.frame_buffer_handle = target_framebuffer_id;
       descr_mouse.frame_buffer_channel = 10;
       _engine.renderpass_begin(descr_mouse);
-      _mouse_material.bind(_md.mouse_x, _md.mouse_y, 8, &_engine);
+      _mouse_material.bind(_md.mouse_x, _md.mouse_y, 800, 450, 8, _settings.mouse_type, &_engine);
       _mouse_material.draw(&_engine);
       _engine.renderpass_end();
     }
