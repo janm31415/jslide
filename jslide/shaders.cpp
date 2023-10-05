@@ -263,14 +263,235 @@ std::string get_mouse_material_fragment_shader()
   return std::string(R"(#version 330 core
   precision mediump float;
   precision mediump int;
-  uniform vec2      iResolution;
   uniform vec2      iMouse;
+  uniform vec2      iMouseResolution;
+  uniform int       iMousePixelsize;
+  uniform int       iMouseType;
   out vec4 FragColor;
   
+vec4 mouseSprite(int lx, int ly, vec4 bg, vec4 c0, vec4 c1) {
+  // line 0
+  // 11__ ____ __
+  if (ly == 0) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c1;
+  }
+  // line 1
+  // 101_ ____ __
+  if (ly == 1) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c1;
+  }
+  // line 2
+  // 1001 ____ __
+  if (ly == 2) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c1;
+  }
+  // line 3
+  // 1000 1___ __
+  if (ly == 3) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c1;
+  }
+  // line 4
+  // 1000 01__ __
+  if (ly == 4) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c1;
+  }
+  // line 5
+  // 1000 001_ __
+  if (ly == 5) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c0;
+    if (lx == 6) return c1;
+  }
+  // line 6
+  // 1000 0001 __
+  if (ly == 6) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c0;
+    if (lx == 6) return c0;
+    if (lx == 7) return c1;
+  }
+  // line 7
+  // 1000 0000 1_
+  if (ly == 7) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c0;
+    if (lx == 6) return c0;
+    if (lx == 7) return c0;
+    if (lx == 8) return c1;
+  }
+  // line 8
+  // 1000 0111 11
+  if (ly == 8) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c1;
+    if (lx == 6) return c1;
+    if (lx == 7) return c1;
+    if (lx == 8) return c1;
+    if (lx == 9) return c1;
+  }
+  // line 9
+  // 1001 001_ __
+  if (ly == 9) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c1;
+    if (lx == 4) return c0;
+    if (lx == 5) return c0;
+    if (lx == 6) return c1;
+  }
+  // line 10
+  // 101_ 1001 __
+  if (ly == 10) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c1;
+    if (lx == 4) return c1;
+    if (lx == 5) return c0;
+    if (lx == 6) return c0;
+    if (lx == 7) return c1;
+  }
+  // line 11
+  // 11__ 1001 __
+  if (ly == 11) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c1;
+    if (lx == 4) return c1;
+    if (lx == 5) return c0;
+    if (lx == 6) return c0;
+    if (lx == 7) return c1;
+  }
+  // line 12
+  // 1___ 1001 __
+  if (ly == 12) {
+    if (lx == 0) return c1;
+    if (lx == 5) return c1;
+    if (lx == 6) return c0;
+    if (lx == 7) return c0;
+    if (lx == 8) return c1;
+  }
+  // line 13
+  // ____ _100 1_
+  if (ly == 13) {
+    if (lx == 5) return c1;
+    if (lx == 6) return c0;
+    if (lx == 7) return c0;
+    if (lx == 8) return c1;
+  }
+  // line 14
+  // ____ __11 1_
+  if (ly == 14) {
+    if (lx == 6) return c1;
+    if (lx == 7) return c1;
+    if (lx == 8) return c1;
+  }
+  return bg;
+}
+
+mat2 rotate2d(float angle)
+{
+    return mat2(cos(angle),-sin(angle), sin(angle), cos(angle));
+}
+
+float rect (vec2 uv, vec2 pos, float blurVal, vec2 size)
+{
+	float value = smoothstep(pos.x - size.x/2., (pos.x - size.x/2.) + blurVal, uv.x) 
+        		- smoothstep(pos.x + size.x/2., (pos.x + size.x/2.) + blurVal,uv.x);
+    
+    return value *= smoothstep(pos.y, pos.y + blurVal, uv.y) 
+        		  - smoothstep(pos.y + size.y, (pos.y+size.y) + blurVal, uv.y);
+}
+
+float circle(vec2 uv,float radius, vec2 pos)
+{
+     
+    float d = distance(pos,uv);
+    float value = step(radius,d);
+    
+    return value; 
+}
 
   void main()
   {
-  discard;
+  if (iMouseType == 1)
+  {
+    vec2 uv = (gl_FragCoord.xy-iMouse)/iMouseResolution.xy;
+    uv.y = -uv.y;
+	  float ratio = float(iMouseResolution.x) / float(iMouseResolution.y);
+    float xoffset = 0.2;
+   	vec2 bladePos = vec2((0.495-xoffset)*ratio,.48);
+    vec2 handlePos = vec2((0.499-xoffset)*ratio,.34);
+    vec2 shinePos = vec2((0.494-xoffset)*ratio,.48);
+    vec2 circlePos = vec2((0.499-xoffset)*ratio,.44);
+    vec2 hiltPos = vec2((0.5-xoffset)*ratio,.48);
+    vec2 bottomPos = vec2((0.5-xoffset)*ratio,.34);
+    
+    uv.x *= ratio;
+    
+    uv-=bladePos;
+    uv*= rotate2d(4);
+    uv+=bladePos;
+    
+    vec3 blade = vec3(rect(uv, bladePos, 0.02, vec2(.029, 0.7)));
+    vec3 handle = vec3(rect(uv, handlePos, 0.0, vec2(.029, 0.15)));
+    vec3 shine = vec3(rect(uv, shinePos, 0.02, vec2(.01, 0.7)));
+    float button = circle(uv, 0.01, circlePos);
+    vec3 hilt = vec3(rect(uv, hiltPos, 0.0, vec2(.05, .015)));
+    vec3 bottom = vec3(rect(uv, bottomPos, 0.0, vec2(.05, .015)));
+    
+    vec3 col = mix(vec3(.0), vec3(0., 0., 1.), blade);
+    col = mix(col, vec3(1., 1., 1.), shine);
+    col += mix(col, vec3(.3), handle);
+    col += mix(col, vec3(.0), button);
+    col = mix(col, vec3(.2), hilt);
+    col = mix(col, vec3(.2), bottom);
+    
+    // Output to screen
+    if (col.x == 0)
+      discard;
+    FragColor = vec4(col,1.0);
+    return;
+  }
+  int localmousex = int(round((gl_FragCoord.x-iMouse.x)/iMousePixelsize));
+  int localmousey = int(round((-(gl_FragCoord.y-iMouse.y))/iMousePixelsize));
+  vec4 bg = vec4(0,0,0,0);
+  vec4 c0 = vec4(1,1,1,1);
+  vec4 c1 = vec4(0,0,0,1);
+  vec4 clr = mouseSprite(localmousex, localmousey, bg, c0, c1);
+  if (clr.w == 0)
+    discard;
+  FragColor = clr;
   }
   )");
   }
