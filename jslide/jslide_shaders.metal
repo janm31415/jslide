@@ -202,8 +202,8 @@ fragment float4 transfer_material_fragment_shader(const BlitVertexOut vertexIn [
 
 
 struct MouseMaterialUniforms {
-  float2 iMouseResolution;
   float2 iMouse;
+  int iMousePixelsize;
 };
 
 vertex BlitVertexOut mouse_material_vertex_shader(const device BlitVertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant MouseMaterialUniforms& input [[buffer(10)]]) {
@@ -366,8 +366,8 @@ float4 mouseSprite(int lx, int ly, float4 bg, float4 c0, float4 c1) {
 
 fragment float4 mouse_material_fragment_shader(const BlitVertexOut vertexIn [[stage_in]], constant MouseMaterialUniforms& input [[buffer(10)]]) {
   float pixelsize = 8;
-	int localmousex = (int)round((vertexIn.position.x-input.iMouse.x)/pixelsize);
-	int localmousey = (int)round((vertexIn.position.y-input.iMouse.y)/pixelsize);
+	int localmousex = (int)round((vertexIn.position.x-input.iMouse.x)/input.iMousePixelsize);
+	int localmousey = (int)round((vertexIn.position.y-input.iMouse.y)/input.iMousePixelsize);
   float4 bg = float4(0,0,0,0);
   float4 c0 = float4(1,1,1,1);
   float4 c1 = float4(0,0,0,1);

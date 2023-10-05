@@ -178,13 +178,14 @@ class mouse_material
     ~mouse_material();
     
     void compile(RenderDoos::render_engine* engine);
-    void bind(float mouse_x, float mouse_y, uint32_t res_w, uint32_t res_h, RenderDoos::render_engine* engine);
+    void bind(float mouse_x, float mouse_y, int32_t mouse_pixelsize, RenderDoos::render_engine* engine);
     void destroy(RenderDoos::render_engine* engine);
     void draw(RenderDoos::render_engine* engine);
     
   private:
     int32_t vs_handle, fs_handle;
     int32_t shader_program_handle;
-    int32_t res_handle, mouse_handle;
+    int32_t mouse_handle;
+    int32_t mouse_pixelsize_handle;
     int32_t geometry_id;
 };
