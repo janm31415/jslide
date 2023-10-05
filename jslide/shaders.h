@@ -14,3 +14,6 @@ std::string get_shadertoy_material_fragment_shader_footer();
 
 std::string get_transfer_material_vertex_shader();
 std::string get_transfer_material_fragment_shader();
+
+std::string get_mouse_material_vertex_shader();
+std::string get_mouse_material_fragment_shader();

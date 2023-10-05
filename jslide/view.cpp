@@ -152,7 +152,8 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   _blit_material.compile(&_engine);
   _shadertoy_material.compile(&_engine);
   _font_material.compile(&_engine);
-  _transfer_material.compile(&_engine);  
+  _transfer_material.compile(&_engine);
+  _mouse_material.compile(&_engine);
 
   _slide_state = new slide_t();
   _slide_state->blit_state = &_blit_material;
@@ -187,6 +188,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 
 view::~view()
   {
+  SDL_ShowCursor(1);
   write_settings(_settings, "jslide.cfg");
   destroy_presentation(_presentation);
 #if defined(RENDERDOOS_METAL)
@@ -202,6 +204,7 @@ view::~view()
   _shadertoy_material.destroy(&_engine);
   _font_material.destroy(&_engine);
   _transfer_material.destroy(&_engine);
+  _mouse_material.destroy(&_engine);
   _engine.remove_frame_buffer(_transfer_framebuffer_id);
   _engine.destroy();
 
@@ -286,7 +289,7 @@ void view::_poll_for_events()
       _md.prev_mouse_y = _md.mouse_y;
       _md.mouse_x = float(event.motion.x);
       _md.mouse_y = float(event.motion.y);
-      if (_settings.fullscreen)
+      //if (_settings.fullscreen)
         {
         float width_ratio = (float)_viewport_w / (float)_w;
         float height_ratio = (float)_viewport_h / (float)_h;
@@ -400,6 +403,7 @@ void view::_poll_for_events()
         {
         case SDLK_ESCAPE:
         {
+        SDL_ShowCursor(1);
         _set_fullscreen(false);
         break;
         }
@@ -410,11 +414,17 @@ void view::_poll_for_events()
           _first_slide();
           }
         _set_fullscreen(true);
+        SDL_ShowCursor(0);
         break;
         }
         case SDLK_F4:
         {
         _settings.crt_effect = !_settings.crt_effect;
+        break;
+        }
+        case SDLK_m:
+        {
+        _settings.show_mouse = !_settings.show_mouse;
         break;
         }
         }
@@ -557,6 +567,7 @@ void view::_imgui_ui()
         ImGui::MenuItem("CRT display", "F4", &_settings.crt_effect);
         ImGui::MenuItem("Log window", NULL, &_settings.log_window);
         ImGui::MenuItem("Script window", NULL, &_settings.script_window);
+        ImGui::MenuItem("Show mouse", "m", &_settings.show_mouse);
         ImGui::EndMenu();
         }
       ImGui::EndMenuBar();
@@ -706,6 +717,8 @@ void view::_script_window()
     }
   ImGui::SameLine();
   ImGui::Checkbox("CRT", &_settings.crt_effect);
+  ImGui::SameLine();
+  ImGui::Checkbox("Mouse", &_settings.show_mouse);  
   ImGui::Text("Ln %d\tCol %d", _line_nr, _col_nr);
   ImGui::End();
   }
@@ -1053,6 +1066,20 @@ void view::loop()
 
         }
 
+    if (_settings.show_mouse)
+      {
+      RenderDoos::renderpass_descriptor descr_mouse;
+      descr_mouse.clear_flags = 0;
+      descr_mouse.w = _viewport_w;
+      descr_mouse.h = _viewport_h;
+      descr_mouse.frame_buffer_handle = target_framebuffer_id;
+      descr_mouse.frame_buffer_channel = 10;
+      _engine.renderpass_begin(descr_mouse);
+      _mouse_material.bind(_md.mouse_x, _md.mouse_y, _viewport_w, _viewport_h, &_engine);
+      _mouse_material.draw(&_engine);
+      _engine.renderpass_end();
+      }
+
     //if (!_presentation.slides.empty())
     //  {
     //  prepare_slide_data(_slide_state, &_engine, _presentation.slides[_slide_id], _sp);
@@ -1085,7 +1112,6 @@ void view::loop()
       _settings.crt_effect ? 1 : 0, flip, 0);
     _blit_material.draw(&_engine);
     _engine.renderpass_end();
-
 
     if (!_settings.fullscreen)
       {

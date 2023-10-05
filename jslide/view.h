@@ -83,7 +83,8 @@ class view
     blit_material _blit_material;
     shadertoy_material _shadertoy_material;
     font_material _font_material;
-    transfer_material _transfer_material;
+    transfer_material _transfer_material;    
+    mouse_material _mouse_material;
     
     int32_t _dummy_image_handle;
     

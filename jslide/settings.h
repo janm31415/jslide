@@ -9,6 +9,7 @@ struct settings
   bool script_window;
   bool fullscreen; 
   bool crt_effect;
+  bool show_mouse;
   };
 
 settings read_settings(const char* filename);

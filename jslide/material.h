@@ -40,7 +40,7 @@ private:
   int32_t iCrt;
   int32_t iFlip;
   int32_t iRotation;
-  uint32_t geometry_id;
+  int32_t geometry_id;
 };
 
 
@@ -139,7 +139,7 @@ private:
   std::string _script;
   properties _props;
   int32_t res_handle, time_handle, global_time_handle, time_delta_handle, frame_handle, fade_handle;
-  uint32_t geometry_id;
+  int32_t geometry_id;
 };
 
 
@@ -168,5 +168,23 @@ private:
   int32_t shader_program_handle;
   properties _props;
   int32_t res_handle, channel0_handle, time_handle, max_time_handle, method_handle;
-  uint32_t geometry_id;
+  int32_t geometry_id;
+};
+
+class mouse_material
+{
+  public:
+    mouse_material();
+    ~mouse_material();
+    
+    void compile(RenderDoos::render_engine* engine);
+    void bind(float mouse_x, float mouse_y, uint32_t res_w, uint32_t res_h, RenderDoos::render_engine* engine);
+    void destroy(RenderDoos::render_engine* engine);
+    void draw(RenderDoos::render_engine* engine);
+    
+  private:
+    int32_t vs_handle, fs_handle;
+    int32_t shader_program_handle;
+    int32_t res_handle, mouse_handle;
+    int32_t geometry_id;
 };

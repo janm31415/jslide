@@ -337,13 +337,13 @@ text_vert_t make_text_vert(float x, float y, float s, float t, float r, float g,
 }
 
 void font_material::draw_text(RenderDoos::render_engine* engine)
-  {
+{
   for (auto id : geometry_ids)
-    {
+  {
     engine->geometry_draw(id);
-    }
   }
-  
+}
+
 void font_material::prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, uint32_t clr)
 {
   
@@ -395,18 +395,18 @@ void font_material::prepare_text(RenderDoos::render_engine* engine, const char* 
   text_vert_t* vp;
   uint32_t* ip;
   /*
-  std::vector<float> vertsdata(verts.size()*7);
-  for (uint32_t i = 0; i < verts.size(); ++i)
-    {
-    vertsdata[i*7+0] = verts[i].x;
-    vertsdata[i*7+1] = verts[i].y;
-    vertsdata[i*7+2] = verts[i].s;
-    vertsdata[i*7+3] = verts[i].t;
-    vertsdata[i*7+4] = verts[i].r;
-    vertsdata[i*7+5] = verts[i].g;
-    vertsdata[i*7+6] = verts[i].b;
-    }
-  */
+   std::vector<float> vertsdata(verts.size()*7);
+   for (uint32_t i = 0; i < verts.size(); ++i)
+   {
+   vertsdata[i*7+0] = verts[i].x;
+   vertsdata[i*7+1] = verts[i].y;
+   vertsdata[i*7+2] = verts[i].s;
+   vertsdata[i*7+3] = verts[i].t;
+   vertsdata[i*7+4] = verts[i].r;
+   vertsdata[i*7+5] = verts[i].g;
+   vertsdata[i*7+6] = verts[i].b;
+   }
+   */
   engine->geometry_begin(id, (int32_t)verts.size(), (int32_t)verts.size(), (float**)&vp, (void**)&ip);
   memcpy(vp, verts.data(), sizeof(float)*7*verts.size());
   //memcpy(vp, vertsdata.data(), sizeof(float)*vertsdata.size());
@@ -424,20 +424,20 @@ void font_material::prepare_text(RenderDoos::render_engine* engine, const char* 
 }
 
 void font_material::prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const jtk::vec3<float>& clr)
-  {
+{
   uint32_t c = 0xff000000 | ((uint32_t)(clr.z*255.f) << 16) | ((uint32_t)(clr.y*255.f) << 8) | ((uint32_t)(clr.x*255.f));
   prepare_text(engine, text, x, y, sx, sy, c);
-  }
+}
 
 void font_material::clear_text(RenderDoos::render_engine* engine)
-  {
+{
   for (auto id : geometry_ids)
     engine->remove_geometry(id);
   geometry_ids.clear();
-  }
-  
+}
+
 void font_material::prepare_text(RenderDoos::render_engine* engine, const char* text, float x, float y, float sx, float sy, const std::vector<jtk::vec3<float>>& colors)
-  {
+{
   const float x_orig = x;
   
   std::vector<text_vert_t> verts(6 * strlen(text));
@@ -500,7 +500,7 @@ void font_material::prepare_text(RenderDoos::render_engine* engine, const char* 
   }
   engine->geometry_end(id);
   //engine->geometry_draw(geometry_id);
-  }
+}
 
 void font_material::get_render_size(float& width, float& height, const char* text, float sx, float sy)
 {
@@ -617,12 +617,12 @@ void shadertoy_material::destroy(RenderDoos::render_engine* engine)
 }
 
 bool shadertoy_material::is_compiled()
-  {
+{
   return shader_program_handle >= 0;
-  }
+}
 
 void shadertoy_material::draw(uint32_t res_w, uint32_t res_h, uint32_t framebuffer_id, RenderDoos::render_engine* engine)
-  {
+{
   RenderDoos::renderpass_descriptor descr;
   descr.clear_color = 0xff00ff00;
   descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
@@ -634,7 +634,7 @@ void shadertoy_material::draw(uint32_t res_w, uint32_t res_h, uint32_t framebuff
   bind(res_w, res_h, engine);
   engine->geometry_draw(geometry_id);
   engine->renderpass_end();
-  }
+}
 
 void shadertoy_material::compile(RenderDoos::render_engine* engine)
 {
@@ -820,7 +820,7 @@ void transfer_material::destroy(RenderDoos::render_engine* engine)
 }
 
 void transfer_material::draw(uint32_t res_w, uint32_t res_h, int32_t texture_handle, int32_t framebuffer_id, RenderDoos::render_engine* engine)
-  {
+{
   RenderDoos::renderpass_descriptor descr;
   descr.clear_color = 0xff00ffff;
   descr.clear_flags = CLEAR_COLOR | CLEAR_DEPTH;
@@ -832,7 +832,7 @@ void transfer_material::draw(uint32_t res_w, uint32_t res_h, int32_t texture_han
   bind(res_w, res_h, texture_handle, engine);
   engine->geometry_draw(geometry_id);
   engine->renderpass_end();
-  }
+}
 
 void transfer_material::compile(RenderDoos::render_engine* engine)
 {
@@ -849,7 +849,7 @@ void transfer_material::compile(RenderDoos::render_engine* engine)
   shader_program_handle = engine->add_program(vs_handle, fs_handle);
   res_handle = engine->add_uniform("iTransferResolution", RenderDoos::uniform_type::vec2, 1);
   channel0_handle = engine->add_uniform("iTransferChannel0", RenderDoos::uniform_type::sampler, 1);
-  time_handle = engine->add_uniform("iTransferTime", RenderDoos::uniform_type::real, 1);  
+  time_handle = engine->add_uniform("iTransferTime", RenderDoos::uniform_type::real, 1);
   max_time_handle = engine->add_uniform("iTransferMaxTime", RenderDoos::uniform_type::real, 1);
   method_handle = engine->add_uniform("iTransferMethod", RenderDoos::uniform_type::integer, 1);
   geometry_id = engine->add_geometry(VERTEX_STANDARD);
@@ -928,4 +928,112 @@ void transfer_material::bind(uint32_t res_w, uint32_t res_h, int32_t texture_han
   assert(tex != nullptr);
   int32_t texture_flags = TEX_WRAP_CLAMP_TO_EDGE | TEX_FILTER_NEAREST;
   engine->bind_texture_to_channel(texture_handle, channel, texture_flags);
+}
+
+mouse_material::mouse_material()
+{
+  vs_handle = -1;
+  fs_handle = -1;
+  shader_program_handle = -1;
+  res_handle = -1;
+  mouse_handle = -1;
+  geometry_id = -1;
+}
+
+mouse_material::~mouse_material()
+{
+}
+
+void mouse_material::compile(RenderDoos::render_engine* engine)
+{
+  if (engine->get_renderer_type() == RenderDoos::renderer_type::METAL)
+  {
+    vs_handle = engine->add_shader(nullptr, SHADER_VERTEX, "mouse_material_vertex_shader");
+    fs_handle = engine->add_shader(nullptr, SHADER_FRAGMENT, "mouse_material_fragment_shader");
+  }
+  else if (engine->get_renderer_type() == RenderDoos::renderer_type::OPENGL)
+  {
+    vs_handle = engine->add_shader(get_mouse_material_vertex_shader().c_str(), SHADER_VERTEX, nullptr);
+    fs_handle = engine->add_shader(get_mouse_material_fragment_shader().c_str(), SHADER_FRAGMENT, nullptr);
+  }
+  shader_program_handle = engine->add_program(vs_handle, fs_handle);
+  res_handle = engine->add_uniform("iMouseResolution", RenderDoos::uniform_type::vec2, 1);
+  mouse_handle = engine->add_uniform("iMouse", RenderDoos::uniform_type::vec2, 1);
+  geometry_id = engine->add_geometry(VERTEX_STANDARD);
+  RenderDoos::vertex_standard* vp;
+  uint32_t* ip;
+  
+  engine->geometry_begin(geometry_id, 4, 6, (float**)&vp, (void**)&ip);
+  // make a quad for drawing the texture
+  
+  vp->x = -1.f;
+  vp->y = -1.f;
+  vp->z = 0.f;
+  vp->nx = 0.f;
+  vp->ny = 0.f;
+  vp->nz = 1.f;
+  vp->u = 0.f;
+  vp->v = 0.f;
+  ++vp;
+  vp->x = 1.f;
+  vp->y = -1.f;
+  vp->z = 0.f;
+  vp->nx = 0.f;
+  vp->ny = 0.f;
+  vp->nz = 1.f;
+  vp->u = 1.f;
+  vp->v = 0.f;
+  ++vp;
+  vp->x = 1.f;
+  vp->y = 1.f;
+  vp->z = 0.f;
+  vp->nx = 0.f;
+  vp->ny = 0.f;
+  vp->nz = 1.f;
+  vp->u = 1.f;
+  vp->v = 1.f;
+  ++vp;
+  vp->x = -1.f;
+  vp->y = 1.f;
+  vp->z = 0.f;
+  vp->nx = 0.f;
+  vp->ny = 0.f;
+  vp->nz = 1.f;
+  vp->u = 0.f;
+  vp->v = 1.f;
+  
+  ip[0] = 0;
+  ip[1] = 1;
+  ip[2] = 2;
+  ip[3] = 0;
+  ip[4] = 2;
+  ip[5] = 3;
+  
+  engine->geometry_end(geometry_id);
+}
+
+void mouse_material::bind(float mouse_x, float mouse_y, uint32_t res_w, uint32_t res_h, RenderDoos::render_engine* engine)
+{
+  float res[2] = { (float)res_w, (float)res_h};
+  float mouse[2] = { (float)mouse_x, (float)mouse_y};
+  engine->set_blending_enabled(false);
+  engine->bind_program(shader_program_handle);
+  engine->set_uniform(res_handle, (void*)res);
+  engine->set_uniform(mouse_handle, (void*)mouse);
+  engine->bind_uniform(shader_program_handle, res_handle);  
+  engine->bind_uniform(shader_program_handle, mouse_handle);
+}
+
+void mouse_material::destroy(RenderDoos::render_engine* engine)
+{
+  engine->remove_shader(vs_handle);
+  engine->remove_shader(fs_handle);
+  engine->remove_program(shader_program_handle);
+  engine->remove_uniform(res_handle);
+  engine->remove_uniform(mouse_handle);
+}
+
+void mouse_material::draw(RenderDoos::render_engine* engine)
+{
+  engine->geometry_draw(geometry_id);
 }

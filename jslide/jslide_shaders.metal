@@ -199,3 +199,180 @@ fragment float4 transfer_material_fragment_shader(const BlitVertexOut vertexIn [
     return texture.sample(sampler2d, pos)*frac;
   }
 }
+
+
+struct MouseMaterialUniforms {
+  float2 iMouseResolution;
+  float2 iMouse;
+};
+
+vertex BlitVertexOut mouse_material_vertex_shader(const device BlitVertexIn *vertices [[buffer(0)]], uint vertexId [[vertex_id]], constant MouseMaterialUniforms& input [[buffer(10)]]) {
+  float4 pos(vertices[vertexId].position, 1);
+  BlitVertexOut out;
+  out.position = pos;
+  out.texcoord = vertices[vertexId].textureCoordinates;
+  return out;
+}
+
+float4 mouseSprite(int lx, int ly, float4 bg, float4 c0, float4 c1) {
+  // line 0
+  // 11__ ____ __
+  if (ly == 0) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c1;
+  }
+  // line 1
+  // 101_ ____ __
+  if (ly == 1) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c1;
+  }
+  // line 2
+  // 1001 ____ __
+  if (ly == 2) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c1;
+  }
+  // line 3
+  // 1000 1___ __
+  if (ly == 3) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c1;
+  }
+  // line 4
+  // 1000 01__ __
+  if (ly == 4) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c1;
+  }
+  // line 5
+  // 1000 001_ __
+  if (ly == 5) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c0;
+    if (lx == 6) return c1;
+  }
+  // line 6
+  // 1000 0001 __
+  if (ly == 6) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c0;
+    if (lx == 6) return c0;
+    if (lx == 7) return c1;
+  }
+  // line 7
+  // 1000 0000 1_
+  if (ly == 7) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c0;
+    if (lx == 6) return c0;
+    if (lx == 7) return c0;
+    if (lx == 8) return c1;
+  }
+  // line 8
+  // 1000 0111 11
+  if (ly == 8) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c0;
+    if (lx == 4) return c0;
+    if (lx == 5) return c1;
+    if (lx == 6) return c1;
+    if (lx == 7) return c1;
+    if (lx == 8) return c1;
+    if (lx == 9) return c1;
+  }
+  // line 9
+  // 1001 001_ __
+  if (ly == 9) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c0;
+    if (lx == 3) return c1;
+    if (lx == 4) return c0;
+    if (lx == 5) return c0;
+    if (lx == 6) return c1;
+  }
+  // line 10
+  // 101_ 1001 __
+  if (ly == 10) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c0;
+    if (lx == 2) return c1;
+    if (lx == 4) return c1;
+    if (lx == 5) return c0;
+    if (lx == 6) return c0;
+    if (lx == 7) return c1;
+  }
+  // line 11
+  // 11__ 1001 __
+  if (ly == 11) {
+    if (lx == 0) return c1;
+    if (lx == 1) return c1;
+    if (lx == 4) return c1;
+    if (lx == 5) return c0;
+    if (lx == 6) return c0;
+    if (lx == 7) return c1;
+  }
+  // line 12
+  // 1___ 1001 __
+  if (ly == 12) {
+    if (lx == 0) return c1;
+    if (lx == 5) return c1;
+    if (lx == 6) return c0;
+    if (lx == 7) return c0;
+    if (lx == 8) return c1;
+  }
+  // line 13
+  // ____ _100 1_
+  if (ly == 13) {
+    if (lx == 5) return c1;
+    if (lx == 6) return c0;
+    if (lx == 7) return c0;
+    if (lx == 8) return c1;
+  }
+  // line 14
+  // ____ __11 1_
+  if (ly == 14) {
+    if (lx == 6) return c1;
+    if (lx == 7) return c1;
+    if (lx == 8) return c1;
+  }
+  return bg;
+}
+
+fragment float4 mouse_material_fragment_shader(const BlitVertexOut vertexIn [[stage_in]], constant MouseMaterialUniforms& input [[buffer(10)]]) {
+  float pixelsize = 8;
+	int localmousex = (int)round((vertexIn.position.x-input.iMouse.x)/pixelsize);
+	int localmousey = (int)round((vertexIn.position.y-input.iMouse.y)/pixelsize);
+  float4 bg = float4(0,0,0,0);
+  float4 c0 = float4(1,1,1,1);
+  float4 c1 = float4(0,0,0,1);
+  float4 clr = mouseSprite(localmousex, localmousey, bg, c0, c1);
+  if (clr.w == 0)
+    discard_fragment();
+  return clr;
+}

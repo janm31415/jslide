@@ -242,3 +242,35 @@ std::string get_transfer_material_fragment_shader()
   }
   )");
   }
+
+std::string get_mouse_material_vertex_shader()
+  {
+  return std::string(R"(#version 330 core
+  precision mediump float;
+  precision mediump int;
+  layout (location = 0) in vec3 vPosition;
+  //layout (location = 1) in vec2 vUV;
+  
+  void main()
+  {
+  gl_Position = vec4(vPosition, 1.0f);
+  }
+  )");
+  }
+
+std::string get_mouse_material_fragment_shader()
+  {
+  return std::string(R"(#version 330 core
+  precision mediump float;
+  precision mediump int;
+  uniform vec2      iResolution;
+  uniform vec2      iMouse;
+  out vec4 FragColor;
+  
+
+  void main()
+  {
+  discard;
+  }
+  )");
+  }
