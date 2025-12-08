@@ -35,7 +35,7 @@ namespace
     {
     keyword_data kd;
 
-    std::string in = "+ - * / sin cos atan sqr sqrt ! % ^ pow acos asin tan exp atan2 mod log ln abs \\";
+    std::string in = "+ - * / sin cos atan sqr sqrt ! % ^ pow acos asin tan exp atan2 mod log ln abs load store cell bbox offset intersection fill invert union \\";
     kd.keywords_1 = break_string(in);
     std::sort(kd.keywords_1.begin(), kd.keywords_1.end());
 
