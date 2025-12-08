@@ -19,6 +19,7 @@ settings read_settings(const char* filename)
   f["crt_effect"] >> s.crt_effect;
   f["show_mouse"] >> s.show_mouse;
   f["mouse_type"] >> s.mouse_type;
+  f["current_script"] >> s.current_script;
   return s;
   }
 
@@ -30,5 +31,6 @@ void write_settings(const settings& s, const char* filename)
   f << "crt_effect" << s.crt_effect;
   f << "show_mouse" << s.show_mouse;
   f << "mouse_type" << s.mouse_type;
+  f << "current_script" << s.current_script;
   f.release();
   }

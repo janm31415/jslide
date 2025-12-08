@@ -11,6 +11,7 @@ struct settings
   bool crt_effect;
   bool show_mouse;
   int mouse_type;
+  std::string current_script;
   };
 
 settings read_settings(const char* filename);

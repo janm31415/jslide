@@ -102,6 +102,18 @@ namespace
     m[".speed30"] = movie_speed::T_SPEED_THIRTY;
     return m;
     }
+
+  std::map<std::string, movie_frametime> get_movie_frametime_map()
+    {
+    std::map<std::string, movie_frametime> m;
+    m[".frametime_not_set"] = movie_frametime::T_NOTSET;
+    m[".frametime_1_10"] = movie_frametime::T_1_10;
+    m[".frametime_1_20"] = movie_frametime::T_1_20;
+    m[".frametime_1_25"] = movie_frametime::T_1_25;
+    m[".frametime_1_30"] = movie_frametime::T_1_30;
+    m[".frametime_1_60"] = movie_frametime::T_1_60;    
+    return m;
+    }
     
   std::map<std::string, movie_loop> get_movie_loop_map()
     {
@@ -209,6 +221,7 @@ namespace
     static auto textsize_map = get_textsize_map();
     static auto transfer_animation_map = get_transfer_animation_map();
     static auto movie_speed_map = get_movie_speed_map();
+    static auto movie_frametime_map = get_movie_frametime_map();
     static auto image_orientation_map = get_image_orientation_map();
     static auto shader_visibility_map = get_shader_visibility_map();
     static auto movie_loop_map = get_movie_loop_map();
@@ -271,6 +284,12 @@ namespace
       if (it9 != movie_loop_map.end())
         {
         current_attributes.e_movie_loop = it9->second;
+        continue;
+        }
+      auto it10 = movie_frametime_map.find(t.value);
+      if (it10 != movie_frametime_map.end())
+        {
+        current_attributes.e_movie_frametime = it10->second;
         continue;
         }
       if (t.value == std::string(".left"))

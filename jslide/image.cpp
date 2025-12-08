@@ -34,7 +34,7 @@ void init_video_data(image_t* state, RenderDoos::render_engine* engine, VideoRea
 void destroy_image_data(image_t* state, RenderDoos::render_engine* engine)
 {
   engine->remove_texture(state->tex_handle);
-  delete[] state->video_frame_data;
+  //delete[] state->video_frame_data;
 }
 
 void draw_image_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render_engine* engine, image_orientation orientation)
@@ -69,7 +69,7 @@ void draw_image_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
   engine->renderpass_end();
 }
 
-void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render_engine* engine, const shadertoy_material::properties& params, movie_speed speed, movie_loop loop, image_orientation orientation)
+void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render_engine* engine, const shadertoy_material::properties& params, movie_speed speed, movie_loop loop, image_orientation orientation, movie_frametime frametime)
 {
   int64_t pts;
   if (video_reader_read_frame(&state->video_state, state->video_frame_data, &pts))
@@ -114,6 +114,14 @@ void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
     engine->renderpass_end();
     
     double time_for_one_frame = (double)(state->video_state.time_base.num) / (double)(state->video_state.time_base.den);
+    switch (frametime) {
+      case movie_frametime::T_1_10: time_for_one_frame = 1.0 / 10.0; break;
+      case movie_frametime::T_1_20: time_for_one_frame = 1.0 / 20.0; break;
+      case movie_frametime::T_1_25: time_for_one_frame = 1.0 / 25.0; break;
+      case movie_frametime::T_1_30: time_for_one_frame = 1.0 / 30.0; break;
+      case movie_frametime::T_1_60: time_for_one_frame = 1.0 / 60.0; break;      
+      default: break;
+      }
     switch (speed)
     {
       default: break;

@@ -182,7 +182,10 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
   if (argc > 1)
   {
     _load(std::string(argv[1]));
-  }
+    }
+  else {
+    _script = _settings.current_script;
+    }
 }
 
 
@@ -681,6 +684,8 @@ int view::script_window_callback(ImGuiInputTextCallbackData* data)
 
 void view::_build()
 {
+  _settings.current_script = _script;
+  write_settings(_settings, "jslide.cfg");
   try
   {
     tokens tokes = tokenize(_script);

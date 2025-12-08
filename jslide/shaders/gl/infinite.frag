@@ -204,22 +204,22 @@ float segDot(vec2 p){
     return d;
 }
 
-float checkChar(int targetChar, int char){
-    return 1.-abs(sign(float(targetChar) - float(char)));
+float checkChar(int targetChar, int ch){
+    return 1.-abs(sign(float(targetChar) - float(ch)));
 }
 
-float drawFont(vec2 p, int char){
+float drawFont(vec2 p, int ch){
     p*=SkewX(-0.4);
-    float d = seg0(p)*checkChar(seg_0,char);
-    d += seg1(p)*checkChar(seg_1,char);
-    d += seg2(p)*checkChar(seg_2,char);
-    d += seg3(p)*checkChar(seg_3,char);
-    d += seg4(p)*checkChar(seg_4,char);
-    d += seg5(p)*checkChar(seg_5,char);
-    d += seg6(p)*checkChar(seg_6,char);
-    d += seg7(p)*checkChar(seg_7,char);
-    d += seg8(p)*checkChar(seg_8,char);
-    d += seg9(p)*checkChar(seg_9,char);
+    float d = seg0(p)*checkChar(seg_0,ch);
+    d += seg1(p)*checkChar(seg_1,ch);
+    d += seg2(p)*checkChar(seg_2,ch);
+    d += seg3(p)*checkChar(seg_3,ch);
+    d += seg4(p)*checkChar(seg_4,ch);
+    d += seg5(p)*checkChar(seg_5,ch);
+    d += seg6(p)*checkChar(seg_6,ch);
+    d += seg7(p)*checkChar(seg_7,ch);
+    d += seg8(p)*checkChar(seg_8,ch);
+    d += seg9(p)*checkChar(seg_9,ch);
     
     return d;
 }
