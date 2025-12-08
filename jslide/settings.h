@@ -10,6 +10,7 @@ struct settings
   bool fullscreen; 
   bool crt_effect;
   bool show_mouse;
+  bool pause_shaders;
   int mouse_type;
   std::string current_script;
   };

@@ -430,6 +430,11 @@ void view::_poll_for_events()
             _settings.show_mouse = !_settings.show_mouse;
             break;
           }
+          case SDLK_p:
+          {
+          _settings.pause_shaders = !_settings.pause_shaders;
+          break;
+          }
           case SDLK_0:
           {
             _settings.mouse_type = 0;
@@ -581,6 +586,7 @@ void view::_imgui_ui()
         ImGui::MenuItem("Log window", NULL, &_settings.log_window);
         ImGui::MenuItem("Script window", NULL, &_settings.script_window);
         ImGui::MenuItem("Show mouse", "m", &_settings.show_mouse);
+        ImGui::MenuItem("Pause shaders", "p", &_settings.pause_shaders);
         ImGui::EndMenu();
       }
       ImGui::EndMenuBar();
@@ -734,6 +740,8 @@ void view::_script_window()
   ImGui::Checkbox("CRT", &_settings.crt_effect);
   ImGui::SameLine();
   ImGui::Checkbox("Mouse", &_settings.show_mouse);
+  ImGui::SameLine();
+  ImGui::Checkbox("Shaders", &_settings.pause_shaders);
   ImGui::Text("Ln %d\tCol %d", _line_nr, _col_nr);
   ImGui::End();
 }
@@ -1160,6 +1168,7 @@ void view::loop()
     }
     
     ++_sp.frame;
-    _sp.time += _sp.time_delta;
+    if (!_settings.pause_shaders)
+      _sp.time += _sp.time_delta;
   }
 }
