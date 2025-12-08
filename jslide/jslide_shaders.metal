@@ -409,11 +409,11 @@ fragment float4 mouse_material_fragment_shader(const BlitVertexOut vertexIn [[st
     uv+=bladePos;
     
     float3 blade = float3(mouse_rect(uv, bladePos, 0.02, float2(.029, 0.7)));
-    float3 handle = float3(mouse_rect(uv, handlePos, 0.0, float2(.029, 0.15)));
+    float3 handle = float3(mouse_rect(uv, handlePos, 0.001, float2(.029, 0.15)));
     float3 shine = float3(mouse_rect(uv, shinePos, 0.02, float2(.01, 0.7)));
     float button = mouse_circle(uv, 0.01, circlePos);
-    float3 hilt = float3(mouse_rect(uv, hiltPos, 0.0, float2(.05, .015)));
-    float3 bottom = float3(mouse_rect(uv, bottomPos, 0.0, float2(.05, .015)));
+    float3 hilt = float3(mouse_rect(uv, hiltPos, 0.001, float2(.05, .015)));
+    float3 bottom = float3(mouse_rect(uv, bottomPos, 0.001, float2(.05, .015)));
     
     float3 col = mix(float3(.0), float3(0., 0., 1.), blade);
     col = mix(col, float3(1., 1., 1.), shine);

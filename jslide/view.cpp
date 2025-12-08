@@ -1079,7 +1079,10 @@ void view::loop()
     if (_settings.show_mouse)
     {
       RenderDoos::renderpass_descriptor descr_mouse;
-      descr_mouse.clear_flags = 0;
+      if (_presentation.slides.empty())
+        descr_mouse.clear_flags = CLEAR_DEPTH|CLEAR_COLOR;
+      else
+        descr_mouse.clear_flags = CLEAR_DEPTH;
       descr_mouse.w = _viewport_w;
       descr_mouse.h = _viewport_h;
       descr_mouse.frame_buffer_handle = target_framebuffer_id;

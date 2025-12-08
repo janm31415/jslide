@@ -464,11 +464,11 @@ float circle(vec2 uv,float radius, vec2 pos)
     uv+=bladePos;
     
     vec3 blade = vec3(rect(uv, bladePos, 0.02, vec2(.029, 0.7)));
-    vec3 handle = vec3(rect(uv, handlePos, 0.0, vec2(.029, 0.15)));
+    vec3 handle = vec3(rect(uv, handlePos, 0.001, vec2(.029, 0.15)));
     vec3 shine = vec3(rect(uv, shinePos, 0.02, vec2(.01, 0.7)));
     float button = circle(uv, 0.01, circlePos);
-    vec3 hilt = vec3(rect(uv, hiltPos, 0.0, vec2(.05, .015)));
-    vec3 bottom = vec3(rect(uv, bottomPos, 0.0, vec2(.05, .015)));
+    vec3 hilt = vec3(rect(uv, hiltPos, 0.001, vec2(.05, .015)));
+    vec3 bottom = vec3(rect(uv, bottomPos, 0.001, vec2(.05, .015)));
     
     vec3 col = mix(vec3(.0), vec3(0., 0., 1.), blade);
     col = mix(col, vec3(1., 1., 1.), shine);
@@ -480,18 +480,18 @@ float circle(vec2 uv,float radius, vec2 pos)
     // Output to screen
     if (col.x == 0)
       discard;
-    FragColor = vec4(col,1.0);
-    return;
-  }
-  int localmousex = int(round((gl_FragCoord.x-iMouse.x)/iMousePixelsize));
-  int localmousey = int(round((-(gl_FragCoord.y-iMouse.y))/iMousePixelsize));
-  vec4 bg = vec4(0,0,0,0);
-  vec4 c0 = vec4(1,1,1,1);
-  vec4 c1 = vec4(0,0,0,1);
-  vec4 clr = mouseSprite(localmousex, localmousey, bg, c0, c1);
-  if (clr.w == 0)
-    discard;
-  FragColor = clr;
+    FragColor = vec4(col,1.0);    
+  } else {
+    int localmousex = int(round((gl_FragCoord.x-iMouse.x)/iMousePixelsize));
+    int localmousey = int(round((-(gl_FragCoord.y-iMouse.y))/iMousePixelsize));
+    vec4 bg = vec4(0,0,0,0);
+    vec4 c0 = vec4(1,1,1,1);
+    vec4 c1 = vec4(0,0,0,1);
+    vec4 clr = mouseSprite(localmousex, localmousey, bg, c0, c1);
+    if (clr.w == 0)
+      discard;
+    FragColor = clr;
+    }
   }
   )");
   }
