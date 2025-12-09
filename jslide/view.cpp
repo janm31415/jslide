@@ -72,7 +72,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 #if defined(RENDERDOOS_METAL)
   SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
 
-  _window = SDL_CreateWindow("jTop",
+  _window = SDL_CreateWindow("jSlide",
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
     _w, _h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
 
@@ -110,7 +110,7 @@ _viewport_pos_x(V_X), _viewport_pos_y(V_Y), _line_nr(1), _col_nr(1), _slide_id(0
 
   //SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-  _window = SDL_CreateWindow("jslide",
+  _window = SDL_CreateWindow("jSlide",
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
     _w, _h,
     SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
@@ -412,6 +412,7 @@ void view::_poll_for_events()
         }
         case SDLK_F5:
         {
+        ImGui::GetIO().WantCaptureKeyboard = false;
         if (!_shift_pressed())
           {
           _first_slide();
@@ -427,28 +428,28 @@ void view::_poll_for_events()
         }
         case SDLK_m:
         {
-        if (!ImGui::GetIO().WantCaptureMouse) {
+        if (!ImGui::GetIO().WantCaptureKeyboard) {
           _settings.show_mouse = !_settings.show_mouse;
           }
         break;
         }
         case SDLK_p:
         {
-        if (!ImGui::GetIO().WantCaptureMouse) {
+        if (!ImGui::GetIO().WantCaptureKeyboard) {
           _settings.pause_shaders = !_settings.pause_shaders;
           }
         break;
         }
         case SDLK_0:
         {
-        if (!ImGui::GetIO().WantCaptureMouse) {
+        if (!ImGui::GetIO().WantCaptureKeyboard) {
           _settings.mouse_type = 0;
           }
         break;
         }
         case SDLK_1:
         {
-        if (!ImGui::GetIO().WantCaptureMouse) {
+        if (!ImGui::GetIO().WantCaptureKeyboard) {
           _settings.mouse_type = 1;
           }
         break;
@@ -749,7 +750,7 @@ void view::_script_window()
   ImGui::SameLine();
   ImGui::Checkbox("Mouse", &_settings.show_mouse);
   ImGui::SameLine();
-  ImGui::Checkbox("Shaders", &_settings.pause_shaders);
+  ImGui::Checkbox("Pause", &_settings.pause_shaders);
   ImGui::Text("Ln %d\tCol %d", _line_nr, _col_nr);
   ImGui::End();
   }
