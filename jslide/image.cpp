@@ -138,6 +138,11 @@ void draw_video_data(image_t* state, uint32_t framebuffer_id, RenderDoos::render
       {
         std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(wait_time * 1000.0));
       }
+    } else {
+      int frames_to_read = params.time_delta / time_for_one_frame;
+      for (int i = 1; i < frames_to_read; ++i) { // skip frames
+        video_reader_read_frame(&state->video_state, state->video_frame_data, &pts);
+      }
     }
     if (state->video_state.endOfStream)
       {

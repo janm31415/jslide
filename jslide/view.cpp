@@ -1111,9 +1111,9 @@ void view::loop()
       descr_mouse.frame_buffer_channel = 10;
       _engine.renderpass_begin(descr_mouse);
       if (_engine.get_renderer_type() == RenderDoos::renderer_type::METAL)
-        _mouse_material.bind(_md.mouse_x, _md.mouse_y, 800, 450, 8, _settings.mouse_type, &_engine);
+        _mouse_material.bind(_md.mouse_x, _md.mouse_y, _slide_state->shader_width, _slide_state->shader_height, 8, _settings.mouse_type, &_engine);
       else
-        _mouse_material.bind(_md.mouse_x, _viewport_h - _md.mouse_y, 800, 450, 8, _settings.mouse_type, &_engine);
+        _mouse_material.bind(_md.mouse_x, _viewport_h - _md.mouse_y, _slide_state->shader_width, _slide_state->shader_height, 8, _settings.mouse_type, &_engine);
       _mouse_material.draw(&_engine);
       _engine.renderpass_end();
       }

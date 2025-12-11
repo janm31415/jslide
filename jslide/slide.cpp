@@ -392,8 +392,8 @@ void init_slide_data(slide_t* state, RenderDoos::render_engine* engine, uint32_t
   state->width = width;
   state->height = height;
   
-  state->shader_width = 800;
-  state->shader_height = 450;
+  state->shader_width = 800*2;
+  state->shader_height = 450*2;
   
   state->framebuffer_id = engine->add_frame_buffer(width, height, false);
   state->shader_framebuffer_id = engine->add_frame_buffer(state->shader_width, state->shader_height, false);
